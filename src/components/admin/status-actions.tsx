@@ -26,7 +26,7 @@ const NEXT_STATUS: Partial<Record<RequestStatus, { status: RequestStatus; label:
     { status: "cancelled", label: "Cancel", icon: XCircle, variant: "destructive" },
   ],
   ready_for_generation: [
-    { status: "pending_review", label: "Move to Review", icon: ArrowRight },
+    // Generation button handles advancing to pending_review
     { status: "cancelled", label: "Cancel", icon: XCircle, variant: "destructive" },
   ],
   pending_review: [

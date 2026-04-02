@@ -25,6 +25,8 @@ import {
 import Link from "next/link";
 import { LiveDataForm } from "@/components/admin/live-data-form";
 import { StatusActions } from "@/components/admin/status-actions";
+import { GenerateDocumentsButton } from "@/components/admin/generate-documents-button";
+import { GeneratedDocumentsCard } from "@/components/admin/generated-documents-card";
 
 const WORKFLOW_STAGES: { key: RequestStatus; label: string }[] = [
   { key: "received", label: "Received" },
@@ -260,30 +262,30 @@ export default async function RequestDetailPage({
             </Card>
           )}
 
-          {/* Document Preview (when pending_review) */}
-          {request.status === "pending_review" && (
+          {/* Generate Documents (when ready_for_generation) */}
+          {request.status === "ready_for_generation" && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Document Preview</CardTitle>
+                <CardTitle className="text-base">Generate Documents</CardTitle>
                 <CardDescription>
-                  Review the generated document before approving delivery.
+                  All data has been collected. Generate PDFs for review using
+                  Typst templates and Claude AI validation.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex min-h-[300px] items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30">
-                  <div className="text-center">
-                    <FileText className="mx-auto size-10 text-muted-foreground" />
-                    <p className="mt-3 text-sm font-medium">
-                      PDF Preview
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Document preview will appear here once generation is
-                      implemented
-                    </p>
-                  </div>
-                </div>
+                <GenerateDocumentsButton requestId={request.id} />
               </CardContent>
             </Card>
+          )}
+
+          {/* Document Preview (when pending_review or later) */}
+          {(request.status === "pending_review" ||
+            request.status === "approved" ||
+            request.status === "delivered") && (
+            <GeneratedDocumentsCard
+              requestId={request.id}
+              tenantId={user.tenantId}
+            />
           )}
         </div>
 
