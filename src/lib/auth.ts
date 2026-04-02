@@ -11,6 +11,13 @@ export interface AdminUser {
   role: string;
 }
 
+export interface PlatformUser {
+  id: string;
+  email: string;
+  fullName: string;
+  role: "platform_admin";
+}
+
 /**
  * Get the current authenticated admin user with their tenant info.
  * Redirects to /login if not authenticated or missing profile.
@@ -53,5 +60,43 @@ export async function getAdminUser(): Promise<AdminUser> {
     tenantSlug: (tenant as { id: string; name: string; slug: string }).slug,
     fullName: profile.full_name,
     role: profile.role,
+  };
+}
+
+/**
+ * Get the current authenticated platform admin user.
+ * Redirects non-platform-admins to /admin/dashboard and
+ * unauthenticated users to /login.
+ */
+export async function getPlatformUser(): Promise<PlatformUser> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, full_name, role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    redirect("/login");
+  }
+
+  if (profile.role !== "platform_admin") {
+    redirect("/admin/dashboard");
+  }
+
+  return {
+    id: profile.id,
+    email: user.email || "",
+    fullName: profile.full_name,
+    role: "platform_admin",
   };
 }
