@@ -1,4 +1,5 @@
 import { getAdminUser } from "@/lib/auth";
+import { createServiceClient } from "@/lib/supabase/server";
 import {
   Card,
   CardContent,
@@ -6,9 +7,37 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Settings } from "lucide-react";
+import { DropboxStatus } from "@/components/admin/dropbox-status";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ dropbox?: string }>;
+}) {
   const user = await getAdminUser();
+  const params = await searchParams;
+
+  // Check if Dropbox is connected for this tenant
+  const serviceClient = await createServiceClient();
+  const { data: tenant } = await serviceClient
+    .from("tenants")
+    .select("dropbox_access_token, dropbox_refresh_token")
+    .eq("id", user.tenantId)
+    .single();
+
+  const isDropboxConnected = !!(
+    tenant?.dropbox_access_token && tenant?.dropbox_refresh_token
+  );
+
+  // Map query param to status
+  const dropboxStatus =
+    params.dropbox === "connected"
+      ? ("connected" as const)
+      : params.dropbox === "denied"
+        ? ("denied" as const)
+        : params.dropbox === "error"
+          ? ("error" as const)
+          : null;
 
   return (
     <div className="space-y-6">
@@ -59,15 +88,17 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Dropbox Integration */}
+      <DropboxStatus
+        isConnected={isDropboxConnected}
+        status={dropboxStatus}
+      />
+
       <Card>
-        <CardContent className="py-8 text-center">
-          <Settings className="mx-auto size-10 text-muted-foreground" />
-          <h3 className="mt-4 text-sm font-semibold">
-            More settings coming soon
-          </h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Stripe Connect, Dropbox integration, email templates, and branding
-            options will be available in future updates.
+        <CardContent className="py-6 text-center">
+          <Settings className="mx-auto size-8 text-muted-foreground/50" />
+          <p className="mt-2 text-xs text-muted-foreground">
+            Stripe Connect, email templates, and branding options coming soon.
           </p>
         </CardContent>
       </Card>

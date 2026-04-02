@@ -3,6 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { generatePdf, uploadPdfToStorage } from "@/lib/documents/generate";
 import { validateDocumentData } from "@/lib/documents/validate";
+import {
+  getValidAccessToken,
+  listFolder,
+  downloadFile,
+  detectDocCategory,
+} from "@/lib/dropbox";
 import type { DocumentType } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
@@ -143,6 +149,16 @@ export async function POST(request: NextRequest) {
     // Service client for storage uploads
     const serviceClient = await createServiceClient();
 
+    // If governing_documents is requested, auto-sync from Dropbox first
+    if (documentTypes.includes("governing_documents") && association) {
+      try {
+        await syncDropboxDocs(serviceClient, profile.tenant_id, docRequest.association_id);
+      } catch (err) {
+        console.warn("Dropbox sync before generation skipped:", err);
+        // Non-fatal — continue with whatever docs we have
+      }
+    }
+
     const generatedDocs: {
       docType: DocumentType;
       storagePath: string;
@@ -233,4 +249,81 @@ export async function POST(request: NextRequest) {
 function formatCentsToDisplay(cents: number | null | undefined): string {
   if (cents == null) return "N/A";
   return `$${(cents / 100).toFixed(2)}`;
+}
+
+const SUPPORTED_EXTENSIONS = [".pdf", ".doc", ".docx", ".txt", ".rtf"];
+
+/**
+ * Auto-sync governing documents from Dropbox before generation.
+ * Downloads new/updated files from the association's mapped Dropbox folder.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function syncDropboxDocs(serviceClient: any, tenantId: string, associationId: string) {
+  // Get association's Dropbox folder path
+  const { data: assoc } = await serviceClient
+    .from("associations")
+    .select("dropbox_folder_path")
+    .eq("id", associationId)
+    .single();
+
+  if (!assoc?.dropbox_folder_path) return;
+
+  // Get tenant's Dropbox tokens
+  const { data: tenant } = await serviceClient
+    .from("tenants")
+    .select("dropbox_access_token, dropbox_refresh_token")
+    .eq("id", tenantId)
+    .single();
+
+  if (!tenant?.dropbox_access_token || !tenant?.dropbox_refresh_token) return;
+
+  const accessToken = await getValidAccessToken(
+    serviceClient,
+    tenantId,
+    tenant.dropbox_access_token,
+    tenant.dropbox_refresh_token
+  );
+
+  const entries = await listFolder(accessToken, assoc.dropbox_folder_path);
+  const files = entries.filter(
+    (e) =>
+      e[".tag"] === "file" &&
+      SUPPORTED_EXTENSIONS.some((ext) => e.name.toLowerCase().endsWith(ext))
+  );
+
+  // Get existing docs
+  const { data: existingDocs } = await serviceClient
+    .from("governing_documents")
+    .select("id, dropbox_path")
+    .eq("association_id", associationId);
+
+  const existingPaths = new Set((existingDocs || []).map((d: { dropbox_path: string }) => d.dropbox_path));
+
+  for (const file of files) {
+    if (existingPaths.has(file.path_lower)) continue; // Already synced
+
+    const { buffer, name } = await downloadFile(accessToken, file.path_lower);
+    const storagePath = `governing-docs/${tenantId}/${associationId}/${name}`;
+
+    await serviceClient.storage.from("documents").upload(storagePath, buffer, {
+      contentType: "application/pdf",
+      upsert: true,
+    });
+
+    const { data: { publicUrl } } = serviceClient.storage
+      .from("documents")
+      .getPublicUrl(storagePath);
+
+    await serviceClient.from("governing_documents").insert({
+      association_id: associationId,
+      tenant_id: tenantId,
+      document_name: name.replace(/\.[^/.]+$/, ""),
+      document_category: detectDocCategory(name),
+      file_url: publicUrl,
+      file_name: name,
+      source: "dropbox",
+      dropbox_path: file.path_lower,
+      last_synced_at: new Date().toISOString(),
+    });
+  }
 }
