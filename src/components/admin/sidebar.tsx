@@ -43,9 +43,9 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
   }
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-[#F0F1F3] dark:bg-[#1A1D26]">
+    <div className="flex h-full flex-col bg-white dark:bg-[#1A1D26] border-r border-[#E5E7EB] dark:border-white/8">
       {/* Logo */}
-      <div className="flex h-14 items-center gap-2.5 border-b border-black/6 dark:border-white/6 px-5">
+      <div className="flex h-14 items-center gap-2.5 border-b border-[#E5E7EB] dark:border-white/8 px-5">
         <div className="flex size-7 items-center justify-center rounded-lg bg-[#38b6ff]/15">
           <FileStack className="size-4 text-[#38b6ff]" />
         </div>
@@ -55,7 +55,7 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
       </div>
 
       {/* Tenant name */}
-      <div className="border-b border-black/6 dark:border-white/6 px-5 py-3">
+      <div className="border-b border-[#E5E7EB] dark:border-white/8 px-5 py-3">
         <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
           Management Company
         </p>
@@ -78,7 +78,7 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 border-l-2",
                 isActive
                   ? "border-[#38b6ff] bg-[#38b6ff]/10 text-[#38b6ff]"
-                  : "border-transparent text-[#6B7280] dark:text-[#94A3B8] hover:bg-black/4 dark:hover:bg-white/5 hover:text-foreground"
+                  : "border-transparent text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#F4F5F7] dark:hover:bg-white/5 hover:text-foreground"
               )}
             >
               <item.icon className="size-4" />
@@ -89,7 +89,7 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
       </nav>
 
       {/* User / Sign Out */}
-      <div className="border-t border-black/6 dark:border-white/6 p-3">
+      <div className="border-t border-[#E5E7EB] dark:border-white/8 p-3">
         <div className="mb-2 flex items-center justify-between px-3">
           <div className="flex items-center gap-2 min-w-0">
             <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#38b6ff]/15 text-xs font-medium text-[#38b6ff]">
@@ -107,7 +107,7 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
         </div>
         <button
           onClick={handleSignOut}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#6B7280] dark:text-[#94A3B8] transition-colors hover:bg-black/4 dark:hover:bg-white/5 hover:text-foreground"
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#6B7280] dark:text-[#94A3B8] transition-colors hover:bg-[#F4F5F7] dark:hover:bg-white/5 hover:text-foreground"
         >
           <LogOut className="size-4" />
           Sign Out
@@ -151,10 +151,10 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar panel — theme-aware */}
+      {/* Sidebar — full height, sticky on desktop, fixed on mobile */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full w-64 transition-transform duration-200 ease-out lg:static lg:translate-x-0",
+          "fixed top-0 left-0 z-50 h-screen w-64 transition-transform duration-200 ease-out lg:sticky lg:top-0 lg:translate-x-0 lg:shrink-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >

@@ -11,12 +11,14 @@ export default async function AdminLayout({
   const user = await getAdminUser();
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <AdminSidebar tenantName={user.tenantName} userName={user.fullName} />
-      <main className="flex-1 pt-14 lg:pt-0">
+      <div className="flex flex-1 flex-col overflow-hidden pt-14 lg:pt-0">
         <AdminTopBar />
-        <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">{children}</div>
-      </main>
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }
