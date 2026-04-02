@@ -4,13 +4,13 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({
-  variable: "--font-inter",
+  variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+  variable: "--font-mono",
   subsets: ["latin"],
   display: "swap",
 });
@@ -20,6 +20,18 @@ export const metadata: Metadata = {
   description:
     "Multi-tenant HOA document ordering and fulfillment platform. Order resale certificates, payoff statements, governing documents, and lender questionnaires.",
 };
+
+// Inline script to prevent dark mode flash (runs before React hydrates)
+const themeScript = `
+(function(){
+  try {
+    var t = localStorage.getItem('propertydocz-theme');
+    var dark = t === 'dark' || (!t || t === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (dark) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  } catch(e){}
+})();
+`;
 
 export default function RootLayout({
   children,
@@ -32,6 +44,9 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable} h-full`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col antialiased">
         <ThemeProvider>{children}</ThemeProvider>
       </body>
