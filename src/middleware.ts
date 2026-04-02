@@ -26,6 +26,20 @@ export async function middleware(request: NextRequest) {
   const tenantSlug = getTenantSlug(hostname);
   const { pathname } = request.nextUrl;
 
+  // Public routes — pass through without auth checks
+  if (
+    pathname === "/login" ||
+    pathname === "/success" ||
+    pathname.startsWith("/api/checkout") ||
+    pathname.startsWith("/api/stripe/webhook")
+  ) {
+    const response = NextResponse.next();
+    if (tenantSlug) {
+      response.headers.set("x-tenant-slug", tenantSlug);
+    }
+    return response;
+  }
+
   // Create a response to modify
   let response = NextResponse.next({
     request: {
@@ -33,31 +47,38 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // Refresh Supabase auth session
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
-      },
+  // Refresh Supabase auth session (only for routes that need it)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    // Supabase not configured — let the request through
+    if (tenantSlug) {
+      response.headers.set("x-tenant-slug", tenantSlug);
     }
-  );
+    return response;
+  }
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
+        response = NextResponse.next({
+          request: {
+            headers: request.headers,
+          },
+        });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
 
   const {
     data: { user },
