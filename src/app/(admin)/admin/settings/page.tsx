@@ -4,7 +4,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Settings } from "lucide-react";
 
@@ -24,18 +23,18 @@ export default async function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-base">Account</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex justify-between">
+        <CardContent className="space-y-3 text-sm">
+          <div className="flex justify-between py-1">
             <span className="text-muted-foreground">Name</span>
             <span className="font-medium">{user.fullName}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between py-1">
             <span className="text-muted-foreground">Email</span>
-            <span className="font-medium">{user.email}</span>
+            <span className="font-data font-medium text-sm">{user.email}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between py-1">
             <span className="text-muted-foreground">Role</span>
-            <span className="font-medium capitalize">
+            <span className="inline-flex items-center rounded-full bg-[#38b6ff]/10 px-2 py-0.5 text-xs font-medium text-[#38b6ff] capitalize">
               {user.role.replace("_", " ")}
             </span>
           </div>
@@ -46,14 +45,16 @@ export default async function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-base">Tenant</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex justify-between">
+        <CardContent className="space-y-3 text-sm">
+          <div className="flex justify-between py-1">
             <span className="text-muted-foreground">Company</span>
             <span className="font-medium">{user.tenantName}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between py-1">
             <span className="text-muted-foreground">Subdomain</span>
-            <span className="font-medium">{user.tenantSlug}.propertydocz.com</span>
+            <span className="font-data font-medium text-sm">
+              {user.tenantSlug}.propertydocz.com
+            </span>
           </div>
         </CardContent>
       </Card>

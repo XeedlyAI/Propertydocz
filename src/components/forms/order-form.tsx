@@ -14,7 +14,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   DOCUMENT_PRICES,
@@ -31,6 +30,7 @@ import {
   User,
   Building2,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 
 interface Association {
@@ -64,9 +64,11 @@ const REQUESTER_TYPE_LABELS: Record<RequesterType, string> = {
 };
 
 const DOCUMENT_DESCRIPTIONS: Record<DocumentType, string> = {
-  resale_certificate: "Required for property sales — includes assessments, violations, insurance, and compliance details",
+  resale_certificate:
+    "Required for property sales — includes assessments, violations, insurance, and compliance details",
   payoff_statement: "Current balance and payoff amounts for a unit",
-  governing_documents: "CC&Rs, bylaws, budgets, insurance certs, minutes, and more",
+  governing_documents:
+    "CC&Rs, bylaws, budgets, insurance certs, minutes, and more",
   lender_questionnaire: "Fannie Mae 1076 + Addendum 1076A + Addendum II",
 };
 
@@ -163,12 +165,12 @@ export function OrderForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Association Selector */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Building2 className="size-5" />
+            <Building2 className="size-5 text-[#38b6ff]" />
             Association
           </CardTitle>
           <CardDescription>
@@ -179,7 +181,7 @@ export function OrderForm({
           <select
             value={associationId}
             onChange={(e) => setAssociationId(e.target.value)}
-            className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+            className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors focus-visible:border-[#38b6ff] focus-visible:ring-2 focus-visible:ring-[#38b6ff]/20 dark:bg-input/30"
             aria-invalid={!!errors.association}
           >
             <option value="">Select an association...</option>
@@ -202,7 +204,7 @@ export function OrderForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="size-5" />
+            <FileText className="size-5 text-[#38b6ff]" />
             Documents Requested
           </CardTitle>
           <CardDescription>
@@ -215,10 +217,10 @@ export function OrderForm({
             return (
               <label
                 key={doc}
-                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all duration-150 ${
                   isSelected
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/40"
+                    ? "border-[#38b6ff] bg-[#38b6ff]/5 ring-1 ring-[#38b6ff]/20"
+                    : "border-border hover:border-[#38b6ff]/40 hover:bg-muted/50"
                 }`}
               >
                 <Checkbox
@@ -231,9 +233,9 @@ export function OrderForm({
                     <span className="text-sm font-medium">
                       {DOCUMENT_LABELS[doc]}
                     </span>
-                    <Badge variant="secondary">
+                    <span className="font-data text-sm font-semibold text-[#38b6ff]">
                       {formatCents(DOCUMENT_PRICES[doc])}
-                    </Badge>
+                    </span>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {DOCUMENT_DESCRIPTIONS[doc]}
@@ -289,7 +291,7 @@ export function OrderForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <User className="size-5" />
+            <User className="size-5 text-[#38b6ff]" />
             Your Information
           </CardTitle>
         </CardHeader>
@@ -352,7 +354,7 @@ export function OrderForm({
                 onChange={(e) =>
                   setRequesterType(e.target.value as RequesterType)
                 }
-                className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors focus-visible:border-[#38b6ff] focus-visible:ring-2 focus-visible:ring-[#38b6ff]/20 dark:bg-input/30"
               >
                 {(
                   Object.entries(REQUESTER_TYPE_LABELS) as [
@@ -374,17 +376,17 @@ export function OrderForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Clock className="size-5" />
+            <Clock className="size-5 text-[#38b6ff]" />
             Turnaround Time
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <label
-              className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors ${
+              className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-all duration-150 ${
                 turnaround === "standard"
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/40"
+                  ? "border-[#38b6ff] bg-[#38b6ff]/5 ring-1 ring-[#38b6ff]/20"
+                  : "border-border hover:border-[#38b6ff]/40 hover:bg-muted/50"
               }`}
             >
               <input
@@ -393,7 +395,7 @@ export function OrderForm({
                 value="standard"
                 checked={turnaround === "standard"}
                 onChange={() => setTurnaround("standard")}
-                className="size-4 accent-primary"
+                className="size-4 accent-[#38b6ff]"
               />
               <div>
                 <div className="flex items-center gap-2">
@@ -406,10 +408,10 @@ export function OrderForm({
               </div>
             </label>
             <label
-              className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors ${
+              className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-all duration-150 ${
                 turnaround === "rush"
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/40"
+                  ? "border-[#38b6ff] bg-[#38b6ff]/5 ring-1 ring-[#38b6ff]/20"
+                  : "border-border hover:border-[#38b6ff]/40 hover:bg-muted/50"
               }`}
             >
               <input
@@ -418,15 +420,15 @@ export function OrderForm({
                 value="rush"
                 checked={turnaround === "rush"}
                 onChange={() => setTurnaround("rush")}
-                className="size-4 accent-primary"
+                className="size-4 accent-[#38b6ff]"
               />
               <div>
                 <div className="flex items-center gap-2">
                   <Zap className="size-4 text-amber-500" />
                   <span className="text-sm font-medium">Rush</span>
-                  <Badge variant="outline" className="text-xs">
+                  <span className="font-data rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
                     +{formatCents(RUSH_FEE_CENTS)}
-                  </Badge>
+                  </span>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   1-2 business days
@@ -477,53 +479,60 @@ export function OrderForm({
         </Card>
       )}
 
-      {/* Order Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Order Summary</CardTitle>
-          <CardDescription>
-            Review your order before submitting
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
+      {/* Order Summary — Dark Accent Card */}
+      <div className="dark-accent-card rounded-xl p-6">
+        <h3 className="text-base font-semibold text-white">Order Summary</h3>
+        <p className="text-xs text-white/50">Review your order before submitting</p>
+        <div className="mt-4 space-y-2.5">
           {selectedDocs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white/40">
               No documents selected yet.
             </p>
           ) : (
             <>
               {selectedDocs.map((doc) => (
-                <div key={doc} className="flex items-center justify-between">
-                  <span className="text-sm">{DOCUMENT_LABELS[doc]}</span>
-                  <span className="text-sm font-medium">
+                <div
+                  key={doc}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm text-white/70">
+                    {DOCUMENT_LABELS[doc]}
+                  </span>
+                  <span className="font-data text-sm font-medium text-white">
                     {formatCents(DOCUMENT_PRICES[doc])}
                   </span>
                 </div>
               ))}
               {turnaround === "rush" && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Rush Processing</span>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm text-white/70">
+                    Rush Processing
+                  </span>
+                  <span className="font-data text-sm font-medium text-white">
                     {formatCents(RUSH_FEE_CENTS)}
                   </span>
                 </div>
               )}
-              <Separator />
-              <div className="flex items-center justify-between">
-                <span className="text-base font-semibold">Total</span>
-                <span className="text-base font-semibold">
-                  {billToClosing ? "Bill to Closing" : formatCents(totalCents)}
+              <Separator className="!bg-white/10" />
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-base font-semibold text-white">
+                  Total
+                </span>
+                <span className="font-data text-xl font-bold text-[#38b6ff]">
+                  {billToClosing
+                    ? "Bill to Closing"
+                    : formatCents(totalCents)}
                 </span>
               </div>
               {billToClosing && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-white/40">
                   Fee will be collected at closing. No payment required now.
                 </p>
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Submit */}
       {errors.submit && (
@@ -536,7 +545,7 @@ export function OrderForm({
         type="submit"
         size="lg"
         disabled={submitting || selectedDocs.length === 0}
-        className="w-full"
+        className="w-full h-11 rounded-[6px] bg-[#38b6ff] text-white font-semibold hover:bg-[#1DA8F0] active:bg-[#0A8FD4] transition-colors"
       >
         {submitting ? (
           <>
@@ -544,9 +553,15 @@ export function OrderForm({
             Submitting...
           </>
         ) : billToClosing ? (
-          "Submit Order (Bill to Closing)"
+          <>
+            <CheckCircle2 className="size-4" />
+            Submit Order (Bill to Closing)
+          </>
         ) : (
-          `Submit Order — ${formatCents(totalCents)}`
+          <>
+            <CheckCircle2 className="size-4" />
+            Submit Order — {formatCents(totalCents)}
+          </>
         )}
       </Button>
 

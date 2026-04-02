@@ -79,7 +79,11 @@ export function LoginForm() {
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button
+            type="submit"
+            className="w-full rounded-[6px] bg-[#38b6ff] text-white font-semibold hover:bg-[#1DA8F0] active:bg-[#0A8FD4]"
+            disabled={loading}
+          >
             {loading ? (
               <>
                 <Loader2 className="size-4 animate-spin" />

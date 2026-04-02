@@ -14,9 +14,9 @@ export default async function SuccessPage({
   const { request_id } = await searchParams;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center px-4 py-12">
-      <div className="mb-6 flex size-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-        <CheckCircle2 className="size-8 text-green-600 dark:text-green-400" />
+    <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center px-4 py-12 bg-background">
+      <div className="mb-6 flex size-16 items-center justify-center rounded-full bg-[#38b6ff]/10">
+        <CheckCircle2 className="size-8 text-[#38b6ff]" />
       </div>
 
       <h1 className="text-2xl font-bold tracking-tight">Order Submitted</h1>
@@ -26,7 +26,10 @@ export default async function SuccessPage({
 
       {request_id && (
         <p className="mt-2 text-sm text-muted-foreground">
-          Reference: <span className="font-mono">{request_id.slice(0, 8)}</span>
+          Reference:{" "}
+          <span className="font-data font-medium text-foreground">
+            {request_id.slice(0, 8)}
+          </span>
         </p>
       )}
 
@@ -36,8 +39,8 @@ export default async function SuccessPage({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-3">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <FileText className="size-4 text-primary" />
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#38b6ff]/10">
+              <FileText className="size-4 text-[#38b6ff]" />
             </div>
             <div>
               <p className="text-sm font-medium">Order Review</p>
@@ -48,8 +51,8 @@ export default async function SuccessPage({
             </div>
           </div>
           <div className="flex gap-3">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Clock className="size-4 text-primary" />
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#38b6ff]/10">
+              <Clock className="size-4 text-[#38b6ff]" />
             </div>
             <div>
               <p className="text-sm font-medium">Document Preparation</p>
@@ -60,8 +63,8 @@ export default async function SuccessPage({
             </div>
           </div>
           <div className="flex gap-3">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Mail className="size-4 text-primary" />
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#38b6ff]/10">
+              <Mail className="size-4 text-[#38b6ff]" />
             </div>
             <div>
               <p className="text-sm font-medium">Delivery</p>
@@ -75,8 +78,8 @@ export default async function SuccessPage({
       </Card>
 
       <p className="mt-8 text-center text-xs text-muted-foreground">
-        Questions? Contact the management company directly or reply to
-        your confirmation email.
+        Questions? Contact the management company directly or reply to your
+        confirmation email.
       </p>
     </main>
   );

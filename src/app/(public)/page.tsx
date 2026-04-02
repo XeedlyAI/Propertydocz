@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getTenantSlugFromHost } from "@/lib/tenant";
 import { OrderForm } from "@/components/forms/order-form";
-import { FileText } from "lucide-react";
+import { FileStack } from "lucide-react";
 
 export default async function OrderPage() {
   const headersList = await headers();
@@ -12,9 +12,14 @@ export default async function OrderPage() {
   // No tenant subdomain — show the main site landing
   if (!tenantSlug) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-8">
-        <h1 className="text-4xl font-bold tracking-tight">PropertyDocz</h1>
-        <p className="mt-4 text-lg text-muted-foreground">
+      <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
+        <div className="flex size-14 items-center justify-center rounded-2xl bg-[#38b6ff]/10">
+          <FileStack className="size-7 text-[#38b6ff]" />
+        </div>
+        <h1 className="mt-6 text-4xl font-bold tracking-tight">
+          PropertyDocz
+        </h1>
+        <p className="mt-3 text-lg text-muted-foreground">
           HOA Document Ordering &amp; Fulfillment Platform
         </p>
       </main>
@@ -26,13 +31,15 @@ export default async function OrderPage() {
   // Fetch tenant by slug
   const { data: tenant, error: tenantError } = await supabase
     .from("tenants")
-    .select("id, name, slug, logo_url, primary_color, contact_email, contact_phone")
+    .select(
+      "id, name, slug, logo_url, primary_color, contact_email, contact_phone"
+    )
     .eq("slug", tenantSlug)
     .single();
 
   if (tenantError || !tenant) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-8">
+      <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
         <h1 className="text-2xl font-bold">Portal Not Found</h1>
         <p className="mt-2 text-muted-foreground">
           The portal &ldquo;{tenantSlug}&rdquo; does not exist. Please check the
@@ -53,8 +60,8 @@ export default async function OrderPage() {
     <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:py-12">
       {/* Header */}
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10">
-          <FileText className="size-6 text-primary" />
+        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-[#38b6ff]/10">
+          <FileStack className="size-6 text-[#38b6ff]" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
           {tenant.name}

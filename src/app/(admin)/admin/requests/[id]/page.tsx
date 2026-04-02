@@ -95,18 +95,21 @@ export default async function RequestDetailPage({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Request #{id.slice(0, 8)}
+            Request <span className="font-data">#{id.slice(0, 8)}</span>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Submitted {new Date(request.created_at).toLocaleString()}
           </p>
         </div>
-        <Badge
-          variant={isCancelled ? "destructive" : "default"}
-          className="text-sm"
+        <span
+          className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
+            isCancelled
+              ? "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+              : "bg-[#38b6ff]/10 text-[#38b6ff]"
+          }`}
         >
           {STATUS_LABELS[request.status as RequestStatus] || request.status}
-        </Badge>
+        </span>
       </div>
 
       {/* Workflow Indicator */}
@@ -127,11 +130,11 @@ export default async function RequestDetailPage({
                       />
                     )}
                     <div
-                      className={`flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
+                      className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors ${
                         isCurrent
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-[#38b6ff] text-white"
                           : isComplete
-                            ? "bg-primary/10 text-primary"
+                            ? "bg-[#38b6ff]/10 text-[#38b6ff]"
                             : "bg-muted text-muted-foreground"
                       }`}
                     >
@@ -321,7 +324,7 @@ export default async function RequestDetailPage({
               <Separator />
               <div className="flex justify-between">
                 <span className="font-semibold">Total</span>
-                <span className="font-semibold">
+                <span className="font-data font-semibold">
                   {request.bill_to_closing
                     ? "BTC"
                     : formatCents(request.total_price_cents)}

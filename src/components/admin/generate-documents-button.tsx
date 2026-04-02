@@ -67,7 +67,7 @@ export function GenerateDocumentsButton({
       <Button
         onClick={handleGenerate}
         disabled={loading}
-        className="w-full gap-2"
+        className="w-full gap-2 rounded-[6px] bg-[#38b6ff] text-white font-semibold hover:bg-[#1DA8F0] active:bg-[#0A8FD4]"
         size="lg"
       >
         {loading ? (
@@ -77,7 +77,7 @@ export function GenerateDocumentsButton({
           </>
         ) : (
           <>
-            <Sparkles className="size-4" />
+            <Sparkles className="size-4 text-white" />
             Generate Documents
           </>
         )}

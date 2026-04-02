@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Building2, Plus, MapPin } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,9 @@ export default async function AssociationsPage() {
 
   const { data: associations } = await supabase
     .from("associations")
-    .select("id, name, legal_name, address, city, state, zip, total_units, project_type")
+    .select(
+      "id, name, legal_name, address, city, state, zip, total_units, project_type"
+    )
     .eq("tenant_id", user.tenantId)
     .order("name");
 
@@ -52,23 +53,31 @@ export default async function AssociationsPage() {
           </p>
         </div>
         <Link href="/admin/associations/new">
-          <Button size="sm">
+          <Button
+            size="sm"
+            className="rounded-[6px] bg-[#38b6ff] text-white font-medium hover:bg-[#1DA8F0]"
+          >
             <Plus className="size-4" />
             Add Association
           </Button>
         </Link>
       </div>
 
-      {(!associations || associations.length === 0) ? (
+      {!associations || associations.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Building2 className="mx-auto size-10 text-muted-foreground" />
-            <h3 className="mt-4 text-sm font-semibold">No associations yet</h3>
+            <h3 className="mt-4 text-sm font-semibold">
+              No associations yet
+            </h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Add your first HOA community to get started.
             </p>
             <Link href="/admin/associations/new">
-              <Button size="sm" className="mt-4">
+              <Button
+                size="sm"
+                className="mt-4 rounded-[6px] bg-[#38b6ff] text-white font-medium hover:bg-[#1DA8F0]"
+              >
                 <Plus className="size-4" />
                 Add Association
               </Button>
@@ -78,14 +87,11 @@ export default async function AssociationsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {associations.map((assoc) => (
-            <Link
-              key={assoc.id}
-              href={`/admin/associations/${assoc.id}`}
-            >
-              <Card className="cursor-pointer transition-shadow hover:shadow-md h-full">
+            <Link key={assoc.id} href={`/admin/associations/${assoc.id}`}>
+              <Card className="cursor-pointer transition-all duration-150 hover:shadow-md hover:border-[#38b6ff]/30 h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Building2 className="size-4 text-primary" />
+                    <Building2 className="size-4 text-[#38b6ff]" />
                     {assoc.name}
                   </CardTitle>
                 </CardHeader>
@@ -103,17 +109,17 @@ export default async function AssociationsPage() {
                   )}
                   <div className="flex items-center gap-2">
                     {assoc.total_units && (
-                      <Badge variant="outline">
+                      <span className="font-data inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                         {assoc.total_units} units
-                      </Badge>
+                      </span>
                     )}
-                    <Badge variant="outline">
+                    <span className="font-data inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                       {propertyCounts[assoc.id] || 0} properties
-                    </Badge>
+                    </span>
                     {assoc.project_type && (
-                      <Badge variant="secondary" className="capitalize">
+                      <span className="inline-flex items-center rounded-md bg-[#38b6ff]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#38b6ff] capitalize">
                         {assoc.project_type}
-                      </Badge>
+                      </span>
                     )}
                   </div>
                 </CardContent>
