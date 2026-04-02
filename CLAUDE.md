@@ -23,6 +23,7 @@ PropertyDocz is a multi-tenant HOA document ordering and fulfillment platform. H
 ## Git Rules
 - Always work on `main` branch
 - Always commit and push to `main`
+- Always commit and push to main after completing any task. Never leave unpushed work.
 - Worktrees are fine — they are hardcoded into Claude Code behavior. Clean up old worktrees each session.
 - No feature branches unless explicitly requested
 

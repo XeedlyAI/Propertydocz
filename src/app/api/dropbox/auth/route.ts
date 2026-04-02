@@ -1,12 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getDropboxAuthUrl } from "@/lib/dropbox";
 
 /**
  * GET /api/dropbox/auth
  * Initiates the Dropbox OAuth flow by redirecting the user to Dropbox authorization.
+ * Builds the redirect_uri dynamically from the request host so it works on any
+ * deployment (propertydocz.com, vercel preview URLs, localhost).
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     const {
@@ -28,9 +30,10 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Build redirect URI (same origin + callback path)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const redirectUri = `${baseUrl}/api/dropbox/callback`;
+    // Build redirect URI from the incoming request's origin
+    const proto = request.headers.get("x-forwarded-proto") || "https";
+    const host = request.headers.get("host") || "localhost:3000";
+    const redirectUri = `${proto}://${host}/api/dropbox/callback`;
 
     // State encodes the tenant_id so the callback can verify ownership
     const state = Buffer.from(

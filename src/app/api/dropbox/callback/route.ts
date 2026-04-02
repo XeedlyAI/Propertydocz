@@ -46,9 +46,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Exchange the code for tokens
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const redirectUri = `${baseUrl}/api/dropbox/callback`;
+    // Exchange the code for tokens — redirect_uri must match what /auth sent
+    const proto = request.headers.get("x-forwarded-proto") || "https";
+    const host = request.headers.get("host") || "localhost:3000";
+    const redirectUri = `${proto}://${host}/api/dropbox/callback`;
     const tokens = await exchangeCodeForTokens(code, redirectUri);
 
     // Save tokens to the tenant record using service client (bypasses RLS)
