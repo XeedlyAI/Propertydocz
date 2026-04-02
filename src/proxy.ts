@@ -21,7 +21,7 @@ function getTenantSlug(hostname: string): string | null {
   return null;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const hostname = request.headers.get("host")?.split(":")[0] || "";
   const tenantSlug = getTenantSlug(hostname);
   const { pathname } = request.nextUrl;
