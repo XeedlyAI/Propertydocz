@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { AssociationForm } from "@/components/admin/association-form";
 import { AssociationDropboxSection } from "@/components/admin/association-dropbox-section";
 import { OnboardingStatus } from "@/components/admin/onboarding-status";
+import { DocumentSyncCard } from "@/components/admin/document-sync-card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -99,6 +100,13 @@ export default async function AssociationDetailPage({
             hasDropboxFolder={!!association.dropbox_folder_path}
             fieldsPopulated={fieldsPopulated ?? 0}
             fieldsTotal={fieldsTotal ?? 0}
+          />
+
+          {/* Document Sync */}
+          <DocumentSyncCard
+            associationId={id}
+            isDropboxConnected={isDropboxConnected}
+            hasDropboxFolder={!!association.dropbox_folder_path}
           />
 
           <h2 className="text-lg font-semibold">Document Sources</h2>
