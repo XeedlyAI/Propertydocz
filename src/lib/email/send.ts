@@ -168,15 +168,33 @@ export async function sendDocumentReady(opts: {
   requestId: string;
   propertyAddress: string;
   documentTypes: string[];
+  downloadLinks?: { label: string; url: string }[];
 }) {
   const resend = getResend();
 
   const docList = opts.documentTypes
     .map((dt) => DOCUMENT_LABELS[dt as DocumentType] || dt)
-    .map((label) => `• ${label}`)
-    .join("\n");
+    .map((label) => `&bull; ${label}`)
+    .join("<br>");
 
   const refId = opts.requestId.slice(0, 8).toUpperCase();
+
+  // Build download buttons if links are available
+  const downloadSection =
+    opts.downloadLinks && opts.downloadLinks.length > 0
+      ? `<div style="margin-top:20px;margin-bottom:20px;">
+          <p style="margin:0 0 12px;font-size:13px;font-weight:600;color:#0C0F14;">Download Your Documents:</p>
+          ${opts.downloadLinks
+            .map(
+              (link) =>
+                `<a href="${link.url}" style="display:block;background:#38b6ff;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;text-align:center;margin-bottom:8px;">${link.label} (PDF)</a>`
+            )
+            .join("")}
+          <p style="margin:8px 0 0;font-size:11px;color:#9CA3AF;">Download links expire in 7 days.</p>
+        </div>`
+      : `<p style="margin:20px 0 0;font-size:13px;color:#6B7280;">
+          Your documents will be delivered as PDF files. If you have any questions, please contact the management company directly.
+        </p>`;
 
   await resend.emails.send({
     from: FROM_ADDRESS,
@@ -194,20 +212,18 @@ export async function sendDocumentReady(opts: {
     <div style="background:#ffffff;border-radius:12px;border:1px solid #E5E7EB;padding:32px;">
       <div style="text-align:center;margin-bottom:20px;">
         <div style="display:inline-block;background:#ECFDF5;border-radius:50%;padding:12px;">
-          <span style="font-size:24px;">✓</span>
+          <span style="font-size:24px;">&#10003;</span>
         </div>
       </div>
       <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#0C0F14;text-align:center;">Your Documents Are Ready</h1>
       <p style="margin:0 0 24px;font-size:14px;color:#6B7280;text-align:center;">
         Hi ${opts.requesterName}, your documents for ${opts.propertyAddress} have been completed and approved.
       </p>
-      <div style="background:#F8F9FA;border-radius:8px;padding:16px;margin-bottom:20px;">
+      <div style="background:#F8F9FA;border-radius:8px;padding:16px;margin-bottom:4px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;">Reference #${refId}</p>
-        <pre style="margin:0;font-size:13px;color:#374151;white-space:pre-wrap;font-family:'Inter',sans-serif;">${docList}</pre>
+        <p style="margin:0;font-size:13px;color:#374151;">${docList}</p>
       </div>
-      <p style="margin:0;font-size:13px;color:#6B7280;">
-        Your documents will be delivered as PDF files. If you have any questions, please contact the management company directly.
-      </p>
+      ${downloadSection}
     </div>
     <p style="text-align:center;margin-top:24px;font-size:11px;color:#9CA3AF;">
       PropertyDocz by XeedlyAI &middot; HOA Document Services

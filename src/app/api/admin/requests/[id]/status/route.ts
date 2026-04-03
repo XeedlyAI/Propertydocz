@@ -117,13 +117,44 @@ export async function POST(
       }
 
       if (nextStatus === "delivered") {
-        // Notify requester that documents are ready
+        // Fetch generated documents and create signed download URLs
+        const serviceClient = await createServiceClient();
+        const { data: generatedDocs } = await serviceClient
+          .from("generated_documents")
+          .select("document_type, file_url, file_name")
+          .eq("document_request_id", id);
+
+        const downloadLinks: { label: string; url: string }[] = [];
+        if (generatedDocs && generatedDocs.length > 0) {
+          for (const doc of generatedDocs) {
+            // Extract storage path from the public URL to create a signed URL
+            const publicUrlBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/documents/`;
+            const storagePath = doc.file_url?.startsWith(publicUrlBase)
+              ? doc.file_url.slice(publicUrlBase.length)
+              : null;
+
+            if (storagePath) {
+              const { data: signedData } = await serviceClient.storage
+                .from("documents")
+                .createSignedUrl(storagePath, 60 * 60 * 24 * 7); // 7 days
+
+              if (signedData?.signedUrl) {
+                const { DOCUMENT_LABELS } = await import("@/lib/pricing");
+                const label = DOCUMENT_LABELS[doc.document_type as keyof typeof DOCUMENT_LABELS] || doc.file_name || doc.document_type;
+                downloadLinks.push({ label, url: signedData.signedUrl });
+              }
+            }
+          }
+        }
+
+        // Notify requester with download links
         await sendDocumentReady({
           to: docRequest.requester_email,
           requesterName: docRequest.requester_name,
           requestId: id,
           propertyAddress: docRequest.property_address,
           documentTypes: docRequest.document_types as string[],
+          downloadLinks,
         });
       }
     } catch (emailErr) {
