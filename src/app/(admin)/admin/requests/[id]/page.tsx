@@ -287,7 +287,6 @@ export default async function RequestDetailPage({
             request.status === "delivered") && (
             <GeneratedDocumentsCard
               requestId={request.id}
-              tenantId={user.tenantId}
             />
           )}
         </div>

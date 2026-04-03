@@ -218,13 +218,21 @@ export async function POST(request: NextRequest) {
         const pdfBuffer = await generatePdf(docType, baseData);
 
         // Step 3: Upload to storage
-        const storagePath = await uploadPdfToStorage(
-          serviceClient,
-          profile.tenant_id,
-          requestId,
-          docType,
-          pdfBuffer
-        );
+        let storagePath: string;
+        try {
+          storagePath = await uploadPdfToStorage(
+            serviceClient,
+            profile.tenant_id,
+            requestId,
+            docType,
+            pdfBuffer
+          );
+        } catch (uploadErr) {
+          const msg = uploadErr instanceof Error ? uploadErr.message : "Unknown upload error";
+          console.error(`Storage upload failed for ${docType}:`, uploadErr);
+          errors.push(`${docType}: Storage upload failed — ${msg}`);
+          continue;
+        }
 
         // Step 4: Record in generated_documents table
         const fileName = `${docType}_${Date.now()}.pdf`;
@@ -232,7 +240,7 @@ export async function POST(request: NextRequest) {
           .from("documents")
           .getPublicUrl(storagePath);
 
-        await serviceClient.from("generated_documents").insert({
+        const { error: insertError } = await serviceClient.from("generated_documents").insert({
           document_request_id: requestId,
           document_type: docType,
           file_url: publicUrl,
@@ -240,6 +248,12 @@ export async function POST(request: NextRequest) {
           file_type: "pdf",
           generation_method: "typst",
         });
+
+        if (insertError) {
+          console.error(`DB insert failed for ${docType}:`, insertError);
+          errors.push(`${docType}: Database insert failed — ${insertError.message}`);
+          continue;
+        }
 
         generatedDocs.push({
           docType,

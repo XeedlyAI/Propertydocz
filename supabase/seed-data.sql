@@ -4,6 +4,13 @@
 -- Updates: replace TENANT_ID below with your actual tenant UUID
 -- ============================================================
 
+-- IMPORTANT: Before running this seed data, ensure the "documents"
+-- storage bucket exists in Supabase Storage:
+--   1. Go to Supabase Dashboard > Storage
+--   2. Create a bucket named "documents"
+--   3. Set it to public (or configure appropriate policies)
+-- The document generation pipeline uploads PDFs to this bucket.
+
 -- Step 0: Find your tenant ID
 -- SELECT id, name, slug FROM tenants;
 -- Then replace all occurrences of 'YOUR_TENANT_ID' below.

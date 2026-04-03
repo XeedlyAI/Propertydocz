@@ -9,25 +9,28 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, AlertTriangle } from "lucide-react";
+import { FileText, Download } from "lucide-react";
 
 interface GeneratedDocumentsCardProps {
   requestId: string;
-  tenantId: string;
 }
 
 export async function GeneratedDocumentsCard({
   requestId,
-  tenantId,
 }: GeneratedDocumentsCardProps) {
   const supabase = await createClient();
 
-  const { data: documents } = await supabase
+  // generated_documents has no tenant_id column — filter by document_request_id only.
+  // RLS on document_requests already scopes to the current tenant.
+  const { data: documents, error } = await supabase
     .from("generated_documents")
-    .select("*")
+    .select("id, document_request_id, document_type, file_url, file_name, file_type, generation_method, generated_at, created_at")
     .eq("document_request_id", requestId)
-    .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching generated documents:", error);
+  }
 
   if (!documents || documents.length === 0) {
     return (
@@ -60,10 +63,6 @@ export async function GeneratedDocumentsCard({
       <CardContent className="space-y-3">
         {documents.map((doc) => {
           const docType = doc.document_type as DocumentType;
-          const warnings = (doc.validation_warnings as string[]) || [];
-          const sizeKb = doc.file_size_bytes
-            ? Math.round(doc.file_size_bytes / 1024)
-            : 0;
 
           return (
             <div
@@ -79,32 +78,25 @@ export async function GeneratedDocumentsCard({
                     {DOCUMENT_LABELS[docType] || docType}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {sizeKb} KB &middot;{" "}
+                    {doc.file_name} &middot;{" "}
                     {new Date(doc.created_at).toLocaleString()}
                   </p>
-                  {doc.validation_notes && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {doc.validation_notes as string}
-                    </p>
-                  )}
-                  {warnings.length > 0 && (
-                    <div className="mt-1 flex items-start gap-1">
-                      <AlertTriangle className="mt-0.5 size-3 shrink-0 text-amber-500" />
-                      <div className="space-y-0.5">
-                        {warnings.map((w, i) => (
-                          <p key={i} className="text-xs text-amber-600">
-                            {w}
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Method: {doc.generation_method}
+                  </p>
                 </div>
               </div>
-              <Badge variant="secondary" className="shrink-0">
-                <Download className="mr-1 size-3" />
-                PDF
-              </Badge>
+              <a
+                href={doc.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0"
+              >
+                <Badge variant="secondary" className="cursor-pointer hover:bg-accent">
+                  <Download className="mr-1 size-3" />
+                  PDF
+                </Badge>
+              </a>
             </div>
           );
         })}
