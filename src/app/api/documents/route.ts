@@ -51,13 +51,21 @@ export async function POST(request: NextRequest) {
       .select(
         `*, associations(name, legal_name, address, city, state, zip,
           manager_name, manager_email, manager_phone,
-          assessment_frequency, monthly_assessment_cents,
+          assessment_frequency, monthly_assessment_amount,
           master_policy_carrier, master_policy_expiration,
-          general_liability, fidelity_bond, flood_zone, flood_insurance,
-          reserve_balance_cents, percent_funded, reserve_study_date,
-          annual_budget_cents, rental_policy, short_term_rental_policy,
+          general_liability_coverage, general_liability_amount,
+          fidelity_bond, fidelity_amount,
+          flood_zone, flood_insurance_in_force, flood_coverage_amount,
+          reserve_balance, percent_funded, reserve_study_date,
+          annual_budget_amount, rental_policy, short_term_rental_policy,
           pet_policy, parking_policy, age_restrictions, right_of_first_refusal,
-          total_units, year_built, project_type, ein)`
+          total_units, year_built, project_type, hoa_ein,
+          in_litigation, litigation_details,
+          capital_contribution_fee, transfer_fee,
+          current_special_assessment, current_sa_amount, current_sa_terms,
+          payable_to, remit_address, wire_instructions,
+          owner_occupied_pct, investor_owned_pct,
+          phases_completed, phases_planned, developer_units_remaining)`
       )
       .eq("id", requestId)
       .eq("tenant_id", profile.tenant_id)
@@ -110,10 +118,12 @@ export async function POST(request: NextRequest) {
       prepared_by_title: profile.role === "tenant_admin" ? "Community Manager" : "Staff",
       // Financial (convert cents to dollar strings)
       monthly_assessment: formatCentsToDisplay(
-        association?.monthly_assessment_cents
+        association?.monthly_assessment_amount
       ),
-      annual_budget: formatCentsToDisplay(association?.annual_budget_cents),
-      reserve_balance: formatCentsToDisplay(association?.reserve_balance_cents),
+      annual_budget: formatCentsToDisplay(association?.annual_budget_amount),
+      reserve_balance: formatCentsToDisplay(association?.reserve_balance),
+      transfer_fee: formatCentsToDisplay(association?.transfer_fee),
+      capital_contribution: formatCentsToDisplay(association?.capital_contribution_fee),
       // Association details
       percent_funded: association?.percent_funded
         ? `${association.percent_funded}%`
@@ -121,10 +131,16 @@ export async function POST(request: NextRequest) {
       reserve_study_date: association?.reserve_study_date || "N/A",
       master_policy_carrier: association?.master_policy_carrier || "N/A",
       master_policy_expiration: association?.master_policy_expiration || "N/A",
-      general_liability: association?.general_liability || "N/A",
-      fidelity_bond: association?.fidelity_bond || "N/A",
+      general_liability: association?.general_liability_coverage
+        ? formatCentsToDisplay(association?.general_liability_amount)
+        : "N/A",
+      fidelity_bond: association?.fidelity_bond
+        ? formatCentsToDisplay(association?.fidelity_amount)
+        : "N/A",
       flood_zone: association?.flood_zone || "N/A",
-      flood_insurance: association?.flood_insurance || "N/A",
+      flood_insurance: association?.flood_insurance_in_force
+        ? formatCentsToDisplay(association?.flood_coverage_amount)
+        : "N/A",
       rental_policy: association?.rental_policy || "N/A",
       short_term_rental_policy: association?.short_term_rental_policy || "N/A",
       pet_policy: association?.pet_policy || "N/A",
@@ -133,6 +149,22 @@ export async function POST(request: NextRequest) {
       right_of_first_refusal: association?.right_of_first_refusal || "No",
       total_units: association?.total_units?.toString() || "N/A",
       year_built: association?.year_built?.toString() || "N/A",
+      association_ein: association?.hoa_ein || "N/A",
+      in_litigation: association?.in_litigation ? "Yes" : "No",
+      litigation_details: association?.litigation_details || "None",
+      // Ownership breakdown
+      percent_owner_occupied: association?.owner_occupied_pct
+        ? `${association.owner_occupied_pct}%`
+        : "N/A",
+      investor_owned_units: association?.investor_owned_pct
+        ? `${Math.round((association.investor_owned_pct / 100) * (association.total_units || 0))}`
+        : "N/A",
+      // Special assessments
+      special_assessments_planned: association?.current_special_assessment ? "Yes" : "No",
+      special_assessment_details: association?.current_sa_terms || "None",
+      // Payment info
+      check_payable_to: association?.payable_to || "N/A",
+      payment_mail_address_line1: association?.remit_address || "N/A",
       // Spread live data last so it overrides defaults
       ...liveData,
     };
@@ -193,16 +225,18 @@ export async function POST(request: NextRequest) {
         );
 
         // Step 4: Record in generated_documents table
+        const fileName = `${docType}_${Date.now()}.pdf`;
+        const { data: { publicUrl } } = serviceClient.storage
+          .from("documents")
+          .getPublicUrl(storagePath);
+
         await serviceClient.from("generated_documents").insert({
           document_request_id: requestId,
-          tenant_id: profile.tenant_id,
           document_type: docType,
-          storage_path: storagePath,
-          file_size_bytes: pdfBuffer.length,
+          file_url: publicUrl,
+          file_name: fileName,
+          file_type: "pdf",
           generation_method: "typst",
-          generated_by: user.id,
-          validation_notes: validation.notes,
-          validation_warnings: validation.warnings,
         });
 
         generatedDocs.push({
