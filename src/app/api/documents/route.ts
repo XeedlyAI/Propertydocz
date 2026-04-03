@@ -236,6 +236,31 @@ export async function POST(request: NextRequest) {
     // Service client for storage uploads
     const serviceClient = await createServiceClient();
 
+    // Fetch tenant's signature image (if any)
+    let signatureImageBuffer: Buffer | null = null;
+    {
+      const { data: tenant } = await serviceClient
+        .from("tenants")
+        .select("signature_image_url")
+        .eq("id", profile.tenant_id)
+        .single();
+
+      if (tenant?.signature_image_url) {
+        try {
+          const { data: sigData, error: sigError } = await serviceClient.storage
+            .from("signatures")
+            .download(tenant.signature_image_url);
+
+          if (!sigError && sigData) {
+            const arrayBuf = await sigData.arrayBuffer();
+            signatureImageBuffer = Buffer.from(arrayBuf);
+          }
+        } catch (err) {
+          console.warn("Failed to download signature image (non-blocking):", err);
+        }
+      }
+    }
+
     // If governing_documents is requested, auto-sync from Dropbox first
     if (documentTypes.includes("governing_documents") && association) {
       try {
@@ -269,8 +294,8 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Step 2: Generate PDF
-        const pdfBuffer = await generatePdf(docType, baseData);
+        // Step 2: Generate PDF (with signature image if available)
+        const pdfBuffer = await generatePdf(docType, baseData, signatureImageBuffer);
 
         // Step 3: Upload to storage
         let storagePath: string;

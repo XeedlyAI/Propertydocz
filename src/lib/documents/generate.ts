@@ -196,9 +196,57 @@ function interpolateTemplate(
  * Writes a temp file (compiler requires real files on disk), compiles to PDF,
  * then cleans up.
  */
+/**
+ * Build the Typst snippet for the signature block.
+ *
+ * If a signature image is provided, renders the image above the signature line.
+ * Otherwise renders a typed electronic signature using italic Inter.
+ * The signature_block is injected RAW (not escaped) since it contains Typst markup.
+ */
+function buildSignatureBlock(
+  hasSignatureImage: boolean,
+  preparedBy: string,
+  preparedByTitle: string,
+  prepDate: string,
+  extraRight?: string,
+): string {
+  const signatureContent = hasSignatureImage
+    ? `#image("signature.png", width: 200pt, height: 80pt, fit: "contain")`
+    : `#text(font: "Inter", size: 14pt, weight: "regular", style: "italic", fill: rgb("#1A1A2E"))[${preparedBy}]
+      #v(2pt)
+      #text(size: 7.5pt, fill: rgb("#777"))[Electronically signed by ${preparedBy}]`;
+
+  const rightLabel = extraRight || `Valid Through: ${prepDate}`;
+
+  return `#block(breakable: false)[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 24pt,
+    [
+      ${signatureContent}
+      #v(4pt)
+      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#555"))[Prepared By: *${preparedBy}*]
+      #v(2pt)
+      #text(size: 8pt, fill: rgb("#555"))[Date: ${prepDate}]
+    ],
+    [
+      #v(40pt)
+      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#555"))[Title: *${preparedByTitle}*]
+      #v(2pt)
+      #text(size: 8pt, fill: rgb("#555"))[${rightLabel}]
+    ],
+  )
+]`;
+}
+
 export async function generatePdf(
   docType: DocumentType,
-  data: Record<string, string>
+  data: Record<string, string>,
+  signatureImageBuffer?: Buffer | null,
 ): Promise<Buffer> {
   const { NodeCompiler } = await import(
     "@myriaddreamin/typst-ts-node-compiler"
@@ -206,7 +254,34 @@ export async function generatePdf(
 
   const template = loadTemplate(docType);
   const formattedData = formatDataValues(data);
-  const typstSource = interpolateTemplate(template, formattedData);
+
+  // Build signature block based on whether we have an image
+  const hasSignatureImage = !!signatureImageBuffer;
+  const preparedBy = data.prepared_by || "Authorized Representative";
+  const preparedByTitle = data.prepared_by_title || "Community Manager";
+  const prepDate = data.preparation_date || new Date().toLocaleDateString("en-US");
+
+  // Determine the right-side label based on doc type
+  let extraRight: string | undefined;
+  if (docType === "resale_certificate") {
+    extraRight = `Valid Through: ${data.valid_through || "N/A"}`;
+  } else if (docType === "payoff_statement") {
+    extraRight = `Good Through: ${data.good_through_date || "N/A"}`;
+  } else if (docType === "lender_questionnaire" || docType === "governing_documents") {
+    extraRight = `Phone: ${data.manager_phone || "N/A"}`;
+  }
+
+  const signatureBlock = buildSignatureBlock(
+    hasSignatureImage,
+    escapeTypst(preparedBy),
+    escapeTypst(preparedByTitle),
+    escapeTypst(prepDate),
+    extraRight ? escapeTypst(extraRight) : undefined,
+  );
+
+  // Interpolate data values (escaped), then replace signature marker (raw Typst)
+  let typstSource = interpolateTemplate(template, formattedData);
+  typstSource = typstSource.replace("// SIGNATURE_BLOCK", signatureBlock);
 
   // Load embedded font files as buffers
   const fontBlobs = loadFontBlobs();
@@ -226,6 +301,11 @@ export async function generatePdf(
   const originalCwd = process.cwd();
 
   try {
+    // Write signature image to temp dir if provided
+    if (signatureImageBuffer) {
+      writeFileSync(join(tempDir, "signature.png"), signatureImageBuffer);
+    }
+
     writeFileSync(tempFile, typstSource, "utf-8");
 
     // Temporarily set cwd to the temp dir so NodeCompiler accepts it
@@ -245,9 +325,12 @@ export async function generatePdf(
     // Restore original working directory
     process.chdir(originalCwd);
 
-    // Clean up temp file and directory
+    // Clean up temp files and directory
     try {
       unlinkSync(tempFile);
+      if (signatureImageBuffer) {
+        try { unlinkSync(join(tempDir, "signature.png")); } catch { /* */ }
+      }
       rmdirSync(tempDir);
     } catch {
       // Ignore cleanup errors

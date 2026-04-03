@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Settings } from "lucide-react";
 import { DropboxStatus } from "@/components/admin/dropbox-status";
+import { SignatureUpload } from "@/components/admin/signature-upload";
 
 export default async function SettingsPage({
   searchParams,
@@ -21,7 +22,7 @@ export default async function SettingsPage({
   const serviceClient = await createServiceClient();
   const { data: tenant } = await serviceClient
     .from("tenants")
-    .select("dropbox_access_token, dropbox_refresh_token")
+    .select("dropbox_access_token, dropbox_refresh_token, signature_image_url")
     .eq("id", user.tenantId)
     .single();
 
@@ -87,6 +88,18 @@ export default async function SettingsPage({
           </div>
         </CardContent>
       </Card>
+
+      {/* Signature Upload */}
+      <SignatureUpload
+        tenantId={user.tenantId}
+        currentSignatureUrl={
+          tenant?.signature_image_url
+            ? serviceClient.storage
+                .from("signatures")
+                .getPublicUrl(tenant.signature_image_url).data.publicUrl
+            : null
+        }
+      />
 
       {/* Dropbox Integration */}
       <DropboxStatus

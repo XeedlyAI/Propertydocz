@@ -267,24 +267,4 @@
 
 #v(20pt)
 
-// --- SIGNATURE ---
-#block(breakable: false)[
-  #grid(
-    columns: (1fr, 1fr),
-    gutter: 24pt,
-    [
-      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
-      #v(4pt)
-      #text(size: 8pt, fill: rgb("#555"))[Prepared By: *#{prepared_by}*]
-      #v(2pt)
-      #text(size: 8pt, fill: rgb("#555"))[Date: #{preparation_date}]
-    ],
-    [
-      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
-      #v(4pt)
-      #text(size: 8pt, fill: rgb("#555"))[Title: *#{prepared_by_title}*]
-      #v(2pt)
-      #text(size: 8pt, fill: rgb("#555"))[Valid Through: #{valid_through}]
-    ],
-  )
-]
+// SIGNATURE_BLOCK
