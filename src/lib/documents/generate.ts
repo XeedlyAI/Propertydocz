@@ -27,16 +27,40 @@ function loadTemplate(docType: DocumentType): string {
 }
 
 /**
+ * Escape characters that are special in Typst markup.
+ *
+ * Key Typst-special chars that break compilation when injected raw:
+ *   $  — math delimiter (unmatched $ causes "unclosed delimiter")
+ *   #  — code/function prefix
+ *   @  — label/reference
+ *   <> — raw/label delimiters
+ *   \  — escape character itself (must come first)
+ *
+ * We prefix each with a backslash so Typst treats them as literal text.
+ */
+function escapeTypst(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\$/g, "\\$")
+    .replace(/#/g, "\\#")
+    .replace(/@/g, "\\@")
+    .replace(/</g, "\\<")
+    .replace(/>/g, "\\>");
+}
+
+/**
  * Interpolate template variables into a Typst template.
  * Replaces all #{variable_name} occurrences with data values.
  * Missing values are replaced with "N/A".
+ * All injected values are escaped so Typst-special characters
+ * (like $ in "$325.00") don't break compilation.
  */
 function interpolateTemplate(
   template: string,
   data: Record<string, string>
 ): string {
   return template.replace(/#\{(\w+)\}/g, (_match: string, key: string) => {
-    return data[key] ?? "N/A";
+    return escapeTypst(data[key] ?? "N/A");
   });
 }
 
