@@ -23,7 +23,7 @@ export default async function SettingsPage({
   const serviceClient = await createServiceClient();
   const { data: tenant } = await serviceClient
     .from("tenants")
-    .select("dropbox_access_token, dropbox_refresh_token, signature_image_url, stripe_account_id")
+    .select("dropbox_access_token, dropbox_refresh_token, signature_image_url, signature_font_style, stripe_account_id")
     .eq("id", user.tenantId)
     .single();
 
@@ -100,6 +100,7 @@ export default async function SettingsPage({
                 .getPublicUrl(tenant.signature_image_url).data.publicUrl
             : null
         }
+        currentFontStyle={tenant?.signature_font_style || null}
       />
 
       {/* Dropbox Integration */}

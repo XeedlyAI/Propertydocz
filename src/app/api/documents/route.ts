@@ -236,14 +236,17 @@ export async function POST(request: NextRequest) {
     // Service client for storage uploads
     const serviceClient = await createServiceClient();
 
-    // Fetch tenant's signature image (if any)
+    // Fetch tenant's signature image and font style (if any)
     let signatureImageBuffer: Buffer | null = null;
+    let signatureFontStyle: string | null = null;
     {
       const { data: tenant } = await serviceClient
         .from("tenants")
-        .select("signature_image_url")
+        .select("signature_image_url, signature_font_style")
         .eq("id", profile.tenant_id)
         .single();
+
+      signatureFontStyle = tenant?.signature_font_style || null;
 
       if (tenant?.signature_image_url) {
         try {
@@ -336,7 +339,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Step 2: Generate PDF (with signature image if available)
-        const pdfBuffer = await generatePdf(docType, baseData, signatureImageBuffer);
+        const pdfBuffer = await generatePdf(docType, baseData, signatureImageBuffer, signatureFontStyle);
 
         // Step 3: Upload to storage
         let storagePath: string;

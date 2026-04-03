@@ -12,16 +12,26 @@ import {
 import { Upload, Trash2, Loader2, PenLine } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
 
+const FONT_STYLES = [
+  { value: "dancing_script", label: "Dancing Script", family: "'Dancing Script', cursive" },
+  { value: "great_vibes", label: "Great Vibes", family: "'Great Vibes', cursive" },
+  { value: "pacifico", label: "Pacifico", family: "'Pacifico', cursive" },
+] as const;
+
 interface SignatureUploadProps {
   tenantId: string;
   currentSignatureUrl: string | null;
+  currentFontStyle: string | null;
 }
 
 export function SignatureUpload({
   tenantId,
   currentSignatureUrl,
+  currentFontStyle,
 }: SignatureUploadProps) {
   const [signatureUrl, setSignatureUrl] = useState(currentSignatureUrl);
+  const [fontStyle, setFontStyle] = useState(currentFontStyle || "dancing_script");
+  const [savingFont, setSavingFont] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
@@ -122,7 +132,35 @@ export function SignatureUpload({
     }
   }
 
+  async function handleFontChange(value: string) {
+    setFontStyle(value);
+    setSavingFont(true);
+    setError("");
+
+    try {
+      const { error: updateError } = await supabase
+        .from("tenants")
+        .update({ signature_font_style: value })
+        .eq("id", tenantId);
+
+      if (updateError) {
+        setError(`Failed to save font: ${updateError.message}`);
+      }
+    } catch {
+      setError("Failed to save font preference.");
+    } finally {
+      setSavingFont(false);
+    }
+  }
+
   return (
+    <>
+    {/* Load Google Fonts for signature preview */}
+    {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400&family=Great+Vibes&family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
@@ -209,8 +247,42 @@ export function SignatureUpload({
           onChange={handleUpload}
         />
 
+        {/* Font style selector — only relevant when no image uploaded */}
+        {!signatureUrl && (
+          <div className="space-y-2 rounded-lg border p-4">
+            <p className="text-sm font-medium">Signature Font Style</p>
+            <p className="text-xs text-muted-foreground">
+              Choose the cursive font used for the typed electronic signature on documents.
+            </p>
+            <div className="grid gap-2">
+              {FONT_STYLES.map((f) => (
+                <button
+                  key={f.value}
+                  type="button"
+                  onClick={() => handleFontChange(f.value)}
+                  disabled={savingFont}
+                  className={`flex items-center justify-between rounded-md border px-3 py-2 text-left transition-colors ${
+                    fontStyle === f.value
+                      ? "border-[#38b6ff] bg-[#38b6ff]/5"
+                      : "border-border hover:bg-muted/50"
+                  }`}
+                >
+                  <span
+                    className="text-lg text-[#1A1A2E]"
+                    style={{ fontFamily: f.family }}
+                  >
+                    John Smith
+                  </span>
+                  <span className="text-xs text-muted-foreground">{f.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {error && <p className="text-sm text-destructive">{error}</p>}
       </CardContent>
     </Card>
+    </>
   );
 }

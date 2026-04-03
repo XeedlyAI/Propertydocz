@@ -34,7 +34,20 @@ const FONT_FILES = [
   "Inter-SemiBoldItalic.ttf",
   "JetBrainsMono-Regular.ttf",
   "JetBrainsMono-Bold.ttf",
+  "DancingScript-Regular.ttf",
+  "GreatVibes-Regular.ttf",
+  "Pacifico-Regular.ttf",
 ];
+
+/**
+ * Signature font style options.
+ * Maps the DB value to the Typst font family name.
+ */
+export const SIGNATURE_FONT_STYLES: Record<string, { label: string; font: string }> = {
+  dancing_script: { label: "Dancing Script", font: "Dancing Script" },
+  great_vibes: { label: "Great Vibes", font: "Great Vibes" },
+  pacifico: { label: "Pacifico", font: "Pacifico" },
+};
 
 let _fontBlobsCache: Buffer[] | null = null;
 
@@ -209,10 +222,18 @@ function buildSignatureBlock(
   preparedByTitle: string,
   prepDate: string,
   extraRight?: string,
+  signatureFontStyle?: string,
 ): string {
+  // Determine font for typed electronic signature
+  const fontInfo = signatureFontStyle
+    ? SIGNATURE_FONT_STYLES[signatureFontStyle]
+    : null;
+  const sigFont = fontInfo ? fontInfo.font : "Inter";
+  const sigStyle = fontInfo ? "" : `, style: "italic"`;
+
   const signatureContent = hasSignatureImage
     ? `#image("signature.png", width: 200pt, height: 80pt, fit: "contain")`
-    : `#text(font: "Inter", size: 14pt, weight: "regular", style: "italic", fill: rgb("#1A1A2E"))[${preparedBy}]
+    : `#text(font: "${sigFont}", size: 18pt, weight: "regular"${sigStyle}, fill: rgb("#1A1A2E"))[${preparedBy}]
       #v(2pt)
       #text(size: 7.5pt, fill: rgb("#777"))[Electronically signed by ${preparedBy}]`;
 
@@ -247,6 +268,7 @@ export async function generatePdf(
   docType: DocumentType,
   data: Record<string, string>,
   signatureImageBuffer?: Buffer | null,
+  signatureFontStyle?: string | null,
 ): Promise<Buffer> {
   const { NodeCompiler } = await import(
     "@myriaddreamin/typst-ts-node-compiler"
@@ -277,6 +299,7 @@ export async function generatePdf(
     escapeTypst(preparedByTitle),
     escapeTypst(prepDate),
     extraRight ? escapeTypst(extraRight) : undefined,
+    signatureFontStyle || undefined,
   );
 
   // Interpolate data values (escaped), then replace signature marker (raw Typst)
