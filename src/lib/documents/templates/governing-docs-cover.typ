@@ -21,6 +21,16 @@
 #set text(font: "Inter", size: 9.5pt, fill: rgb("#1A1A2E"))
 #set par(justify: true, leading: 0.65em)
 
+// --- SUBTITLE BAR HELPER ---
+#let field-label(body) = {
+  rect(
+    width: 100%,
+    inset: (x: 6pt, y: 3pt),
+    fill: rgb("#EEEFF2"),
+    radius: 1pt,
+  )[#text(weight: "bold", size: 8pt, fill: rgb("#1A1A2E"))[#body]]
+}
+
 // --- HEADER BAR ---
 #rect(
   width: 100%,
@@ -151,8 +161,12 @@
   #rect(width: 100%, inset: (x: 10pt, y: 6pt), fill: rgb("#1A1A2E"), radius: 2pt)[
     #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Notes]
   ]
-  #v(6pt)
-  #text(size: 9pt)[#{package_notes}]
+  #v(8pt)
+
+  #stack(dir: ttb, spacing: 5pt,
+    field-label[Package Notes],
+    pad(left: 14pt)[#text(size: 9pt)[#{package_notes}]],
+  )
 ]
 
 #v(12pt)

@@ -21,6 +21,16 @@
 #set text(font: "Inter", size: 9.5pt, fill: rgb("#1A1A2E"))
 #set par(justify: true, leading: 0.65em)
 
+// --- SUBTITLE BAR HELPER ---
+#let field-label(body) = {
+  rect(
+    width: 100%,
+    inset: (x: 6pt, y: 3pt),
+    fill: rgb("#EEEFF2"),
+    radius: 1pt,
+  )[#text(weight: "bold", size: 8pt, fill: rgb("#1A1A2E"))[#body]]
+}
+
 // --- HEADER BAR ---
 #rect(
   width: 100%,
@@ -147,11 +157,13 @@
     columns: (1fr, 1fr),
     gutter: 12pt,
     [
-      #text(weight: "bold", size: 8pt)[Daily Per Diem Amount]
-      #v(2pt)
-      #text(font: "JetBrains Mono", size: 11pt, weight: "bold", fill: rgb("#1A1A2E"))[#{per_diem_amount}]
-      #v(2pt)
-      #text(size: 8pt, fill: rgb("#777"))[Effective: #{per_diem_start_date}]
+      #field-label[Daily Per Diem Amount]
+      #pad(left: 14pt, top: 2pt)[
+        #text(font: "JetBrains Mono", size: 11pt, weight: "bold", fill: rgb("#1A1A2E"))[#{per_diem_amount}]
+      ]
+      #pad(left: 14pt, top: 2pt)[
+        #text(size: 8pt, fill: rgb("#777"))[Effective: #{per_diem_start_date}]
+      ]
     ],
     [
       #rect(

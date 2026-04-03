@@ -21,6 +21,17 @@
 #set text(font: "Inter", size: 9.5pt, fill: rgb("#1A1A2E"))
 #set par(justify: true, leading: 0.65em)
 
+// --- SUBTITLE BAR HELPER ---
+// Light grey background bar for field labels within sections
+#let field-label(body) = {
+  rect(
+    width: 100%,
+    inset: (x: 6pt, y: 3pt),
+    fill: rgb("#EEEFF2"),
+    radius: 1pt,
+  )[#text(weight: "bold", size: 8pt, fill: rgb("#1A1A2E"))[#body]]
+}
+
 // --- HEADER BAR ---
 #rect(
   width: 100%,
@@ -128,11 +139,11 @@
   ]
   #v(8pt)
 
-  #grid(
-    columns: (120pt, 1fr),
-    gutter: 6pt,
-    [#text(weight: "bold", size: 9pt)[Status:]], [#{account_status}],
-    [#text(weight: "bold", size: 9pt)[Violations:]], [#{outstanding_violations}],
+  #stack(dir: ttb, spacing: 5pt,
+    field-label[Status],
+    pad(left: 14pt)[#text(size: 9pt)[#{account_status}]],
+    field-label[Violations],
+    pad(left: 14pt)[#text(size: 9pt)[#{outstanding_violations}]],
   )
 ]
 
@@ -152,13 +163,14 @@
 
   #grid(
     columns: (1fr, 1fr),
-    gutter: 8pt,
-    [#text(weight: "bold", size: 8pt)[Master Policy Carrier] #v(1pt) #text(size: 9pt)[#{master_policy_carrier}]],
-    [#text(weight: "bold", size: 8pt)[Policy Expiration] #v(1pt) #text(size: 9pt)[#{master_policy_expiration}]],
-    [#text(weight: "bold", size: 8pt)[General Liability] #v(1pt) #text(font: "JetBrains Mono", size: 9pt)[#{general_liability}]],
-    [#text(weight: "bold", size: 8pt)[Fidelity Bond] #v(1pt) #text(font: "JetBrains Mono", size: 9pt)[#{fidelity_bond}]],
-    [#text(weight: "bold", size: 8pt)[Flood Zone] #v(1pt) #text(size: 9pt)[#{flood_zone}]],
-    [#text(weight: "bold", size: 8pt)[Flood Insurance] #v(1pt) #text(size: 9pt)[#{flood_insurance}]],
+    row-gutter: 5pt,
+    column-gutter: 16pt,
+    [#field-label[Master Policy Carrier] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{master_policy_carrier}]]],
+    [#field-label[Policy Expiration] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{master_policy_expiration}]]],
+    [#field-label[General Liability] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono", size: 9pt)[#{general_liability}]]],
+    [#field-label[Fidelity Bond] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono", size: 9pt)[#{fidelity_bond}]]],
+    [#field-label[Flood Zone] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{flood_zone}]]],
+    [#field-label[Flood Insurance] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{flood_insurance}]]],
   )
 ]
 
@@ -178,16 +190,15 @@
 
   #grid(
     columns: (1fr, 1fr, 1fr),
-    gutter: 8pt,
-    [#text(weight: "bold", size: 8pt)[Reserve Balance] #v(1pt) #text(font: "JetBrains Mono", size: 9.5pt)[#{reserve_balance}]],
-    [#text(weight: "bold", size: 8pt)[Percent Funded] #v(1pt) #text(font: "JetBrains Mono", size: 9.5pt)[#{percent_funded}]],
-    [#text(weight: "bold", size: 8pt)[Study Date] #v(1pt) #text(size: 9pt)[#{reserve_study_date}]],
+    row-gutter: 5pt,
+    column-gutter: 12pt,
+    [#field-label[Reserve Balance] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono", size: 9.5pt)[#{reserve_balance}]]],
+    [#field-label[Percent Funded] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono", size: 9.5pt)[#{percent_funded}]]],
+    [#field-label[Study Date] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{reserve_study_date}]]],
   )
-  #v(4pt)
-  #grid(
-    columns: (120pt, 1fr),
-    [#text(weight: "bold", size: 8pt)[Annual Budget]], [#text(font: "JetBrains Mono", size: 9pt)[#{annual_budget}]],
-  )
+  #v(5pt)
+  #field-label[Annual Budget]
+  #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono", size: 9pt)[#{annual_budget}]]
 ]
 
 #v(14pt)
@@ -206,18 +217,18 @@
 
   #grid(
     columns: (1fr, 1fr),
-    row-gutter: 8pt,
+    row-gutter: 5pt,
     column-gutter: 16pt,
-    [#text(weight: "bold", size: 8pt)[Rental Policy] #v(1pt) #text(size: 9pt)[#{rental_policy}]],
-    [#text(weight: "bold", size: 8pt)[Short-Term Rental] #v(1pt) #text(size: 9pt)[#{short_term_rental_policy}]],
-    [#text(weight: "bold", size: 8pt)[Pet Policy] #v(1pt) #text(size: 9pt)[#{pet_policy}]],
-    [#text(weight: "bold", size: 8pt)[Parking] #v(1pt) #text(size: 9pt)[#{parking_policy}]],
-    [#text(weight: "bold", size: 8pt)[Age Restrictions] #v(1pt) #text(size: 9pt)[#{age_restrictions}]],
-    [#text(weight: "bold", size: 8pt)[Right of First Refusal] #v(1pt) #text(size: 9pt)[#{right_of_first_refusal}]],
+    [#field-label[Rental Policy] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{rental_policy}]]],
+    [#field-label[Short-Term Rental] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{short_term_rental_policy}]]],
+    [#field-label[Pet Policy] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{pet_policy}]]],
+    [#field-label[Parking] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{parking_policy}]]],
+    [#field-label[Age Restrictions] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{age_restrictions}]]],
+    [#field-label[Right of First Refusal] #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{right_of_first_refusal}]]],
   )
-  #v(6pt)
-  #text(weight: "bold", size: 8pt)[Unit-Specific Restrictions] #v(1pt)
-  #text(size: 9pt)[#{unit_restrictions}]
+  #v(5pt)
+  #field-label[Unit-Specific Restrictions]
+  #pad(left: 14pt, top: 2pt)[#text(size: 9pt)[#{unit_restrictions}]]
 ]
 
 #v(14pt)
@@ -234,11 +245,11 @@
   ]
   #v(8pt)
 
-  #grid(
-    columns: (120pt, 1fr),
-    gutter: 6pt,
-    [#text(weight: "bold", size: 9pt)[Pending Litigation:]], [#{in_litigation}],
-    [#text(weight: "bold", size: 9pt)[Details:]], [#{litigation_details}],
+  #stack(dir: ttb, spacing: 5pt,
+    field-label[Pending Litigation],
+    pad(left: 14pt)[#text(size: 9pt)[#{in_litigation}]],
+    field-label[Details],
+    pad(left: 14pt)[#text(size: 9pt)[#{litigation_details}]],
   )
 ]
 

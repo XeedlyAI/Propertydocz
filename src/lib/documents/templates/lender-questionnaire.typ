@@ -21,6 +21,16 @@
 #set text(font: "Inter", size: 9pt, fill: rgb("#1A1A2E"))
 #set par(justify: true, leading: 0.6em)
 
+// --- SUBTITLE BAR HELPER ---
+#let field-label(body) = {
+  rect(
+    width: 100%,
+    inset: (x: 6pt, y: 3pt),
+    fill: rgb("#EEEFF2"),
+    radius: 1pt,
+  )[#text(weight: "bold", size: 8pt, fill: rgb("#1A1A2E"))[#body]]
+}
+
 // --- HEADER BAR ---
 #rect(
   width: 100%,
@@ -54,18 +64,18 @@
 
   #grid(
     columns: (1fr, 1fr),
-    row-gutter: 6pt,
+    row-gutter: 5pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[HOA/Project Name] #v(1pt) #{association_name}],
-    [#text(weight: "bold", size: 8pt)[Legal Name] #v(1pt) #{association_legal_name}],
-    [#text(weight: "bold", size: 8pt)[Address] #v(1pt) #{association_address}],
-    [#text(weight: "bold", size: 8pt)[City, State, ZIP] #v(1pt) #{association_city}, #{association_state} #{association_zip}],
-    [#text(weight: "bold", size: 8pt)[Management Company] #v(1pt) #{manager_name}],
-    [#text(weight: "bold", size: 8pt)[Contact Email] #v(1pt) #{manager_email}],
-    [#text(weight: "bold", size: 8pt)[Contact Phone] #v(1pt) #{manager_phone}],
-    [#text(weight: "bold", size: 8pt)[Tax ID (EIN)] #v(1pt) #text(font: "JetBrains Mono", size: 9pt)[#{association_ein}]],
-    [#text(weight: "bold", size: 8pt)[Year Built] #v(1pt) #{year_built}],
-    [#text(weight: "bold", size: 8pt)[Year Converted] #v(1pt) #{year_converted}],
+    [#field-label[HOA/Project Name] #pad(left: 14pt, top: 2pt)[#{association_name}]],
+    [#field-label[Legal Name] #pad(left: 14pt, top: 2pt)[#{association_legal_name}]],
+    [#field-label[Address] #pad(left: 14pt, top: 2pt)[#{association_address}]],
+    [#field-label[City, State, ZIP] #pad(left: 14pt, top: 2pt)[#{association_city}, #{association_state} #{association_zip}]],
+    [#field-label[Management Company] #pad(left: 14pt, top: 2pt)[#{manager_name}]],
+    [#field-label[Contact Email] #pad(left: 14pt, top: 2pt)[#{manager_email}]],
+    [#field-label[Contact Phone] #pad(left: 14pt, top: 2pt)[#{manager_phone}]],
+    [#field-label[Tax ID (EIN)] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono", size: 9pt)[#{association_ein}]]],
+    [#field-label[Year Built] #pad(left: 14pt, top: 2pt)[#{year_built}]],
+    [#field-label[Year Converted] #pad(left: 14pt, top: 2pt)[#{year_converted}]],
   )
 ]
 
@@ -80,14 +90,14 @@
 
   #grid(
     columns: (1fr, 1fr),
-    row-gutter: 6pt,
+    row-gutter: 5pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[Total Units] #v(1pt) #text(font: "JetBrains Mono")[#{total_units}]],
-    [#text(weight: "bold", size: 8pt)[Subject Unit] #v(1pt) #{unit_number}],
-    [#text(weight: "bold", size: 8pt)[Property Address] #v(1pt) #{property_address}],
-    [#text(weight: "bold", size: 8pt)[Owner of Record] #v(1pt) #{owner_name}],
-    [#text(weight: "bold", size: 8pt)[Phases Complete] #v(1pt) #{phases_complete}],
-    [#text(weight: "bold", size: 8pt)[Additional Phases Planned] #v(1pt) #{additional_phases_planned}],
+    [#field-label[Total Units] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono")[#{total_units}]]],
+    [#field-label[Subject Unit] #pad(left: 14pt, top: 2pt)[#{unit_number}]],
+    [#field-label[Property Address] #pad(left: 14pt, top: 2pt)[#{property_address}]],
+    [#field-label[Owner of Record] #pad(left: 14pt, top: 2pt)[#{owner_name}]],
+    [#field-label[Phases Complete] #pad(left: 14pt, top: 2pt)[#{phases_complete}]],
+    [#field-label[Additional Phases Planned] #pad(left: 14pt, top: 2pt)[#{additional_phases_planned}]],
   )
 ]
 
@@ -102,14 +112,14 @@
 
   #grid(
     columns: (1fr, 1fr),
-    row-gutter: 6pt,
+    row-gutter: 5pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[Project complete?] #v(1pt) #{project_complete}],
-    [#text(weight: "bold", size: 8pt)[% Complete] #v(1pt) #{percent_complete}],
-    [#text(weight: "bold", size: 8pt)[Developer still in control?] #v(1pt) #{developer_in_control}],
-    [#text(weight: "bold", size: 8pt)[Turnover date] #v(1pt) #{turnover_date}],
-    [#text(weight: "bold", size: 8pt)[Pending additions/annexations?] #v(1pt) #{pending_annexations}],
-    [#text(weight: "bold", size: 8pt)[Conversion project?] #v(1pt) #{is_conversion}],
+    [#field-label[Project complete?] #pad(left: 14pt, top: 2pt)[#{project_complete}]],
+    [#field-label[% Complete] #pad(left: 14pt, top: 2pt)[#{percent_complete}]],
+    [#field-label[Developer still in control?] #pad(left: 14pt, top: 2pt)[#{developer_in_control}]],
+    [#field-label[Turnover date] #pad(left: 14pt, top: 2pt)[#{turnover_date}]],
+    [#field-label[Pending additions/annexations?] #pad(left: 14pt, top: 2pt)[#{pending_annexations}]],
+    [#field-label[Conversion project?] #pad(left: 14pt, top: 2pt)[#{is_conversion}]],
   )
 ]
 
@@ -154,14 +164,14 @@
 
   #grid(
     columns: (1fr, 1fr),
-    row-gutter: 6pt,
+    row-gutter: 5pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[Annual Operating Budget] #v(1pt) #text(font: "JetBrains Mono")[#{annual_budget}]],
-    [#text(weight: "bold", size: 8pt)[Monthly Assessment] #v(1pt) #text(font: "JetBrains Mono")[#{monthly_assessment}]],
-    [#text(weight: "bold", size: 8pt)[Assessment Frequency] #v(1pt) #{assessment_frequency}],
-    [#text(weight: "bold", size: 8pt)[Special assessments?] #v(1pt) #{special_assessments_planned}],
-    [#text(weight: "bold", size: 8pt)[Special Assessment Details] #v(1pt) #{special_assessment_details}],
-    [#text(weight: "bold", size: 8pt)[Assessments adequate?] #v(1pt) #{assessments_adequate}],
+    [#field-label[Annual Operating Budget] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono")[#{annual_budget}]]],
+    [#field-label[Monthly Assessment] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono")[#{monthly_assessment}]]],
+    [#field-label[Assessment Frequency] #pad(left: 14pt, top: 2pt)[#{assessment_frequency}]],
+    [#field-label[Special assessments?] #pad(left: 14pt, top: 2pt)[#{special_assessments_planned}]],
+    [#field-label[Special Assessment Details] #pad(left: 14pt, top: 2pt)[#{special_assessment_details}]],
+    [#field-label[Assessments adequate?] #pad(left: 14pt, top: 2pt)[#{assessments_adequate}]],
   )
 ]
 
@@ -176,14 +186,14 @@
 
   #grid(
     columns: (1fr, 1fr),
-    row-gutter: 6pt,
+    row-gutter: 5pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[Current Reserve Balance] #v(1pt) #text(font: "JetBrains Mono")[#{reserve_balance}]],
-    [#text(weight: "bold", size: 8pt)[Percent Funded] #v(1pt) #text(font: "JetBrains Mono")[#{percent_funded}]],
-    [#text(weight: "bold", size: 8pt)[Reserve Study Completed?] #v(1pt) #{reserve_study_completed}],
-    [#text(weight: "bold", size: 8pt)[Reserve Study Date] #v(1pt) #{reserve_study_date}],
-    [#text(weight: "bold", size: 8pt)[Study current (within 3 yrs)?] #v(1pt) #{reserve_study_current}],
-    [#text(weight: "bold", size: 8pt)[Annual Reserve Contribution] #v(1pt) #text(font: "JetBrains Mono")[#{annual_reserve_contribution}]],
+    [#field-label[Current Reserve Balance] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono")[#{reserve_balance}]]],
+    [#field-label[Percent Funded] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono")[#{percent_funded}]]],
+    [#field-label[Reserve Study Completed?] #pad(left: 14pt, top: 2pt)[#{reserve_study_completed}]],
+    [#field-label[Reserve Study Date] #pad(left: 14pt, top: 2pt)[#{reserve_study_date}]],
+    [#field-label[Study current (within 3 yrs)?] #pad(left: 14pt, top: 2pt)[#{reserve_study_current}]],
+    [#field-label[Annual Reserve Contribution] #pad(left: 14pt, top: 2pt)[#text(font: "JetBrains Mono")[#{annual_reserve_contribution}]]],
   )
 ]
 
@@ -214,11 +224,9 @@
     [Umbrella / Excess], [#{umbrella_coverage}], [#{umbrella_expiration}],
   )
 
-  #v(3pt)
-  #grid(
-    columns: (120pt, 1fr),
-    [#text(weight: "bold", size: 8pt)[Flood Zone:]], [#{flood_zone}],
-  )
+  #v(5pt)
+  #field-label[Flood Zone]
+  #pad(left: 14pt, top: 2pt)[#{flood_zone}]
 ]
 
 #v(10pt)
@@ -230,12 +238,13 @@
   ]
   #v(6pt)
 
-  #grid(
-    columns: (160pt, 1fr),
-    row-gutter: 5pt,
-    [#text(weight: "bold", size: 8pt)[Current litigation?]], [#{in_litigation}],
-    [#text(weight: "bold", size: 8pt)[Nature of litigation:]], [#{litigation_details}],
-    [#text(weight: "bold", size: 8pt)[Safety/structural related?]], [#{litigation_safety_related}],
+  #stack(dir: ttb, spacing: 5pt,
+    field-label[Current litigation?],
+    pad(left: 14pt)[#{in_litigation}],
+    field-label[Nature of litigation],
+    pad(left: 14pt)[#{litigation_details}],
+    field-label[Safety/structural related?],
+    pad(left: 14pt)[#{litigation_safety_related}],
   )
 ]
 
@@ -250,16 +259,16 @@
 
   #grid(
     columns: (1fr, 1fr),
-    row-gutter: 6pt,
+    row-gutter: 5pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[Rental Restrictions?] #v(1pt) #{rental_policy}],
-    [#text(weight: "bold", size: 8pt)[Short-Term Rental?] #v(1pt) #{short_term_rental_policy}],
-    [#text(weight: "bold", size: 8pt)[Rental Cap] #v(1pt) #{rental_cap}],
-    [#text(weight: "bold", size: 8pt)[Right of First Refusal?] #v(1pt) #{right_of_first_refusal}],
-    [#text(weight: "bold", size: 8pt)[Age Restrictions?] #v(1pt) #{age_restrictions}],
-    [#text(weight: "bold", size: 8pt)[Pet Restrictions?] #v(1pt) #{pet_policy}],
-    [#text(weight: "bold", size: 8pt)[Mandatory Fees?] #v(1pt) #{mandatory_membership_fees}],
-    [#text(weight: "bold", size: 8pt)[Commercial Space?] #v(1pt) #{commercial_space}],
+    [#field-label[Rental Restrictions?] #pad(left: 14pt, top: 2pt)[#{rental_policy}]],
+    [#field-label[Short-Term Rental?] #pad(left: 14pt, top: 2pt)[#{short_term_rental_policy}]],
+    [#field-label[Rental Cap] #pad(left: 14pt, top: 2pt)[#{rental_cap}]],
+    [#field-label[Right of First Refusal?] #pad(left: 14pt, top: 2pt)[#{right_of_first_refusal}]],
+    [#field-label[Age Restrictions?] #pad(left: 14pt, top: 2pt)[#{age_restrictions}]],
+    [#field-label[Pet Restrictions?] #pad(left: 14pt, top: 2pt)[#{pet_policy}]],
+    [#field-label[Mandatory Fees?] #pad(left: 14pt, top: 2pt)[#{mandatory_membership_fees}]],
+    [#field-label[Commercial Space?] #pad(left: 14pt, top: 2pt)[#{commercial_space}]],
   )
 ]
 
@@ -274,16 +283,16 @@
 
   #grid(
     columns: (1fr, 1fr),
-    row-gutter: 6pt,
+    row-gutter: 5pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[Environmental hazards?] #v(1pt) #{environmental_hazards}],
-    [#text(weight: "bold", size: 8pt)[Asbestos?] #v(1pt) #{asbestos}],
-    [#text(weight: "bold", size: 8pt)[Lead-based paint?] #v(1pt) #{lead_paint}],
-    [#text(weight: "bold", size: 8pt)[Mold issues?] #v(1pt) #{mold_issues}],
-    [#text(weight: "bold", size: 8pt)[FEMA disaster area?] #v(1pt) #{fema_disaster}],
-    [#text(weight: "bold", size: 8pt)[Structural deficiencies?] #v(1pt) #{structural_deficiencies}],
-    [#text(weight: "bold", size: 8pt)[Deferred maintenance?] #v(1pt) #{deferred_maintenance}],
-    [#text(weight: "bold", size: 8pt)[Failed inspections?] #v(1pt) #{failed_inspections}],
+    [#field-label[Environmental hazards?] #pad(left: 14pt, top: 2pt)[#{environmental_hazards}]],
+    [#field-label[Asbestos?] #pad(left: 14pt, top: 2pt)[#{asbestos}]],
+    [#field-label[Lead-based paint?] #pad(left: 14pt, top: 2pt)[#{lead_paint}]],
+    [#field-label[Mold issues?] #pad(left: 14pt, top: 2pt)[#{mold_issues}]],
+    [#field-label[FEMA disaster area?] #pad(left: 14pt, top: 2pt)[#{fema_disaster}]],
+    [#field-label[Structural deficiencies?] #pad(left: 14pt, top: 2pt)[#{structural_deficiencies}]],
+    [#field-label[Deferred maintenance?] #pad(left: 14pt, top: 2pt)[#{deferred_maintenance}]],
+    [#field-label[Failed inspections?] #pad(left: 14pt, top: 2pt)[#{failed_inspections}]],
   )
 ]
 
@@ -296,13 +305,15 @@
   ]
   #v(6pt)
 
-  #grid(
-    columns: (130pt, 1fr),
-    row-gutter: 5pt,
-    [#text(weight: "bold", size: 8pt)[Common amenities:]], [#{common_amenities}],
-    [#text(weight: "bold", size: 8pt)[Utilities included:]], [#{utilities_included}],
-    [#text(weight: "bold", size: 8pt)[FHA approved?]], [#{fha_approved}],
-    [#text(weight: "bold", size: 8pt)[VA approved?]], [#{va_approved}],
+  #stack(dir: ttb, spacing: 5pt,
+    field-label[Common amenities],
+    pad(left: 14pt)[#{common_amenities}],
+    field-label[Utilities included],
+    pad(left: 14pt)[#{utilities_included}],
+    field-label[FHA approved?],
+    pad(left: 14pt)[#{fha_approved}],
+    field-label[VA approved?],
+    pad(left: 14pt)[#{va_approved}],
   )
 ]
 
