@@ -46,122 +46,132 @@
 #v(12pt)
 
 // --- ASSOCIATION / PREPARED FOR ---
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 16pt,
-  [
-    #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[ASSOCIATION]
-    #v(4pt)
-    #text(size: 11pt, weight: "bold")[#{association_name}]
-    #v(2pt)
-    #text(size: 9pt, fill: rgb("#555"))[
-      #{association_address} \
-      #{association_city}, #{association_state} #{association_zip}
-    ]
-    #v(4pt)
-    #text(size: 8pt, fill: rgb("#777"))[
-      Manager: #{manager_name} \
-      #{manager_email} #h(6pt) #{manager_phone}
-    ]
-  ],
-  [
-    #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[PREPARED FOR]
-    #v(4pt)
-    #text(size: 11pt, weight: "bold")[#{property_address}]
-    #v(2pt)
-    #text(size: 9pt, fill: rgb("#555"))[
-      Unit/Lot: #{unit_number} \
-      Owner: #{owner_name}
-    ]
-    #v(4pt)
-    #text(size: 8pt, fill: rgb("#777"))[
-      Requested By: #{requester_name} \
-      Type: #{requester_type}
-    ]
-  ],
-)
+#block(breakable: false)[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 16pt,
+    [
+      #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[ASSOCIATION]
+      #v(4pt)
+      #text(size: 11pt, weight: "bold")[#{association_name}]
+      #v(2pt)
+      #text(size: 9pt, fill: rgb("#555"))[
+        #{association_address} \
+        #{association_city}, #{association_state} #{association_zip}
+      ]
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#777"))[
+        Manager: #{manager_name} \
+        #{manager_email} #h(6pt) #{manager_phone}
+      ]
+    ],
+    [
+      #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[PREPARED FOR]
+      #v(4pt)
+      #text(size: 11pt, weight: "bold")[#{property_address}]
+      #v(2pt)
+      #text(size: 9pt, fill: rgb("#555"))[
+        Unit/Lot: #{unit_number} \
+        Owner: #{owner_name}
+      ]
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#777"))[
+        Requested By: #{requester_name} \
+        Type: #{requester_type}
+      ]
+    ],
+  )
+]
 
 #v(16pt)
 
 // --- DOCUMENT CHECKLIST ---
-#rect(width: 100%, inset: (x: 10pt, y: 6pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Document Checklist]
-]
-#v(4pt)
-#text(size: 8pt, fill: rgb("#777"))[The following documents are included in or referenced by this package.]
-#v(8pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 6pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Document Checklist]
+  ]
+  #v(4pt)
+  #text(size: 8pt, fill: rgb("#777"))[The following documents are included in or referenced by this package.]
+  #v(8pt)
 
-#table(
-  columns: (auto, 1fr, auto, auto),
-  stroke: none,
-  inset: (x: 8pt, y: 6pt),
-  fill: (_, y) => if calc.rem(y, 2) == 0 { rgb("#F4F5F7") } else { white },
-  table.header(
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[\#]],
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Document]],
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Status]],
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Pages]],
-  ),
-  [1], [Declaration of CC&Rs], [#{ccr_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{ccr_pages}]],
-  [2], [CC&R Amendments], [#{ccr_amendments_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{ccr_amendments_pages}]],
-  [3], [Bylaws], [#{bylaws_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{bylaws_pages}]],
-  [4], [Bylaws Amendments], [#{bylaws_amendments_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{bylaws_amendments_pages}]],
-  [5], [Articles of Incorporation], [#{articles_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{articles_pages}]],
-  [6], [Rules & Regulations], [#{rules_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{rules_pages}]],
-  [7], [Architectural Guidelines], [#{architectural_guidelines_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{architectural_guidelines_pages}]],
-  [8], [Current Year Budget], [#{budget_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{budget_pages}]],
-  [9], [Most Recent Financial Statement], [#{financial_statement_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{financial_statement_pages}]],
-  [10], [Reserve Study], [#{reserve_study_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{reserve_study_pages}]],
-  [11], [Insurance Certificate], [#{insurance_cert_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{insurance_cert_pages}]],
-  [12], [Meeting Minutes (most recent)], [#{meeting_minutes_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{meeting_minutes_pages}]],
-  [13], [Plat/Survey Map], [#{plat_map_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{plat_map_pages}]],
-)
+  #table(
+    columns: (auto, 1fr, auto, auto),
+    stroke: none,
+    inset: (x: 8pt, y: 6pt),
+    fill: (_, y) => if calc.rem(y, 2) == 0 { rgb("#F4F5F7") } else { white },
+    table.header(
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[\#]],
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Document]],
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Status]],
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Pages]],
+    ),
+    [1], [Declaration of CC&Rs], [#{ccr_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{ccr_pages}]],
+    [2], [CC&R Amendments], [#{ccr_amendments_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{ccr_amendments_pages}]],
+    [3], [Bylaws], [#{bylaws_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{bylaws_pages}]],
+    [4], [Bylaws Amendments], [#{bylaws_amendments_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{bylaws_amendments_pages}]],
+    [5], [Articles of Incorporation], [#{articles_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{articles_pages}]],
+    [6], [Rules & Regulations], [#{rules_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{rules_pages}]],
+    [7], [Architectural Guidelines], [#{architectural_guidelines_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{architectural_guidelines_pages}]],
+    [8], [Current Year Budget], [#{budget_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{budget_pages}]],
+    [9], [Most Recent Financial Statement], [#{financial_statement_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{financial_statement_pages}]],
+    [10], [Reserve Study], [#{reserve_study_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{reserve_study_pages}]],
+    [11], [Insurance Certificate], [#{insurance_cert_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{insurance_cert_pages}]],
+    [12], [Meeting Minutes (most recent)], [#{meeting_minutes_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{meeting_minutes_pages}]],
+    [13], [Plat/Survey Map], [#{plat_map_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{plat_map_pages}]],
+  )
+]
 
 #v(10pt)
 
 // --- STATUS LEGEND ---
-#rect(
-  width: 100%,
-  inset: 8pt,
-  fill: rgb("#F4F5F7"),
-  radius: 2pt,
-)[
-  #text(size: 8pt, weight: "bold")[Status Legend]
-  #v(3pt)
-  #grid(
-    columns: (1fr, 1fr, 1fr, 1fr),
-    gutter: 4pt,
-    text(size: 7.5pt)[#text(fill: rgb("#16A34A"))[*Included*] — in package],
-    text(size: 7.5pt)[#text(fill: rgb("#DC2626"))[*Not Available*] — not on file],
-    text(size: 7.5pt)[#text(fill: rgb("#38b6ff"))[*On File*] — available on request],
-    text(size: 7.5pt)[#text(fill: rgb("#999"))[*Not Applicable*]],
-  )
+#block(breakable: false)[
+  #rect(
+    width: 100%,
+    inset: 8pt,
+    fill: rgb("#F4F5F7"),
+    radius: 2pt,
+  )[
+    #text(size: 8pt, weight: "bold")[Status Legend]
+    #v(3pt)
+    #grid(
+      columns: (1fr, 1fr, 1fr, 1fr),
+      gutter: 4pt,
+      text(size: 7.5pt)[#text(fill: rgb("#16A34A"))[*Included*] — in package],
+      text(size: 7.5pt)[#text(fill: rgb("#DC2626"))[*Not Available*] — not on file],
+      text(size: 7.5pt)[#text(fill: rgb("#38b6ff"))[*On File*] — available on request],
+      text(size: 7.5pt)[#text(fill: rgb("#999"))[*Not Applicable*]],
+    )
+  ]
 ]
 
 #v(12pt)
 
 // --- NOTES ---
-#rect(width: 100%, inset: (x: 10pt, y: 6pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Notes]
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 6pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Notes]
+  ]
+  #v(6pt)
+  #text(size: 9pt)[#{package_notes}]
 ]
-#v(6pt)
-#text(size: 9pt)[#{package_notes}]
 
 #v(12pt)
 
 // --- TOTAL PAGES ---
-#align(center)[
-  #rect(
-    width: 50%,
-    inset: 10pt,
-    fill: rgb("#E8F4FD"),
-    stroke: 1.5pt + rgb("#38b6ff"),
-    radius: 4pt,
-  )[
-    #align(center)[
-      #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[TOTAL PACKAGE]
-      #v(2pt)
-      #text(font: "JetBrains Mono", size: 14pt, weight: "bold", fill: rgb("#1A1A2E"))[#{total_pages} pages]
+#block(breakable: false)[
+  #align(center)[
+    #rect(
+      width: 50%,
+      inset: 10pt,
+      fill: rgb("#E8F4FD"),
+      stroke: 1.5pt + rgb("#38b6ff"),
+      radius: 4pt,
+    )[
+      #align(center)[
+        #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[TOTAL PACKAGE]
+        #v(2pt)
+        #text(font: "JetBrains Mono", size: 14pt, weight: "bold", fill: rgb("#1A1A2E"))[#{total_pages} pages]
+      ]
     ]
   ]
 ]
@@ -169,42 +179,46 @@
 #v(18pt)
 
 // --- CERTIFICATION ---
-#rect(
-  width: 100%,
-  inset: 12pt,
-  fill: rgb("#F0F7FF"),
-  stroke: (left: 3pt + rgb("#38b6ff")),
-  radius: 2pt,
-)[
-  #text(size: 8.5pt, fill: rgb("#333"))[
-    *NOTICE:* This governing documents package has been compiled by the association's management company for the benefit of the requesting party. The documents included are believed to be the most current versions on file as of the preparation date.
+#block(breakable: false)[
+  #rect(
+    width: 100%,
+    inset: 12pt,
+    fill: rgb("#F0F7FF"),
+    stroke: (left: 3pt + rgb("#38b6ff")),
+    radius: 2pt,
+  )[
+    #text(size: 8.5pt, fill: rgb("#333"))[
+      *NOTICE:* This governing documents package has been compiled by the association's management company for the benefit of the requesting party. The documents included are believed to be the most current versions on file as of the preparation date.
 
-    #v(4pt)
-    The recipient is advised that governing documents may be amended from time to time. This package does not guarantee completeness. Verify with the county recorder's office that no additional amendments have been recorded.
+      #v(4pt)
+      The recipient is advised that governing documents may be amended from time to time. This package does not guarantee completeness. Verify with the county recorder's office that no additional amendments have been recorded.
 
-    #v(4pt)
-    Documents in this package are the property of #{association_name} and are provided for the sole use of the requesting party in connection with a real estate transaction or lending decision.
+      #v(4pt)
+      Documents in this package are the property of #{association_name} and are provided for the sole use of the requesting party in connection with a real estate transaction or lending decision.
+    ]
   ]
 ]
 
 #v(20pt)
 
 // --- SIGNATURE ---
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 24pt,
-  [
-    #line(length: 85%, stroke: 0.5pt + rgb("#999"))
-    #v(4pt)
-    #text(size: 8pt, fill: rgb("#555"))[Prepared By: *#{prepared_by}*]
-    #v(2pt)
-    #text(size: 8pt, fill: rgb("#555"))[Date: #{preparation_date}]
-  ],
-  [
-    #line(length: 85%, stroke: 0.5pt + rgb("#999"))
-    #v(4pt)
-    #text(size: 8pt, fill: rgb("#555"))[Title: *#{prepared_by_title}*]
-    #v(2pt)
-    #text(size: 8pt, fill: rgb("#555"))[Phone: #{manager_phone}]
-  ],
-)
+#block(breakable: false)[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 24pt,
+    [
+      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#555"))[Prepared By: *#{prepared_by}*]
+      #v(2pt)
+      #text(size: 8pt, fill: rgb("#555"))[Date: #{preparation_date}]
+    ],
+    [
+      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#555"))[Title: *#{prepared_by_title}*]
+      #v(2pt)
+      #text(size: 8pt, fill: rgb("#555"))[Phone: #{manager_phone}]
+    ],
+  )
+]

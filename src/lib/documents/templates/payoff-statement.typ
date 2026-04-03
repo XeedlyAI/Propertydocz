@@ -46,227 +46,239 @@
 #v(12pt)
 
 // --- ASSOCIATION / PROPERTY INFO ---
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 16pt,
-  [
-    #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[ASSOCIATION]
-    #v(4pt)
-    #text(size: 11pt, weight: "bold")[#{association_name}]
-    #v(2pt)
-    #text(size: 9pt, fill: rgb("#555"))[
-      #{association_address} \
-      #{association_city}, #{association_state} #{association_zip}
-    ]
-    #v(4pt)
-    #text(size: 8pt, fill: rgb("#777"))[
-      Manager: #{manager_name} \
-      #{manager_email} #h(6pt) #{manager_phone}
-    ]
-  ],
-  [
-    #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[PROPERTY]
-    #v(4pt)
-    #text(size: 11pt, weight: "bold")[#{property_address}]
-    #v(2pt)
-    #text(size: 9pt, fill: rgb("#555"))[
-      Unit/Lot: #{unit_number} \
-      Owner: #{owner_name}
-    ]
-  ],
-)
+#block(breakable: false)[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 16pt,
+    [
+      #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[ASSOCIATION]
+      #v(4pt)
+      #text(size: 11pt, weight: "bold")[#{association_name}]
+      #v(2pt)
+      #text(size: 9pt, fill: rgb("#555"))[
+        #{association_address} \
+        #{association_city}, #{association_state} #{association_zip}
+      ]
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#777"))[
+        Manager: #{manager_name} \
+        #{manager_email} #h(6pt) #{manager_phone}
+      ]
+    ],
+    [
+      #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[PROPERTY]
+      #v(4pt)
+      #text(size: 11pt, weight: "bold")[#{property_address}]
+      #v(2pt)
+      #text(size: 9pt, fill: rgb("#555"))[
+        Unit/Lot: #{unit_number} \
+        Owner: #{owner_name}
+      ]
+    ],
+  )
+]
 
 #v(14pt)
 
 // --- SECTION 1: ITEMIZED AMOUNT DUE ---
-#rect(
-  width: 100%,
-  inset: (x: 10pt, y: 6pt),
-  fill: rgb("#1A1A2E"),
-  radius: 2pt,
-)[
-  #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Section 1 #h(8pt) Itemized Amount Due]
-]
-#v(8pt)
+#block(breakable: false)[
+  #rect(
+    width: 100%,
+    inset: (x: 10pt, y: 6pt),
+    fill: rgb("#1A1A2E"),
+    radius: 2pt,
+  )[
+    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Section 1 #h(8pt) Itemized Amount Due]
+  ]
+  #v(8pt)
 
-#table(
-  columns: (1fr, auto),
-  stroke: none,
-  inset: (x: 10pt, y: 6pt),
-  fill: (_, y) => if calc.rem(y, 2) == 0 { rgb("#F4F5F7") } else { white },
-  table.header(
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Item]],
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Amount]],
-  ),
-  [Regular Assessments Due], [#text(font: "JetBrains Mono", size: 9pt)[#{regular_assessments_due}]],
-  [Past Due Assessments], [#text(font: "JetBrains Mono", size: 9pt)[#{past_due_assessments}]],
-  [Late Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{late_fees}]],
-  [Interest], [#text(font: "JetBrains Mono", size: 9pt)[#{interest}]],
-  [Special Assessments Due], [#text(font: "JetBrains Mono", size: 9pt)[#{special_assessments_due}]],
-  [Collection / Legal Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{collection_legal_fees}]],
-  [Return Check Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{return_check_fees}]],
-  [Lien Recording Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{lien_recording_fees}]],
-  [Other Charges], [#text(font: "JetBrains Mono", size: 9pt)[#{other_charges}]],
-  [Payoff Statement Fee], [#text(font: "JetBrains Mono", size: 9pt)[#{payoff_statement_fee}]],
-  table.cell(fill: rgb("#E8F4FD"))[#text(weight: "bold")[Total Payoff Amount]],
-  table.cell(fill: rgb("#E8F4FD"))[#text(font: "JetBrains Mono", size: 10pt, weight: "bold", fill: rgb("#1A1A2E"))[#{total_payoff_amount}]],
-)
+  #table(
+    columns: (1fr, auto),
+    stroke: none,
+    inset: (x: 10pt, y: 6pt),
+    fill: (_, y) => if calc.rem(y, 2) == 0 { rgb("#F4F5F7") } else { white },
+    table.header(
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Item]],
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Amount]],
+    ),
+    [Regular Assessments Due], [#text(font: "JetBrains Mono", size: 9pt)[#{regular_assessments_due}]],
+    [Past Due Assessments], [#text(font: "JetBrains Mono", size: 9pt)[#{past_due_assessments}]],
+    [Late Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{late_fees}]],
+    [Interest], [#text(font: "JetBrains Mono", size: 9pt)[#{interest}]],
+    [Special Assessments Due], [#text(font: "JetBrains Mono", size: 9pt)[#{special_assessments_due}]],
+    [Collection / Legal Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{collection_legal_fees}]],
+    [Return Check Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{return_check_fees}]],
+    [Lien Recording Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{lien_recording_fees}]],
+    [Other Charges], [#text(font: "JetBrains Mono", size: 9pt)[#{other_charges}]],
+    [Payoff Statement Fee], [#text(font: "JetBrains Mono", size: 9pt)[#{payoff_statement_fee}]],
+    table.cell(fill: rgb("#E8F4FD"))[#text(weight: "bold")[Total Payoff Amount]],
+    table.cell(fill: rgb("#E8F4FD"))[#text(font: "JetBrains Mono", size: 10pt, weight: "bold", fill: rgb("#1A1A2E"))[#{total_payoff_amount}]],
+  )
 
-#v(6pt)
+  #v(6pt)
 
-#rect(
-  width: 100%,
-  inset: 8pt,
-  fill: rgb("#FFF8E1"),
-  stroke: (left: 3pt + rgb("#F59E0B")),
-  radius: 2pt,
-)[
-  #text(size: 8pt, fill: rgb("#92400E"))[
-    *HB 217 Notice:* Late fees may not exceed the greater of \$50 or 10% of the past-due assessment. Interest on delinquent assessments may not exceed 10% per annum. All fees above comply with these statutory limits.
+  #rect(
+    width: 100%,
+    inset: 8pt,
+    fill: rgb("#FFF8E1"),
+    stroke: (left: 3pt + rgb("#F59E0B")),
+    radius: 2pt,
+  )[
+    #text(size: 8pt, fill: rgb("#92400E"))[
+      *HB 217 Notice:* Late fees may not exceed the greater of \$50 or 10% of the past-due assessment. Interest on delinquent assessments may not exceed 10% per annum. All fees above comply with these statutory limits.
+    ]
   ]
 ]
 
 #v(14pt)
 
 // --- SECTION 2: PER DIEM & GOOD THROUGH DATE ---
-#rect(
-  width: 100%,
-  inset: (x: 10pt, y: 6pt),
-  fill: rgb("#1A1A2E"),
-  radius: 2pt,
-)[
-  #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Section 2 #h(8pt) Per Diem & Validity]
-]
-#v(8pt)
+#block(breakable: false)[
+  #rect(
+    width: 100%,
+    inset: (x: 10pt, y: 6pt),
+    fill: rgb("#1A1A2E"),
+    radius: 2pt,
+  )[
+    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Section 2 #h(8pt) Per Diem & Validity]
+  ]
+  #v(8pt)
 
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 12pt,
-  [
-    #text(weight: "bold", size: 8pt)[Daily Per Diem Amount]
-    #v(2pt)
-    #text(font: "JetBrains Mono", size: 11pt, weight: "bold", fill: rgb("#1A1A2E"))[#{per_diem_amount}]
-    #v(2pt)
-    #text(size: 8pt, fill: rgb("#777"))[Effective: #{per_diem_start_date}]
-  ],
-  [
-    #rect(
-      width: 100%,
-      inset: 10pt,
-      fill: rgb("#E8F4FD"),
-      stroke: 1.5pt + rgb("#38b6ff"),
-      radius: 4pt,
-    )[
-      #align(center)[
-        #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[GOOD THROUGH DATE]
-        #v(2pt)
-        #text(font: "JetBrains Mono", size: 13pt, weight: "bold", fill: rgb("#1A1A2E"))[#{good_through_date}]
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 12pt,
+    [
+      #text(weight: "bold", size: 8pt)[Daily Per Diem Amount]
+      #v(2pt)
+      #text(font: "JetBrains Mono", size: 11pt, weight: "bold", fill: rgb("#1A1A2E"))[#{per_diem_amount}]
+      #v(2pt)
+      #text(size: 8pt, fill: rgb("#777"))[Effective: #{per_diem_start_date}]
+    ],
+    [
+      #rect(
+        width: 100%,
+        inset: 10pt,
+        fill: rgb("#E8F4FD"),
+        stroke: 1.5pt + rgb("#38b6ff"),
+        radius: 4pt,
+      )[
+        #align(center)[
+          #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[GOOD THROUGH DATE]
+          #v(2pt)
+          #text(font: "JetBrains Mono", size: 13pt, weight: "bold", fill: rgb("#1A1A2E"))[#{good_through_date}]
+        ]
       ]
-    ]
-  ],
-)
+    ],
+  )
 
-#v(4pt)
-#text(size: 8pt, fill: rgb("#777"))[
-  If closing occurs after the good-through date, add the per diem for each additional day.
+  #v(4pt)
+  #text(size: 8pt, fill: rgb("#777"))[
+    If closing occurs after the good-through date, add the per diem for each additional day.
+  ]
 ]
 
 #v(14pt)
 
 // --- SECTION 3: PAYMENT INSTRUCTIONS ---
-#rect(
-  width: 100%,
-  inset: (x: 10pt, y: 6pt),
-  fill: rgb("#1A1A2E"),
-  radius: 2pt,
-)[
-  #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Section 3 #h(8pt) Payment Instructions]
-]
-#v(8pt)
+#block(breakable: false)[
+  #rect(
+    width: 100%,
+    inset: (x: 10pt, y: 6pt),
+    fill: rgb("#1A1A2E"),
+    radius: 2pt,
+  )[
+    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Section 3 #h(8pt) Payment Instructions]
+  ]
+  #v(8pt)
 
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 16pt,
-  [
-    #rect(
-      width: 100%,
-      inset: 10pt,
-      fill: rgb("#F4F5F7"),
-      radius: 2pt,
-    )[
-      #text(weight: "bold", size: 9pt)[Check Payment]
-      #v(6pt)
-      #text(size: 8.5pt)[
-        Make payable to: *#{check_payable_to}* \
-        #v(2pt)
-        Mail to: \
-        #{payment_mail_address_line1} \
-        #{payment_mail_address_line2}
-        #v(4pt)
-        Reference: #{owner_name} — #{unit_number}
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 16pt,
+    [
+      #rect(
+        width: 100%,
+        inset: 10pt,
+        fill: rgb("#F4F5F7"),
+        radius: 2pt,
+      )[
+        #text(weight: "bold", size: 9pt)[Check Payment]
+        #v(6pt)
+        #text(size: 8.5pt)[
+          Make payable to: *#{check_payable_to}* \
+          #v(2pt)
+          Mail to: \
+          #{payment_mail_address_line1} \
+          #{payment_mail_address_line2}
+          #v(4pt)
+          Reference: #{owner_name} — #{unit_number}
+        ]
       ]
-    ]
-  ],
-  [
-    #rect(
-      width: 100%,
-      inset: 10pt,
-      fill: rgb("#F4F5F7"),
-      radius: 2pt,
-    )[
-      #text(weight: "bold", size: 9pt)[Wire Transfer]
-      #v(6pt)
-      #text(size: 8.5pt)[
-        Bank: *#{wire_bank_name}* \
-        #v(2pt)
-        Routing: #text(font: "JetBrains Mono")[#{wire_routing_number}] \
-        Account: #text(font: "JetBrains Mono")[#{wire_account_number}] \
-        #v(2pt)
-        Reference: #{owner_name} — #{unit_number}
+    ],
+    [
+      #rect(
+        width: 100%,
+        inset: 10pt,
+        fill: rgb("#F4F5F7"),
+        radius: 2pt,
+      )[
+        #text(weight: "bold", size: 9pt)[Wire Transfer]
+        #v(6pt)
+        #text(size: 8.5pt)[
+          Bank: *#{wire_bank_name}* \
+          #v(2pt)
+          Routing: #text(font: "JetBrains Mono")[#{wire_routing_number}] \
+          Account: #text(font: "JetBrains Mono")[#{wire_account_number}] \
+          #v(2pt)
+          Reference: #{owner_name} — #{unit_number}
+        ]
       ]
-    ]
-  ],
-)
+    ],
+  )
+]
 
 #v(18pt)
 
 // --- CERTIFICATION ---
-#rect(
-  width: 100%,
-  inset: 12pt,
-  fill: rgb("#F0F7FF"),
-  stroke: (left: 3pt + rgb("#38b6ff")),
-  radius: 2pt,
-)[
-  #text(size: 8.5pt, fill: rgb("#333"))[
-    *CERTIFICATION:* This Payoff Statement is prepared in accordance with Utah Code \u{00A7}57-8a-106 and \u{00A7}57-8a-311.
+#block(breakable: false)[
+  #rect(
+    width: 100%,
+    inset: 12pt,
+    fill: rgb("#F0F7FF"),
+    stroke: (left: 3pt + rgb("#38b6ff")),
+    radius: 2pt,
+  )[
+    #text(size: 8.5pt, fill: rgb("#333"))[
+      *CERTIFICATION:* This Payoff Statement is prepared in accordance with Utah Code \u{00A7}57-8a-106 and \u{00A7}57-8a-311.
 
-    #v(4pt)
-    *Fee Cap Notice (\u{00A7}57-8a-106):* The fee charged for preparing this statement does not exceed \$50.00, as required by Utah Code \u{00A7}57-8a-106.
+      #v(4pt)
+      *Fee Cap Notice (\u{00A7}57-8a-106):* The fee charged for preparing this statement does not exceed \$50.00, as required by Utah Code \u{00A7}57-8a-106.
 
-    #v(4pt)
-    This statement represents the amounts due to the association as of the preparation date. The association reserves the right to amend this statement if additional charges accrue or errors are discovered. This statement does not constitute a release of lien.
+      #v(4pt)
+      This statement represents the amounts due to the association as of the preparation date. The association reserves the right to amend this statement if additional charges accrue or errors are discovered. This statement does not constitute a release of lien.
+    ]
   ]
 ]
 
 #v(20pt)
 
 // --- SIGNATURE ---
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 24pt,
-  [
-    #line(length: 85%, stroke: 0.5pt + rgb("#999"))
-    #v(4pt)
-    #text(size: 8pt, fill: rgb("#555"))[Prepared By: *#{prepared_by}*]
-    #v(2pt)
-    #text(size: 8pt, fill: rgb("#555"))[Date: #{preparation_date}]
-  ],
-  [
-    #line(length: 85%, stroke: 0.5pt + rgb("#999"))
-    #v(4pt)
-    #text(size: 8pt, fill: rgb("#555"))[Title: *#{prepared_by_title}*]
-    #v(2pt)
-    #text(size: 8pt, fill: rgb("#555"))[Good Through: #{good_through_date}]
-  ],
-)
+#block(breakable: false)[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 24pt,
+    [
+      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#555"))[Prepared By: *#{prepared_by}*]
+      #v(2pt)
+      #text(size: 8pt, fill: rgb("#555"))[Date: #{preparation_date}]
+    ],
+    [
+      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#555"))[Title: *#{prepared_by_title}*]
+      #v(2pt)
+      #text(size: 8pt, fill: rgb("#555"))[Good Through: #{good_through_date}]
+    ],
+  )
+]

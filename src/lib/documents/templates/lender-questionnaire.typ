@@ -46,280 +46,306 @@
 #v(10pt)
 
 // --- SECTION 1: BASIC PROJECT INFO ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 1 #h(8pt) Basic Project Information]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 1 #h(8pt) Basic Project Information]
+  ]
+  #v(6pt)
 
-#grid(
-  columns: (1fr, 1fr),
-  row-gutter: 6pt,
-  column-gutter: 14pt,
-  [#text(weight: "bold", size: 8pt)[HOA/Project Name] #v(1pt) #{association_name}],
-  [#text(weight: "bold", size: 8pt)[Legal Name] #v(1pt) #{association_legal_name}],
-  [#text(weight: "bold", size: 8pt)[Address] #v(1pt) #{association_address}],
-  [#text(weight: "bold", size: 8pt)[City, State, ZIP] #v(1pt) #{association_city}, #{association_state} #{association_zip}],
-  [#text(weight: "bold", size: 8pt)[Management Company] #v(1pt) #{manager_name}],
-  [#text(weight: "bold", size: 8pt)[Contact Email] #v(1pt) #{manager_email}],
-  [#text(weight: "bold", size: 8pt)[Contact Phone] #v(1pt) #{manager_phone}],
-  [#text(weight: "bold", size: 8pt)[Tax ID (EIN)] #v(1pt) #text(font: "JetBrains Mono", size: 9pt)[#{association_ein}]],
-  [#text(weight: "bold", size: 8pt)[Year Built] #v(1pt) #{year_built}],
-  [#text(weight: "bold", size: 8pt)[Year Converted] #v(1pt) #{year_converted}],
-)
+  #grid(
+    columns: (1fr, 1fr),
+    row-gutter: 6pt,
+    column-gutter: 14pt,
+    [#text(weight: "bold", size: 8pt)[HOA/Project Name] #v(1pt) #{association_name}],
+    [#text(weight: "bold", size: 8pt)[Legal Name] #v(1pt) #{association_legal_name}],
+    [#text(weight: "bold", size: 8pt)[Address] #v(1pt) #{association_address}],
+    [#text(weight: "bold", size: 8pt)[City, State, ZIP] #v(1pt) #{association_city}, #{association_state} #{association_zip}],
+    [#text(weight: "bold", size: 8pt)[Management Company] #v(1pt) #{manager_name}],
+    [#text(weight: "bold", size: 8pt)[Contact Email] #v(1pt) #{manager_email}],
+    [#text(weight: "bold", size: 8pt)[Contact Phone] #v(1pt) #{manager_phone}],
+    [#text(weight: "bold", size: 8pt)[Tax ID (EIN)] #v(1pt) #text(font: "JetBrains Mono", size: 9pt)[#{association_ein}]],
+    [#text(weight: "bold", size: 8pt)[Year Built] #v(1pt) #{year_built}],
+    [#text(weight: "bold", size: 8pt)[Year Converted] #v(1pt) #{year_converted}],
+  )
+]
 
 #v(10pt)
 
 // --- SECTION 2: UNIT & PROJECT COMPOSITION ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 2 #h(8pt) Unit & Project Composition]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 2 #h(8pt) Unit & Project Composition]
+  ]
+  #v(6pt)
 
-#grid(
-  columns: (1fr, 1fr),
-  row-gutter: 6pt,
-  column-gutter: 14pt,
-  [#text(weight: "bold", size: 8pt)[Total Units] #v(1pt) #text(font: "JetBrains Mono")[#{total_units}]],
-  [#text(weight: "bold", size: 8pt)[Subject Unit] #v(1pt) #{unit_number}],
-  [#text(weight: "bold", size: 8pt)[Property Address] #v(1pt) #{property_address}],
-  [#text(weight: "bold", size: 8pt)[Owner of Record] #v(1pt) #{owner_name}],
-  [#text(weight: "bold", size: 8pt)[Phases Complete] #v(1pt) #{phases_complete}],
-  [#text(weight: "bold", size: 8pt)[Additional Phases Planned] #v(1pt) #{additional_phases_planned}],
-)
+  #grid(
+    columns: (1fr, 1fr),
+    row-gutter: 6pt,
+    column-gutter: 14pt,
+    [#text(weight: "bold", size: 8pt)[Total Units] #v(1pt) #text(font: "JetBrains Mono")[#{total_units}]],
+    [#text(weight: "bold", size: 8pt)[Subject Unit] #v(1pt) #{unit_number}],
+    [#text(weight: "bold", size: 8pt)[Property Address] #v(1pt) #{property_address}],
+    [#text(weight: "bold", size: 8pt)[Owner of Record] #v(1pt) #{owner_name}],
+    [#text(weight: "bold", size: 8pt)[Phases Complete] #v(1pt) #{phases_complete}],
+    [#text(weight: "bold", size: 8pt)[Additional Phases Planned] #v(1pt) #{additional_phases_planned}],
+  )
+]
 
 #v(10pt)
 
 // --- SECTION 3: PROJECT COMPLETION & CONTROL ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 3 #h(8pt) Project Completion & Control]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 3 #h(8pt) Project Completion & Control]
+  ]
+  #v(6pt)
 
-#grid(
-  columns: (1fr, 1fr),
-  row-gutter: 6pt,
-  column-gutter: 14pt,
-  [#text(weight: "bold", size: 8pt)[Project complete?] #v(1pt) #{project_complete}],
-  [#text(weight: "bold", size: 8pt)[% Complete] #v(1pt) #{percent_complete}],
-  [#text(weight: "bold", size: 8pt)[Developer still in control?] #v(1pt) #{developer_in_control}],
-  [#text(weight: "bold", size: 8pt)[Turnover date] #v(1pt) #{turnover_date}],
-  [#text(weight: "bold", size: 8pt)[Pending additions/annexations?] #v(1pt) #{pending_annexations}],
-  [#text(weight: "bold", size: 8pt)[Conversion project?] #v(1pt) #{is_conversion}],
-)
+  #grid(
+    columns: (1fr, 1fr),
+    row-gutter: 6pt,
+    column-gutter: 14pt,
+    [#text(weight: "bold", size: 8pt)[Project complete?] #v(1pt) #{project_complete}],
+    [#text(weight: "bold", size: 8pt)[% Complete] #v(1pt) #{percent_complete}],
+    [#text(weight: "bold", size: 8pt)[Developer still in control?] #v(1pt) #{developer_in_control}],
+    [#text(weight: "bold", size: 8pt)[Turnover date] #v(1pt) #{turnover_date}],
+    [#text(weight: "bold", size: 8pt)[Pending additions/annexations?] #v(1pt) #{pending_annexations}],
+    [#text(weight: "bold", size: 8pt)[Conversion project?] #v(1pt) #{is_conversion}],
+  )
+]
 
 #v(10pt)
 
 // --- SECTION 4: OWNERSHIP DISTRIBUTION ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 4 #h(8pt) Ownership Distribution]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 4 #h(8pt) Ownership Distribution]
+  ]
+  #v(6pt)
 
-#table(
-  columns: (1fr, auto),
-  stroke: none,
-  inset: (x: 10pt, y: 5pt),
-  fill: (_, y) => if calc.rem(y, 2) == 0 { rgb("#F4F5F7") } else { white },
-  table.header(
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Category]],
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Count / %]],
-  ),
-  [Total Units], [#text(font: "JetBrains Mono", size: 9pt)[#{total_units}]],
-  [Owner-Occupied Units], [#text(font: "JetBrains Mono", size: 9pt)[#{owner_occupied_units}]],
-  [Investor-Owned / Rented], [#text(font: "JetBrains Mono", size: 9pt)[#{investor_owned_units}]],
-  [% Owner-Occupied], [#text(font: "JetBrains Mono", size: 9pt)[#{percent_owner_occupied}]],
-  [Units Owned by Single Entity], [#text(font: "JetBrains Mono", size: 9pt)[#{units_single_entity}]],
-  [% Owned by Single Entity], [#text(font: "JetBrains Mono", size: 9pt)[#{percent_single_entity}]],
-  [Developer-Held Units], [#text(font: "JetBrains Mono", size: 9pt)[#{developer_held_units}]],
-  [Delinquent Units (60+ days)], [#text(font: "JetBrains Mono", size: 9pt)[#{delinquent_units}]],
-  [% Delinquent (60+ days)], [#text(font: "JetBrains Mono", size: 9pt)[#{percent_delinquent}]],
-)
+  #table(
+    columns: (1fr, auto),
+    stroke: none,
+    inset: (x: 10pt, y: 5pt),
+    fill: (_, y) => if calc.rem(y, 2) == 0 { rgb("#F4F5F7") } else { white },
+    table.header(
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Category]],
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Count / %]],
+    ),
+    [Total Units], [#text(font: "JetBrains Mono", size: 9pt)[#{total_units}]],
+    [Owner-Occupied Units], [#text(font: "JetBrains Mono", size: 9pt)[#{owner_occupied_units}]],
+    [Investor-Owned / Rented], [#text(font: "JetBrains Mono", size: 9pt)[#{investor_owned_units}]],
+    [% Owner-Occupied], [#text(font: "JetBrains Mono", size: 9pt)[#{percent_owner_occupied}]],
+    [Units Owned by Single Entity], [#text(font: "JetBrains Mono", size: 9pt)[#{units_single_entity}]],
+    [% Owned by Single Entity], [#text(font: "JetBrains Mono", size: 9pt)[#{percent_single_entity}]],
+    [Developer-Held Units], [#text(font: "JetBrains Mono", size: 9pt)[#{developer_held_units}]],
+    [Delinquent Units (60+ days)], [#text(font: "JetBrains Mono", size: 9pt)[#{delinquent_units}]],
+    [% Delinquent (60+ days)], [#text(font: "JetBrains Mono", size: 9pt)[#{percent_delinquent}]],
+  )
+]
 
 #v(10pt)
 
 // --- SECTION 5: FINANCIAL ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 5 #h(8pt) Financial Information]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 5 #h(8pt) Financial Information]
+  ]
+  #v(6pt)
 
-#grid(
-  columns: (1fr, 1fr),
-  row-gutter: 6pt,
-  column-gutter: 14pt,
-  [#text(weight: "bold", size: 8pt)[Annual Operating Budget] #v(1pt) #text(font: "JetBrains Mono")[#{annual_budget}]],
-  [#text(weight: "bold", size: 8pt)[Monthly Assessment] #v(1pt) #text(font: "JetBrains Mono")[#{monthly_assessment}]],
-  [#text(weight: "bold", size: 8pt)[Assessment Frequency] #v(1pt) #{assessment_frequency}],
-  [#text(weight: "bold", size: 8pt)[Special assessments?] #v(1pt) #{special_assessments_planned}],
-  [#text(weight: "bold", size: 8pt)[Special Assessment Details] #v(1pt) #{special_assessment_details}],
-  [#text(weight: "bold", size: 8pt)[Assessments adequate?] #v(1pt) #{assessments_adequate}],
-)
+  #grid(
+    columns: (1fr, 1fr),
+    row-gutter: 6pt,
+    column-gutter: 14pt,
+    [#text(weight: "bold", size: 8pt)[Annual Operating Budget] #v(1pt) #text(font: "JetBrains Mono")[#{annual_budget}]],
+    [#text(weight: "bold", size: 8pt)[Monthly Assessment] #v(1pt) #text(font: "JetBrains Mono")[#{monthly_assessment}]],
+    [#text(weight: "bold", size: 8pt)[Assessment Frequency] #v(1pt) #{assessment_frequency}],
+    [#text(weight: "bold", size: 8pt)[Special assessments?] #v(1pt) #{special_assessments_planned}],
+    [#text(weight: "bold", size: 8pt)[Special Assessment Details] #v(1pt) #{special_assessment_details}],
+    [#text(weight: "bold", size: 8pt)[Assessments adequate?] #v(1pt) #{assessments_adequate}],
+  )
+]
 
 #v(10pt)
 
 // --- SECTION 6: RESERVES ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 6 #h(8pt) Reserve Fund]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 6 #h(8pt) Reserve Fund]
+  ]
+  #v(6pt)
 
-#grid(
-  columns: (1fr, 1fr),
-  row-gutter: 6pt,
-  column-gutter: 14pt,
-  [#text(weight: "bold", size: 8pt)[Current Reserve Balance] #v(1pt) #text(font: "JetBrains Mono")[#{reserve_balance}]],
-  [#text(weight: "bold", size: 8pt)[Percent Funded] #v(1pt) #text(font: "JetBrains Mono")[#{percent_funded}]],
-  [#text(weight: "bold", size: 8pt)[Reserve Study Completed?] #v(1pt) #{reserve_study_completed}],
-  [#text(weight: "bold", size: 8pt)[Reserve Study Date] #v(1pt) #{reserve_study_date}],
-  [#text(weight: "bold", size: 8pt)[Study current (within 3 yrs)?] #v(1pt) #{reserve_study_current}],
-  [#text(weight: "bold", size: 8pt)[Annual Reserve Contribution] #v(1pt) #text(font: "JetBrains Mono")[#{annual_reserve_contribution}]],
-)
+  #grid(
+    columns: (1fr, 1fr),
+    row-gutter: 6pt,
+    column-gutter: 14pt,
+    [#text(weight: "bold", size: 8pt)[Current Reserve Balance] #v(1pt) #text(font: "JetBrains Mono")[#{reserve_balance}]],
+    [#text(weight: "bold", size: 8pt)[Percent Funded] #v(1pt) #text(font: "JetBrains Mono")[#{percent_funded}]],
+    [#text(weight: "bold", size: 8pt)[Reserve Study Completed?] #v(1pt) #{reserve_study_completed}],
+    [#text(weight: "bold", size: 8pt)[Reserve Study Date] #v(1pt) #{reserve_study_date}],
+    [#text(weight: "bold", size: 8pt)[Study current (within 3 yrs)?] #v(1pt) #{reserve_study_current}],
+    [#text(weight: "bold", size: 8pt)[Annual Reserve Contribution] #v(1pt) #text(font: "JetBrains Mono")[#{annual_reserve_contribution}]],
+  )
+]
 
 #v(10pt)
 
 // --- SECTION 7: INSURANCE ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 7 #h(8pt) Insurance]
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 7 #h(8pt) Insurance]
+  ]
+  #v(6pt)
+
+  #table(
+    columns: (1fr, auto, auto),
+    stroke: none,
+    inset: (x: 8pt, y: 5pt),
+    fill: (_, y) => if calc.rem(y, 2) == 0 { rgb("#F4F5F7") } else { white },
+    table.header(
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Coverage Type]],
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Carrier / Details]],
+      table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Expiration]],
+    ),
+    [Master/Hazard Policy], [#{master_policy_carrier}], [#{master_policy_expiration}],
+    [General Liability], [#{general_liability}], [#{general_liability_expiration}],
+    [Fidelity Bond / Crime], [#{fidelity_bond}], [#{fidelity_bond_expiration}],
+    [Flood Insurance], [#{flood_insurance}], [#{flood_insurance_expiration}],
+    [Workers' Compensation], [#{workers_comp}], [#{workers_comp_expiration}],
+    [Umbrella / Excess], [#{umbrella_coverage}], [#{umbrella_expiration}],
+  )
+
+  #v(3pt)
+  #grid(
+    columns: (120pt, 1fr),
+    [#text(weight: "bold", size: 8pt)[Flood Zone:]], [#{flood_zone}],
+  )
 ]
-#v(6pt)
-
-#table(
-  columns: (1fr, auto, auto),
-  stroke: none,
-  inset: (x: 8pt, y: 5pt),
-  fill: (_, y) => if calc.rem(y, 2) == 0 { rgb("#F4F5F7") } else { white },
-  table.header(
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Coverage Type]],
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Carrier / Details]],
-    table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Expiration]],
-  ),
-  [Master/Hazard Policy], [#{master_policy_carrier}], [#{master_policy_expiration}],
-  [General Liability], [#{general_liability}], [#{general_liability_expiration}],
-  [Fidelity Bond / Crime], [#{fidelity_bond}], [#{fidelity_bond_expiration}],
-  [Flood Insurance], [#{flood_insurance}], [#{flood_insurance_expiration}],
-  [Workers' Compensation], [#{workers_comp}], [#{workers_comp_expiration}],
-  [Umbrella / Excess], [#{umbrella_coverage}], [#{umbrella_expiration}],
-)
-
-#v(3pt)
-#grid(
-  columns: (120pt, 1fr),
-  [#text(weight: "bold", size: 8pt)[Flood Zone:]], [#{flood_zone}],
-)
 
 #v(10pt)
 
 // --- SECTION 8: LITIGATION ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 8 #h(8pt) Litigation]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 8 #h(8pt) Litigation]
+  ]
+  #v(6pt)
 
-#grid(
-  columns: (160pt, 1fr),
-  row-gutter: 5pt,
-  [#text(weight: "bold", size: 8pt)[Current litigation?]], [#{in_litigation}],
-  [#text(weight: "bold", size: 8pt)[Nature of litigation:]], [#{litigation_details}],
-  [#text(weight: "bold", size: 8pt)[Safety/structural related?]], [#{litigation_safety_related}],
-)
+  #grid(
+    columns: (160pt, 1fr),
+    row-gutter: 5pt,
+    [#text(weight: "bold", size: 8pt)[Current litigation?]], [#{in_litigation}],
+    [#text(weight: "bold", size: 8pt)[Nature of litigation:]], [#{litigation_details}],
+    [#text(weight: "bold", size: 8pt)[Safety/structural related?]], [#{litigation_safety_related}],
+  )
+]
 
 #v(10pt)
 
 // --- SECTION 9: RESTRICTIONS ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 9 #h(8pt) Restrictions & Policies]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 9 #h(8pt) Restrictions & Policies]
+  ]
+  #v(6pt)
 
-#grid(
-  columns: (1fr, 1fr),
-  row-gutter: 6pt,
-  column-gutter: 14pt,
-  [#text(weight: "bold", size: 8pt)[Rental Restrictions?] #v(1pt) #{rental_policy}],
-  [#text(weight: "bold", size: 8pt)[Short-Term Rental?] #v(1pt) #{short_term_rental_policy}],
-  [#text(weight: "bold", size: 8pt)[Rental Cap] #v(1pt) #{rental_cap}],
-  [#text(weight: "bold", size: 8pt)[Right of First Refusal?] #v(1pt) #{right_of_first_refusal}],
-  [#text(weight: "bold", size: 8pt)[Age Restrictions?] #v(1pt) #{age_restrictions}],
-  [#text(weight: "bold", size: 8pt)[Pet Restrictions?] #v(1pt) #{pet_policy}],
-  [#text(weight: "bold", size: 8pt)[Mandatory Fees?] #v(1pt) #{mandatory_membership_fees}],
-  [#text(weight: "bold", size: 8pt)[Commercial Space?] #v(1pt) #{commercial_space}],
-)
+  #grid(
+    columns: (1fr, 1fr),
+    row-gutter: 6pt,
+    column-gutter: 14pt,
+    [#text(weight: "bold", size: 8pt)[Rental Restrictions?] #v(1pt) #{rental_policy}],
+    [#text(weight: "bold", size: 8pt)[Short-Term Rental?] #v(1pt) #{short_term_rental_policy}],
+    [#text(weight: "bold", size: 8pt)[Rental Cap] #v(1pt) #{rental_cap}],
+    [#text(weight: "bold", size: 8pt)[Right of First Refusal?] #v(1pt) #{right_of_first_refusal}],
+    [#text(weight: "bold", size: 8pt)[Age Restrictions?] #v(1pt) #{age_restrictions}],
+    [#text(weight: "bold", size: 8pt)[Pet Restrictions?] #v(1pt) #{pet_policy}],
+    [#text(weight: "bold", size: 8pt)[Mandatory Fees?] #v(1pt) #{mandatory_membership_fees}],
+    [#text(weight: "bold", size: 8pt)[Commercial Space?] #v(1pt) #{commercial_space}],
+  )
+]
 
 #v(10pt)
 
 // --- SECTION 10: ENVIRONMENTAL & SAFETY ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 10 #h(8pt) Environmental & Safety]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 10 #h(8pt) Environmental & Safety]
+  ]
+  #v(6pt)
 
-#grid(
-  columns: (1fr, 1fr),
-  row-gutter: 6pt,
-  column-gutter: 14pt,
-  [#text(weight: "bold", size: 8pt)[Environmental hazards?] #v(1pt) #{environmental_hazards}],
-  [#text(weight: "bold", size: 8pt)[Asbestos?] #v(1pt) #{asbestos}],
-  [#text(weight: "bold", size: 8pt)[Lead-based paint?] #v(1pt) #{lead_paint}],
-  [#text(weight: "bold", size: 8pt)[Mold issues?] #v(1pt) #{mold_issues}],
-  [#text(weight: "bold", size: 8pt)[FEMA disaster area?] #v(1pt) #{fema_disaster}],
-  [#text(weight: "bold", size: 8pt)[Structural deficiencies?] #v(1pt) #{structural_deficiencies}],
-  [#text(weight: "bold", size: 8pt)[Deferred maintenance?] #v(1pt) #{deferred_maintenance}],
-  [#text(weight: "bold", size: 8pt)[Failed inspections?] #v(1pt) #{failed_inspections}],
-)
+  #grid(
+    columns: (1fr, 1fr),
+    row-gutter: 6pt,
+    column-gutter: 14pt,
+    [#text(weight: "bold", size: 8pt)[Environmental hazards?] #v(1pt) #{environmental_hazards}],
+    [#text(weight: "bold", size: 8pt)[Asbestos?] #v(1pt) #{asbestos}],
+    [#text(weight: "bold", size: 8pt)[Lead-based paint?] #v(1pt) #{lead_paint}],
+    [#text(weight: "bold", size: 8pt)[Mold issues?] #v(1pt) #{mold_issues}],
+    [#text(weight: "bold", size: 8pt)[FEMA disaster area?] #v(1pt) #{fema_disaster}],
+    [#text(weight: "bold", size: 8pt)[Structural deficiencies?] #v(1pt) #{structural_deficiencies}],
+    [#text(weight: "bold", size: 8pt)[Deferred maintenance?] #v(1pt) #{deferred_maintenance}],
+    [#text(weight: "bold", size: 8pt)[Failed inspections?] #v(1pt) #{failed_inspections}],
+  )
+]
 
 #v(10pt)
 
 // --- SECTION 11: COMMON AREA & SERVICES ---
-#rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-  #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 11 #h(8pt) Common Area & Services]
-]
-#v(6pt)
+#block(breakable: false)[
+  #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 11 #h(8pt) Common Area & Services]
+  ]
+  #v(6pt)
 
-#grid(
-  columns: (130pt, 1fr),
-  row-gutter: 5pt,
-  [#text(weight: "bold", size: 8pt)[Common amenities:]], [#{common_amenities}],
-  [#text(weight: "bold", size: 8pt)[Utilities included:]], [#{utilities_included}],
-  [#text(weight: "bold", size: 8pt)[FHA approved?]], [#{fha_approved}],
-  [#text(weight: "bold", size: 8pt)[VA approved?]], [#{va_approved}],
-)
+  #grid(
+    columns: (130pt, 1fr),
+    row-gutter: 5pt,
+    [#text(weight: "bold", size: 8pt)[Common amenities:]], [#{common_amenities}],
+    [#text(weight: "bold", size: 8pt)[Utilities included:]], [#{utilities_included}],
+    [#text(weight: "bold", size: 8pt)[FHA approved?]], [#{fha_approved}],
+    [#text(weight: "bold", size: 8pt)[VA approved?]], [#{va_approved}],
+  )
+]
 
 #v(14pt)
 
 // --- CERTIFICATION ---
-#rect(
-  width: 100%,
-  inset: 10pt,
-  fill: rgb("#F0F7FF"),
-  stroke: (left: 3pt + rgb("#38b6ff")),
-  radius: 2pt,
-)[
-  #text(size: 8pt, fill: rgb("#333"))[
-    *CERTIFICATION:* The information provided in this questionnaire is accurate to the best of our knowledge as of the preparation date. This questionnaire is provided for mortgage lending due diligence purposes and is not a guarantee or warranty of any kind.
+#block(breakable: false)[
+  #rect(
+    width: 100%,
+    inset: 10pt,
+    fill: rgb("#F0F7FF"),
+    stroke: (left: 3pt + rgb("#38b6ff")),
+    radius: 2pt,
+  )[
+    #text(size: 8pt, fill: rgb("#333"))[
+      *CERTIFICATION:* The information provided in this questionnaire is accurate to the best of our knowledge as of the preparation date. This questionnaire is provided for mortgage lending due diligence purposes and is not a guarantee or warranty of any kind.
 
-    #v(3pt)
-    *Preparation Date:* #{preparation_date}
+      #v(3pt)
+      *Preparation Date:* #{preparation_date}
+    ]
   ]
 ]
 
 #v(18pt)
 
 // --- SIGNATURE ---
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 24pt,
-  [
-    #line(length: 85%, stroke: 0.5pt + rgb("#999"))
-    #v(4pt)
-    #text(size: 8pt, fill: rgb("#555"))[Prepared By: *#{prepared_by}*]
-    #v(2pt)
-    #text(size: 8pt, fill: rgb("#555"))[Date: #{preparation_date}]
-  ],
-  [
-    #line(length: 85%, stroke: 0.5pt + rgb("#999"))
-    #v(4pt)
-    #text(size: 8pt, fill: rgb("#555"))[Title: *#{prepared_by_title}*]
-    #v(2pt)
-    #text(size: 8pt, fill: rgb("#555"))[Phone: #{manager_phone}]
-  ],
-)
+#block(breakable: false)[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 24pt,
+    [
+      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#555"))[Prepared By: *#{prepared_by}*]
+      #v(2pt)
+      #text(size: 8pt, fill: rgb("#555"))[Date: #{preparation_date}]
+    ],
+    [
+      #line(length: 85%, stroke: 0.5pt + rgb("#999"))
+      #v(4pt)
+      #text(size: 8pt, fill: rgb("#555"))[Title: *#{prepared_by_title}*]
+      #v(2pt)
+      #text(size: 8pt, fill: rgb("#555"))[Phone: #{manager_phone}]
+    ],
+  )
+]
