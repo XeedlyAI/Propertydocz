@@ -76,6 +76,72 @@ export async function GET() {
       .select("id, name, reserve_study_date, master_policy_expiration, total_units")
       .eq("tenant_id", profile.tenant_id);
 
+    // Staleness check — find fields past their staleness threshold
+    const { data: staleFieldData } = await serviceClient
+      .from("association_field_values")
+      .select("association_id, field_key, value, last_verified_at, confidence")
+      .eq("confidence", "ai_extracted")
+      .not("value", "is", null)
+      .in(
+        "association_id",
+        (associations || []).map((a) => a.id)
+      );
+
+    const { data: fieldDefs } = await serviceClient
+      .from("field_definitions")
+      .select("field_key, label, staleness_days, tier")
+      .not("staleness_days", "is", null);
+
+    // Build staleness alerts
+    const stalenessAlerts: Array<{
+      association_name: string;
+      field_label: string;
+      days_stale: number;
+      threshold_days: number;
+      current_value: string;
+    }> = [];
+
+    if (staleFieldData && fieldDefs) {
+      const assocNameMap = new Map(
+        (associations || []).map((a) => [a.id, a.name])
+      );
+      const fieldDefMap = new Map(
+        fieldDefs.map((fd) => [fd.field_key, fd])
+      );
+
+      for (const fv of staleFieldData) {
+        const def = fieldDefMap.get(fv.field_key);
+        if (!def || !def.staleness_days) continue;
+
+        const verifiedAt = fv.last_verified_at
+          ? new Date(fv.last_verified_at).getTime()
+          : 0;
+        const daysSinceVerified = verifiedAt
+          ? Math.floor((now.getTime() - verifiedAt) / (1000 * 60 * 60 * 24))
+          : 999;
+
+        if (daysSinceVerified > def.staleness_days) {
+          stalenessAlerts.push({
+            association_name: assocNameMap.get(fv.association_id) || "Unknown",
+            field_label: def.label,
+            days_stale: daysSinceVerified - def.staleness_days,
+            threshold_days: def.staleness_days,
+            current_value: fv.value || "",
+          });
+        }
+      }
+    }
+
+    // Group staleness by association for cleaner context
+    const stalenesssByAssoc = new Map<string, string[]>();
+    for (const alert of stalenessAlerts) {
+      const existing = stalenesssByAssoc.get(alert.association_name) || [];
+      existing.push(
+        `${alert.field_label} (${alert.days_stale}d past ${alert.threshold_days}d threshold)`
+      );
+      stalenesssByAssoc.set(alert.association_name, existing);
+    }
+
     const allRequests = requests || [];
     const allAssociations = associations || [];
 
@@ -141,6 +207,11 @@ ${avgTurnaround !== null ? `- Average turnaround: ${avgTurnaround.toFixed(1)} da
 ASSOCIATIONS (${allAssociations.length} total):
 ${expiringInsurance.length > 0 ? `- ${expiringInsurance.length} with insurance expiring within 30 days: ${expiringInsurance.map((a) => a.name).join(", ")}` : "- No insurance expirations in next 30 days"}
 ${staleReserves.length > 0 ? `- ${staleReserves.length} with reserve studies older than 3 years: ${staleReserves.map((a) => a.name).join(", ")}` : "- All reserve studies are current"}
+${stalenessAlerts.length > 0 ? `
+DATA STALENESS ALERTS (${stalenessAlerts.length} stale fields across ${stalenesssByAssoc.size} associations):
+${Array.from(stalenesssByAssoc.entries())
+  .map(([name, fields]) => `- ${name}: ${fields.join("; ")}`)
+  .join("\n")}` : ""}
 `.trim();
 
     // Call Claude
@@ -170,7 +241,7 @@ Return JSON array with objects having:
 - title: Short headline (under 80 chars)
 - detail: 1-2 sentence explanation with specific data points
 
-Prioritize: rush orders first, then expiring docs, then performance metrics, then optimization suggestions. Be specific with names, dates, and numbers. Do not invent data — only reference what's provided.`,
+Prioritize: rush orders first, then data staleness alerts (fields past their freshness threshold that could affect document accuracy), then expiring docs, then performance metrics, then optimization suggestions. For stale data, recommend syncing Dropbox documents or manual verification. Be specific with names, dates, and numbers. Do not invent data — only reference what's provided.`,
       messages: [
         {
           role: "user",
