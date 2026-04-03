@@ -39,6 +39,8 @@ create table tenants (
   primary_color text default '#1a1a2e',
   contact_email text,
   contact_phone text,
+  advisory_cache jsonb,
+  advisory_cached_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

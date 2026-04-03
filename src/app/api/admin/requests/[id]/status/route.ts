@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { sendAdminNotification, sendDocumentReady } from "@/lib/email/send";
 import type { RequestStatus } from "@/lib/types";
 
 // Valid status transitions
@@ -43,7 +44,7 @@ export async function POST(
     // Verify request belongs to tenant
     const { data: docRequest } = await supabase
       .from("document_requests")
-      .select("id, status, tenant_id")
+      .select("id, status, tenant_id, requester_name, requester_email, property_address, document_types")
       .eq("id", id)
       .eq("tenant_id", profile.tenant_id)
       .single();
@@ -89,6 +90,44 @@ export async function POST(
         { error: "Failed to update status" },
         { status: 500 }
       );
+    }
+
+    // Send email notifications for key transitions
+    try {
+      if (nextStatus === "awaiting_data") {
+        // Notify admin that data is needed
+        const serviceClient = await createServiceClient();
+        const { data: tenant } = await serviceClient
+          .from("tenants")
+          .select("contact_email, name")
+          .eq("id", profile.tenant_id)
+          .single();
+
+        if (tenant?.contact_email) {
+          await sendAdminNotification({
+            to: tenant.contact_email,
+            tenantName: tenant.name,
+            requesterName: docRequest.requester_name,
+            requestId: id,
+            propertyAddress: docRequest.property_address,
+            documentTypes: docRequest.document_types as string[],
+            reason: "Live data input needed",
+          });
+        }
+      }
+
+      if (nextStatus === "delivered") {
+        // Notify requester that documents are ready
+        await sendDocumentReady({
+          to: docRequest.requester_email,
+          requesterName: docRequest.requester_name,
+          requestId: id,
+          propertyAddress: docRequest.property_address,
+          documentTypes: docRequest.document_types as string[],
+        });
+      }
+    } catch (emailErr) {
+      console.error("Email notification failed (non-blocking):", emailErr);
     }
 
     return NextResponse.json({ success: true, status: nextStatus });

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { orderFormSchema } from "@/lib/schemas";
-import { calculateOrderTotal } from "@/lib/pricing";
+import { calculateOrderTotal, DOCUMENT_LABELS } from "@/lib/pricing";
+import { createCheckoutSession } from "@/lib/stripe";
+import { sendOrderConfirmation, sendAdminNotification } from "@/lib/email/send";
+import type { DocumentType } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const { data: tenant, error: tenantError } = await supabase
       .from("tenants")
-      .select("id")
+      .select("id, name, stripe_account_id, platform_fee_percent, contact_email")
       .eq("id", tenantId)
       .single();
 
@@ -113,6 +116,71 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // If bill-to-closing, skip payment and send notifications
+    if (data.bill_to_closing) {
+      await sendNotifications(
+        docRequest.id,
+        data.requester_email,
+        data.requester_name,
+        propertyAddress,
+        data.document_types,
+        totalPriceCents,
+        tenant.contact_email,
+        tenant.name
+      );
+
+      return NextResponse.json({
+        id: docRequest.id,
+        message: "Order submitted successfully",
+      });
+    }
+
+    // If Stripe Connect is configured, create a checkout session
+    if (tenant.stripe_account_id && process.env.STRIPE_SECRET_KEY) {
+      try {
+        const proto = request.headers.get("x-forwarded-proto") || "https";
+        const host = request.headers.get("host") || "localhost:3000";
+        const baseUrl = `${proto}://${host}`;
+
+        const docLabels = (data.document_types as DocumentType[])
+          .map((dt) => DOCUMENT_LABELS[dt])
+          .join(", ");
+
+        const checkoutUrl = await createCheckoutSession({
+          tenantStripeAccountId: tenant.stripe_account_id,
+          platformFeePercent: tenant.platform_fee_percent || 15,
+          totalAmountCents: totalPriceCents,
+          requestId: docRequest.id,
+          tenantName: tenant.name,
+          requesterEmail: data.requester_email,
+          documentDescription: docLabels,
+          successUrl: `${baseUrl}/success?request_id=${docRequest.id}`,
+          cancelUrl: `${baseUrl}?cancelled=true`,
+        });
+
+        return NextResponse.json({
+          id: docRequest.id,
+          checkout_url: checkoutUrl,
+          message: "Redirecting to payment",
+        });
+      } catch (stripeErr) {
+        console.error("Stripe checkout creation failed:", stripeErr);
+        // Fall through to non-Stripe flow
+      }
+    }
+
+    // No Stripe — mark as received and send notifications
+    await sendNotifications(
+      docRequest.id,
+      data.requester_email,
+      data.requester_name,
+      propertyAddress,
+      data.document_types,
+      totalPriceCents,
+      tenant.contact_email,
+      tenant.name
+    );
+
     return NextResponse.json({
       id: docRequest.id,
       message: "Order submitted successfully",
@@ -123,5 +191,45 @@ export async function POST(request: NextRequest) {
       { error: "Internal server error" },
       { status: 500 }
     );
+  }
+}
+
+async function sendNotifications(
+  requestId: string,
+  requesterEmail: string,
+  requesterName: string,
+  propertyAddress: string,
+  documentTypes: string[],
+  totalCents: number,
+  adminEmail: string | null,
+  tenantName: string
+) {
+  try {
+    await sendOrderConfirmation({
+      to: requesterEmail,
+      requesterName,
+      requestId,
+      documentTypes,
+      totalCents,
+      propertyAddress,
+    });
+  } catch (err) {
+    console.error("Order confirmation email failed:", err);
+  }
+
+  if (adminEmail) {
+    try {
+      await sendAdminNotification({
+        to: adminEmail,
+        tenantName,
+        requesterName,
+        requestId,
+        propertyAddress,
+        documentTypes,
+        reason: "New document order submitted",
+      });
+    } catch (err) {
+      console.error("Admin notification email failed:", err);
+    }
   }
 }

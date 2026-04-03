@@ -12,6 +12,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { AiAdvisory } from "@/components/admin/ai-advisory";
 
 const STATUS_COLORS: Record<RequestStatus, string> = {
   received: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
@@ -166,6 +167,9 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* AI Advisory */}
+      <AiAdvisory />
 
       {/* Recent Requests Table */}
       <Card>
