@@ -28,8 +28,13 @@ export async function proxy(request: NextRequest) {
 
   // Public routes — pass through without auth checks
   if (
+    pathname === "/" ||
     pathname === "/login" ||
     pathname === "/success" ||
+    pathname === "/pricing" ||
+    pathname === "/how-it-works" ||
+    pathname === "/for-management-companies" ||
+    pathname === "/for-agents" ||
     pathname.startsWith("/api/checkout") ||
     pathname.startsWith("/api/stripe/webhook")
   ) {

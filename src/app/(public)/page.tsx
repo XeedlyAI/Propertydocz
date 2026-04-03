@@ -3,26 +3,20 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getTenantSlugFromHost } from "@/lib/tenant";
 import { OrderForm } from "@/components/forms/order-form";
 import { FileStack } from "lucide-react";
+import { MarketingLayout } from "@/components/marketing/marketing-layout";
+import { HomePage } from "@/components/marketing/home-page";
 
-export default async function OrderPage() {
+export default async function PublicPage() {
   const headersList = await headers();
   const host = headersList.get("host") || "";
   const tenantSlug = getTenantSlugFromHost(host);
 
-  // No tenant subdomain — show the main site landing
+  // No tenant subdomain — show the marketing site
   if (!tenantSlug) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-[#38b6ff]/10">
-          <FileStack className="size-7 text-[#38b6ff]" />
-        </div>
-        <h1 className="mt-6 text-4xl font-bold tracking-tight">
-          PropertyDocz
-        </h1>
-        <p className="mt-3 text-lg text-muted-foreground">
-          HOA Document Ordering &amp; Fulfillment Platform
-        </p>
-      </main>
+      <MarketingLayout>
+        <HomePage />
+      </MarketingLayout>
     );
   }
 
