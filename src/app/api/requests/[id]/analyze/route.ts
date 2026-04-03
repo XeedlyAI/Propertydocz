@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { autoFillRequest } from "@/lib/services/auto-fill";
-import { checkForNewDocuments } from "@/lib/services/dropbox-delta";
+import { syncAssociationDocuments } from "@/lib/services/dropbox-sync";
 import { analyzeRequestGaps } from "@/lib/services/gap-analysis";
 import { getFieldsForDocumentType } from "@/lib/services/field-registry";
 import { getAssociationFieldValues } from "@/lib/services/association-data";
@@ -63,15 +63,15 @@ export async function POST(
 
     const primaryDocType = (docRequest.document_types as string[])[0];
 
-    // Step 1: Check Dropbox for new documents
-    let deltaResult = null;
+    // Step 1: Sync Dropbox documents (replaces delta check)
+    let syncResult = null;
     try {
-      deltaResult = await checkForNewDocuments(
+      syncResult = await syncAssociationDocuments(
         docRequest.association_id,
         docRequest.tenant_id
       );
     } catch (err) {
-      console.error("Delta check failed during re-analysis:", err);
+      console.error("Dropbox sync failed during re-analysis:", err);
     }
 
     // Step 2: Re-run auto-fill (picks up any new Dropbox data + admin edits)
@@ -116,7 +116,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       autoFillResult,
-      deltaResult,
+      syncResult,
       gapAnalysis,
     });
   } catch (error) {

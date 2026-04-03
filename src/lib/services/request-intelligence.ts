@@ -8,7 +8,7 @@
 
 import { createServiceClient } from "@/lib/supabase/server";
 import { autoFillRequest, type AutoFillResult } from "./auto-fill";
-import { checkForNewDocuments, type DeltaResult } from "./dropbox-delta";
+import { syncAssociationDocuments, type SyncResult } from "./dropbox-sync";
 import { analyzeRequestGaps } from "./gap-analysis";
 import { getFieldsForDocumentType } from "./field-registry";
 import { getAssociationFieldValues } from "./association-data";
@@ -17,7 +17,7 @@ import type { GapAnalysisResult } from "@/lib/types/fields";
 /** Result of the full intelligence pipeline */
 export interface IntelligenceResult {
   autoFill: AutoFillResult | null;
-  delta: DeltaResult | null;
+  sync: SyncResult | null;
   gapAnalysis: GapAnalysisResult | null;
   finalStatus: string;
   error?: string;
@@ -44,7 +44,7 @@ export async function runRequestIntelligence(
 ): Promise<IntelligenceResult> {
   const result: IntelligenceResult = {
     autoFill: null,
-    delta: null,
+    sync: null,
     gapAnalysis: null,
     finalStatus: "awaiting_data",
   };
@@ -67,15 +67,15 @@ export async function runRequestIntelligence(
       console.error("Auto-fill failed:", error);
     }
 
-    // Step 2: Check Dropbox for new documents
+    // Step 2: Sync Dropbox documents (replaces delta check)
     try {
-      result.delta = await checkForNewDocuments(associationId, tenantId);
+      result.sync = await syncAssociationDocuments(associationId, tenantId);
     } catch (error) {
-      console.error("Dropbox delta check failed:", error);
+      console.error("Dropbox sync failed:", error);
     }
 
-    // Step 3: If delta found new data, re-run auto-fill to pick up new values
-    if (result.delta && !result.delta.no_changes) {
+    // Step 3: If sync found new data, re-run auto-fill to pick up new values
+    if (result.sync && result.sync.fields_updated.length > 0) {
       try {
         result.autoFill = await autoFillRequest(
           requestId,
