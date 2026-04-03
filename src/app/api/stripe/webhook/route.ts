@@ -66,6 +66,13 @@ export async function POST(request: NextRequest) {
 
           // Send confirmation email to requester
           try {
+            // Fetch tenant contact for reply-to
+            const { data: tenantForReply } = await serviceClient
+              .from("tenants")
+              .select("contact_email")
+              .eq("id", docRequest.tenant_id)
+              .single();
+
             await sendOrderConfirmation({
               to: docRequest.requester_email,
               requesterName: docRequest.requester_name,
@@ -73,6 +80,7 @@ export async function POST(request: NextRequest) {
               documentTypes: docRequest.document_types as string[],
               totalCents: docRequest.total_price_cents,
               propertyAddress: docRequest.property_address,
+              replyTo: tenantForReply?.contact_email || undefined,
             });
           } catch (emailErr) {
             console.error("Failed to send order confirmation:", emailErr);

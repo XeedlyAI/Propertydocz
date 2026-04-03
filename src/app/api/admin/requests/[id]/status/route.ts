@@ -147,6 +147,13 @@ export async function POST(
           }
         }
 
+        // Get tenant contact for reply-to
+        const { data: tenantForReply } = await serviceClient
+          .from("tenants")
+          .select("contact_email")
+          .eq("id", profile.tenant_id)
+          .single();
+
         // Notify requester with download links
         await sendDocumentReady({
           to: docRequest.requester_email,
@@ -155,6 +162,7 @@ export async function POST(
           propertyAddress: docRequest.property_address,
           documentTypes: docRequest.document_types as string[],
           downloadLinks,
+          replyTo: tenantForReply?.contact_email || undefined,
         });
       }
     } catch (emailErr) {

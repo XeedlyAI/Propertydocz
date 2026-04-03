@@ -212,6 +212,7 @@ async function sendNotifications(
       documentTypes,
       totalCents,
       propertyAddress,
+      replyTo: adminEmail || undefined,
     });
   } catch (err) {
     console.error("Order confirmation email failed:", err);

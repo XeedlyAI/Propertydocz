@@ -25,6 +25,7 @@ export async function sendOrderConfirmation(opts: {
   documentTypes: string[];
   totalCents: number;
   propertyAddress: string;
+  replyTo?: string;
 }) {
   const resend = getResend();
 
@@ -39,6 +40,7 @@ export async function sendOrderConfirmation(opts: {
   await resend.emails.send({
     from: FROM_ADDRESS,
     to: opts.to,
+    replyTo: opts.replyTo,
     subject: `Order Confirmed — Ref #${refId}`,
     html: `
 <!DOCTYPE html>
@@ -169,6 +171,7 @@ export async function sendDocumentReady(opts: {
   propertyAddress: string;
   documentTypes: string[];
   downloadLinks?: { label: string; url: string }[];
+  replyTo?: string;
 }) {
   const resend = getResend();
 
@@ -199,6 +202,7 @@ export async function sendDocumentReady(opts: {
   await resend.emails.send({
     from: FROM_ADDRESS,
     to: opts.to,
+    replyTo: opts.replyTo,
     subject: `Documents Ready — Ref #${refId}`,
     html: `
 <!DOCTYPE html>
