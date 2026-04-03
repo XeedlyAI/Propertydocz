@@ -192,6 +192,47 @@ export async function POST(request: NextRequest) {
       day: "numeric",
     });
 
+    // Auto-calculate payoff total from line items (never trust pre-computed totals)
+    if (documentTypes.includes("payoff_statement")) {
+      const payoffLineItemKeys = [
+        "regular_assessments_due",
+        "past_due_assessments",
+        "late_fees",
+        "interest",
+        "special_assessments_due",
+        "collection_legal_fees",
+        "return_check_fees",
+        "lien_recording_fees",
+        "other_charges",
+      ];
+      const total = payoffLineItemKeys.reduce((sum, key) => {
+        const raw = baseData[key] || "$0.00";
+        // Parse "$1,234.56" → 1234.56
+        const parsed = parseFloat(raw.replace(/[$,]/g, ""));
+        return sum + (isNaN(parsed) ? 0 : parsed);
+      }, 0);
+      baseData.total_payoff_amount = `$${total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    // Auto-calculate resale cert total from line items
+    if (documentTypes.includes("resale_certificate")) {
+      const resaleLineItemKeys = [
+        "current_balance_due",
+        "special_assessments_due",
+        "other_fees",
+        "prorated_assessment",
+      ];
+      // Include transfer_fee and capital_contribution (from association data)
+      const transferFee = parseFloat((baseData.transfer_fee || "$0.00").replace(/[$,]/g, ""));
+      const capitalContribution = parseFloat((baseData.capital_contribution || "$0.00").replace(/[$,]/g, ""));
+      const total = resaleLineItemKeys.reduce((sum, key) => {
+        const raw = baseData[key] || "$0.00";
+        const parsed = parseFloat(raw.replace(/[$,]/g, ""));
+        return sum + (isNaN(parsed) ? 0 : parsed);
+      }, (isNaN(transferFee) ? 0 : transferFee) + (isNaN(capitalContribution) ? 0 : capitalContribution));
+      baseData.total_due_at_closing = `$${total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
     // Service client for storage uploads
     const serviceClient = await createServiceClient();
 

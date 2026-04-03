@@ -265,20 +265,15 @@ export default async function RequestDetailPage({
             </Card>
           )}
 
-          {/* Generate Documents (when ready_for_generation) */}
-          {request.status === "ready_for_generation" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Generate Documents</CardTitle>
-                <CardDescription>
-                  All data has been collected. Generate PDFs for review using
-                  Typst templates and Claude AI validation.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <GenerateDocumentsButton requestId={request.id} />
-              </CardContent>
-            </Card>
+          {/* Generate Documents — renders in ready_for_generation AND pending_review
+              so the client component can persist its success banner after generation
+              triggers a router.refresh() that changes status to pending_review */}
+          {(request.status === "ready_for_generation" ||
+            request.status === "pending_review") && (
+            <GenerateDocumentsButton
+              requestId={request.id}
+              status={request.status}
+            />
           )}
 
           {/* Document Preview (when pending_review or later) */}

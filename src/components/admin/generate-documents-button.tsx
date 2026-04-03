@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Loader2, Sparkles, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 interface GenerationResult {
@@ -13,15 +21,19 @@ interface GenerationResult {
 
 interface GenerateDocumentsButtonProps {
   requestId: string;
+  status: string;
 }
 
 export function GenerateDocumentsButton({
   requestId,
+  status,
 }: GenerateDocumentsButtonProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<GenerationResult[] | null>(null);
   const [generationErrors, setGenerationErrors] = useState<string[]>([]);
+  const [generated, setGenerated] = useState(false);
 
   async function handleGenerate() {
     setLoading(true);
@@ -51,9 +63,12 @@ export function GenerateDocumentsButton({
         setGenerationErrors(data.errors);
       }
 
-      // If successful, reload to show updated status
+      // Use router.refresh() to re-fetch server components without losing
+      // client state — the success banner persists while the page updates
+      // to show pending_review status and generated documents.
       if (data.success) {
-        setTimeout(() => window.location.reload(), 1500);
+        setGenerated(true);
+        router.refresh();
       }
     } catch {
       setError("Network error. Please try again.");
@@ -62,75 +77,99 @@ export function GenerateDocumentsButton({
     }
   }
 
+  // After generation + refresh, status becomes pending_review.
+  // If we didn't just generate (no client-side results), don't render anything —
+  // the GeneratedDocumentsCard handles the pending_review display.
+  if (status === "pending_review" && !generated) {
+    return null;
+  }
+
+  // Show the generate card when ready, or results after generation
   return (
-    <div className="space-y-3">
-      <Button
-        onClick={handleGenerate}
-        disabled={loading}
-        className="w-full gap-2 rounded-[6px] bg-[#38b6ff] text-white font-semibold hover:bg-[#1DA8F0] active:bg-[#0A8FD4]"
-        size="lg"
-      >
-        {loading ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Generating...
-          </>
-        ) : (
-          <>
-            <Sparkles className="size-4 text-white" />
-            Generate Documents
-          </>
-        )}
-      </Button>
-
-      {loading && (
-        <p className="text-center text-xs text-muted-foreground">
-          Validating data and generating PDFs. This may take a moment...
-        </p>
-      )}
-
-      {results && results.length > 0 && (
-        <div className="space-y-2 rounded-lg border border-green-200 bg-green-50 p-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-green-700">
-            <CheckCircle2 className="size-4" />
-            Documents generated successfully
-          </div>
-          {results.map((r) => (
-            <div key={r.document_type} className="text-xs text-green-600">
-              <span className="font-medium">
-                {r.document_type.replace(/_/g, " ")}
-              </span>
-              {r.warnings.length > 0 && (
-                <ul className="mt-1 ml-4 list-disc text-amber-600">
-                  {r.warnings.map((w, i) => (
-                    <li key={i}>{w}</li>
-                  ))}
-                </ul>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">
+          {generated ? "Generation Complete" : "Generate Documents"}
+        </CardTitle>
+        <CardDescription>
+          {generated
+            ? "Documents have been generated and are ready for review below."
+            : "All data has been collected. Generate PDFs for review using Typst templates and Claude AI validation."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {!generated && (
+            <Button
+              onClick={handleGenerate}
+              disabled={loading}
+              className="w-full gap-2 rounded-[6px] bg-[#38b6ff] text-white font-semibold hover:bg-[#1DA8F0] active:bg-[#0A8FD4]"
+              size="lg"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="size-4 text-white" />
+                  Generate Documents
+                </>
               )}
-            </div>
-          ))}
-        </div>
-      )}
+            </Button>
+          )}
 
-      {generationErrors.length > 0 && (
-        <div className="space-y-1 rounded-lg border border-amber-200 bg-amber-50 p-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-amber-700">
-            <AlertTriangle className="size-4" />
-            Some documents had issues
-          </div>
-          {generationErrors.map((e, i) => (
-            <p key={i} className="text-xs text-amber-600">
-              {e}
+          {loading && (
+            <p className="text-center text-xs text-muted-foreground">
+              Validating data and generating PDFs. This may take a moment...
             </p>
-          ))}
-        </div>
-      )}
+          )}
 
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3">
-          <p className="text-sm text-red-600">{error}</p>
+          {results && results.length > 0 && (
+            <div className="space-y-2 rounded-lg border border-green-200 bg-green-50 p-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-green-700">
+                <CheckCircle2 className="size-4" />
+                Documents generated successfully
+              </div>
+              {results.map((r) => (
+                <div key={r.document_type} className="text-xs text-green-600">
+                  <span className="font-medium">
+                    {r.document_type.replace(/_/g, " ")}
+                  </span>
+                  {r.warnings.length > 0 && (
+                    <ul className="mt-1 ml-4 list-disc text-amber-600">
+                      {r.warnings.map((w, i) => (
+                        <li key={i}>{w}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {generationErrors.length > 0 && (
+            <div className="space-y-1 rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-amber-700">
+                <AlertTriangle className="size-4" />
+                Some documents had issues
+              </div>
+              {generationErrors.map((e, i) => (
+                <p key={i} className="text-xs text-amber-600">
+                  {e}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
