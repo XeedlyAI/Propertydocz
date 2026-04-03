@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, unlinkSync, mkdtempSync, existsSync, mkdirSync, rmdirSync } from "fs";
 import { join } from "path";
+import { tmpdir } from "os";
 import type { DocumentType } from "@/lib/types";
 
 // Template file mapping
@@ -57,19 +58,25 @@ export async function generatePdf(
   const template = loadTemplate(docType);
   const typstSource = interpolateTemplate(template, data);
 
-  // The Typst NodeCompiler requires temp files to be within its workspace
-  // (defaults to process.cwd()). Using OS tmpdir fails with "entry file
-  // is not in workspace". So we create a .tmp dir inside the project root.
-  const projectRoot = process.cwd();
-  const tmpBase = join(projectRoot, ".tmp");
+  // Vercel serverless: process.cwd() is /var/task (read-only).
+  // NodeCompiler hardcodes workspace root to process.cwd(), ignoring the
+  // `root` option. Workaround: write temp file to os.tmpdir() (/tmp on
+  // Vercel), then chdir there before compilation so the compiler's
+  // workspace matches. Restore cwd immediately after.
+  const tmpBase = join(tmpdir(), "propertydocz");
   if (!existsSync(tmpBase)) {
     mkdirSync(tmpBase, { recursive: true });
   }
   const tempDir = mkdtempSync(join(tmpBase, "gen-"));
   const tempFile = join(tempDir, "document.typ");
 
+  const originalCwd = process.cwd();
+
   try {
     writeFileSync(tempFile, typstSource, "utf-8");
+
+    // Temporarily set cwd to the temp dir so NodeCompiler accepts it
+    process.chdir(tempDir);
 
     const compiler = NodeCompiler.create();
     const pdfBuffer = compiler.pdf({ mainFilePath: tempFile });
@@ -80,6 +87,9 @@ export async function generatePdf(
 
     return Buffer.from(pdfBuffer);
   } finally {
+    // Restore original working directory
+    process.chdir(originalCwd);
+
     // Clean up temp file and directory
     try {
       unlinkSync(tempFile);
