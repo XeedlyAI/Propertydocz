@@ -12,6 +12,47 @@ const TEMPLATE_FILES: Record<DocumentType, string> = {
 };
 
 /**
+ * Font directory — contains Inter and JetBrains Mono TTF files.
+ * These are loaded as blobs and passed to NodeCompiler so they're
+ * available regardless of system fonts (works on Vercel serverless).
+ */
+const FONTS_DIR = join(
+  process.cwd(),
+  "src",
+  "lib",
+  "documents",
+  "fonts"
+);
+
+/**
+ * Font files to load. Each is read once and cached in memory.
+ */
+const FONT_FILES = [
+  "Inter-Regular.ttf",
+  "Inter-Bold.ttf",
+  "Inter-Medium.ttf",
+  "Inter-SemiBoldItalic.ttf",
+  "JetBrainsMono-Regular.ttf",
+  "JetBrainsMono-Bold.ttf",
+];
+
+let _fontBlobsCache: Buffer[] | null = null;
+
+/**
+ * Load font files as buffers. Cached after first call.
+ */
+function loadFontBlobs(): Buffer[] {
+  if (_fontBlobsCache) return _fontBlobsCache;
+
+  _fontBlobsCache = FONT_FILES.map((file) => {
+    const fontPath = join(FONTS_DIR, file);
+    return readFileSync(fontPath);
+  });
+
+  return _fontBlobsCache;
+}
+
+/**
  * Load a Typst template from the templates directory.
  */
 function loadTemplate(docType: DocumentType): string {
@@ -68,6 +109,8 @@ function interpolateTemplate(
  * Generate a PDF buffer from a document type and its data.
  *
  * Uses @myriaddreamin/typst-ts-node-compiler for compilation.
+ * Fonts (Inter, JetBrains Mono) are loaded as blobs so they work
+ * on Vercel serverless where no system fonts are installed.
  * Writes a temp file (compiler requires real files on disk), compiles to PDF,
  * then cleans up.
  */
@@ -81,6 +124,9 @@ export async function generatePdf(
 
   const template = loadTemplate(docType);
   const typstSource = interpolateTemplate(template, data);
+
+  // Load embedded font files as buffers
+  const fontBlobs = loadFontBlobs();
 
   // Vercel serverless: process.cwd() is /var/task (read-only).
   // NodeCompiler hardcodes workspace root to process.cwd(), ignoring the
@@ -102,7 +148,9 @@ export async function generatePdf(
     // Temporarily set cwd to the temp dir so NodeCompiler accepts it
     process.chdir(tempDir);
 
-    const compiler = NodeCompiler.create();
+    const compiler = NodeCompiler.create({
+      fontArgs: [{ fontBlobs }],
+    });
     const pdfBuffer = compiler.pdf({ mainFilePath: tempFile });
 
     if (!pdfBuffer || pdfBuffer.length === 0) {

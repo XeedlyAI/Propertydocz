@@ -7,7 +7,7 @@
   margin: (top: 0.75in, bottom: 1in, left: 0.65in, right: 0.65in),
   numbering: "1",
   footer: context [
-    #set text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 7pt, fill: rgb("#999"))
+    #set text(font: "Inter", size: 7pt, fill: rgb("#999"))
     #line(length: 100%, stroke: 0.5pt + rgb("#E0E0E0"))
     #v(4pt)
     #grid(
@@ -18,7 +18,7 @@
     )
   ],
 )
-#set text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 9pt, fill: rgb("#1A1A2E"))
+#set text(font: "Inter", size: 9pt, fill: rgb("#1A1A2E"))
 #set par(justify: true, leading: 0.6em)
 
 // --- HEADER BAR ---
@@ -31,14 +31,14 @@
   #grid(
     columns: (1fr, auto),
     [
-      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 14pt, weight: "bold", fill: white)[HOA LENDER QUESTIONNAIRE]
+      #text(font: "Inter", size: 14pt, weight: "bold", fill: white)[HOA LENDER QUESTIONNAIRE]
       #v(2pt)
-      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8pt, fill: rgb("#38b6ff"))[Fannie Mae Form 1076 / Freddie Mac Form 476]
+      #text(font: "Inter", size: 8pt, fill: rgb("#38b6ff"))[Fannie Mae Form 1076 / Freddie Mac Form 476]
     ],
     align(right)[
-      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8pt, fill: rgb("#8899AA"))[Preparation Date]
+      #text(font: "Inter", size: 8pt, fill: rgb("#8899AA"))[Preparation Date]
       #v(1pt)
-      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 10pt, weight: "bold", fill: white)[#{preparation_date}]
+      #text(font: "Inter", size: 10pt, weight: "bold", fill: white)[#{preparation_date}]
     ],
   )
 ]
@@ -48,7 +48,7 @@
 // --- SECTION 1: BASIC PROJECT INFO ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 1 #h(8pt) Basic Project Information]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 1 #h(8pt) Basic Project Information]
   ]
   #v(6pt)
 
@@ -63,7 +63,7 @@
     [#text(weight: "bold", size: 8pt)[Management Company] #v(1pt) #{manager_name}],
     [#text(weight: "bold", size: 8pt)[Contact Email] #v(1pt) #{manager_email}],
     [#text(weight: "bold", size: 8pt)[Contact Phone] #v(1pt) #{manager_phone}],
-    [#text(weight: "bold", size: 8pt)[Tax ID (EIN)] #v(1pt) #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{association_ein}]],
+    [#text(weight: "bold", size: 8pt)[Tax ID (EIN)] #v(1pt) #text(font: "JetBrains Mono", size: 9pt)[#{association_ein}]],
     [#text(weight: "bold", size: 8pt)[Year Built] #v(1pt) #{year_built}],
     [#text(weight: "bold", size: 8pt)[Year Converted] #v(1pt) #{year_converted}],
   )
@@ -74,7 +74,7 @@
 // --- SECTION 2: UNIT & PROJECT COMPOSITION ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 2 #h(8pt) Unit & Project Composition]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 2 #h(8pt) Unit & Project Composition]
   ]
   #v(6pt)
 
@@ -82,7 +82,7 @@
     columns: (1fr, 1fr),
     row-gutter: 6pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[Total Units] #v(1pt) #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"))[#{total_units}]],
+    [#text(weight: "bold", size: 8pt)[Total Units] #v(1pt) #text(font: "JetBrains Mono")[#{total_units}]],
     [#text(weight: "bold", size: 8pt)[Subject Unit] #v(1pt) #{unit_number}],
     [#text(weight: "bold", size: 8pt)[Property Address] #v(1pt) #{property_address}],
     [#text(weight: "bold", size: 8pt)[Owner of Record] #v(1pt) #{owner_name}],
@@ -96,7 +96,7 @@
 // --- SECTION 3: PROJECT COMPLETION & CONTROL ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 3 #h(8pt) Project Completion & Control]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 3 #h(8pt) Project Completion & Control]
   ]
   #v(6pt)
 
@@ -118,7 +118,7 @@
 // --- SECTION 4: OWNERSHIP DISTRIBUTION ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 4 #h(8pt) Ownership Distribution]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 4 #h(8pt) Ownership Distribution]
   ]
   #v(6pt)
 
@@ -131,15 +131,15 @@
       table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Category]],
       table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Count / %]],
     ),
-    [Total Units], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{total_units}]],
-    [Owner-Occupied Units], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{owner_occupied_units}]],
-    [Investor-Owned / Rented], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{investor_owned_units}]],
-    [% Owner-Occupied], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{percent_owner_occupied}]],
-    [Units Owned by Single Entity], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{units_single_entity}]],
-    [% Owned by Single Entity], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{percent_single_entity}]],
-    [Developer-Held Units], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{developer_held_units}]],
-    [Delinquent Units (60+ days)], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{delinquent_units}]],
-    [% Delinquent (60+ days)], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{percent_delinquent}]],
+    [Total Units], [#text(font: "JetBrains Mono", size: 9pt)[#{total_units}]],
+    [Owner-Occupied Units], [#text(font: "JetBrains Mono", size: 9pt)[#{owner_occupied_units}]],
+    [Investor-Owned / Rented], [#text(font: "JetBrains Mono", size: 9pt)[#{investor_owned_units}]],
+    [% Owner-Occupied], [#text(font: "JetBrains Mono", size: 9pt)[#{percent_owner_occupied}]],
+    [Units Owned by Single Entity], [#text(font: "JetBrains Mono", size: 9pt)[#{units_single_entity}]],
+    [% Owned by Single Entity], [#text(font: "JetBrains Mono", size: 9pt)[#{percent_single_entity}]],
+    [Developer-Held Units], [#text(font: "JetBrains Mono", size: 9pt)[#{developer_held_units}]],
+    [Delinquent Units (60+ days)], [#text(font: "JetBrains Mono", size: 9pt)[#{delinquent_units}]],
+    [% Delinquent (60+ days)], [#text(font: "JetBrains Mono", size: 9pt)[#{percent_delinquent}]],
   )
 ]
 
@@ -148,7 +148,7 @@
 // --- SECTION 5: FINANCIAL ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 5 #h(8pt) Financial Information]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 5 #h(8pt) Financial Information]
   ]
   #v(6pt)
 
@@ -156,8 +156,8 @@
     columns: (1fr, 1fr),
     row-gutter: 6pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[Annual Operating Budget] #v(1pt) #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"))[#{annual_budget}]],
-    [#text(weight: "bold", size: 8pt)[Monthly Assessment] #v(1pt) #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"))[#{monthly_assessment}]],
+    [#text(weight: "bold", size: 8pt)[Annual Operating Budget] #v(1pt) #text(font: "JetBrains Mono")[#{annual_budget}]],
+    [#text(weight: "bold", size: 8pt)[Monthly Assessment] #v(1pt) #text(font: "JetBrains Mono")[#{monthly_assessment}]],
     [#text(weight: "bold", size: 8pt)[Assessment Frequency] #v(1pt) #{assessment_frequency}],
     [#text(weight: "bold", size: 8pt)[Special assessments?] #v(1pt) #{special_assessments_planned}],
     [#text(weight: "bold", size: 8pt)[Special Assessment Details] #v(1pt) #{special_assessment_details}],
@@ -170,7 +170,7 @@
 // --- SECTION 6: RESERVES ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 6 #h(8pt) Reserve Fund]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 6 #h(8pt) Reserve Fund]
   ]
   #v(6pt)
 
@@ -178,12 +178,12 @@
     columns: (1fr, 1fr),
     row-gutter: 6pt,
     column-gutter: 14pt,
-    [#text(weight: "bold", size: 8pt)[Current Reserve Balance] #v(1pt) #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"))[#{reserve_balance}]],
-    [#text(weight: "bold", size: 8pt)[Percent Funded] #v(1pt) #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"))[#{percent_funded}]],
+    [#text(weight: "bold", size: 8pt)[Current Reserve Balance] #v(1pt) #text(font: "JetBrains Mono")[#{reserve_balance}]],
+    [#text(weight: "bold", size: 8pt)[Percent Funded] #v(1pt) #text(font: "JetBrains Mono")[#{percent_funded}]],
     [#text(weight: "bold", size: 8pt)[Reserve Study Completed?] #v(1pt) #{reserve_study_completed}],
     [#text(weight: "bold", size: 8pt)[Reserve Study Date] #v(1pt) #{reserve_study_date}],
     [#text(weight: "bold", size: 8pt)[Study current (within 3 yrs)?] #v(1pt) #{reserve_study_current}],
-    [#text(weight: "bold", size: 8pt)[Annual Reserve Contribution] #v(1pt) #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"))[#{annual_reserve_contribution}]],
+    [#text(weight: "bold", size: 8pt)[Annual Reserve Contribution] #v(1pt) #text(font: "JetBrains Mono")[#{annual_reserve_contribution}]],
   )
 ]
 
@@ -192,7 +192,7 @@
 // --- SECTION 7: INSURANCE ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 7 #h(8pt) Insurance]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 7 #h(8pt) Insurance]
   ]
   #v(6pt)
 
@@ -226,7 +226,7 @@
 // --- SECTION 8: LITIGATION ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 8 #h(8pt) Litigation]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 8 #h(8pt) Litigation]
   ]
   #v(6pt)
 
@@ -244,7 +244,7 @@
 // --- SECTION 9: RESTRICTIONS ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 9 #h(8pt) Restrictions & Policies]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 9 #h(8pt) Restrictions & Policies]
   ]
   #v(6pt)
 
@@ -268,7 +268,7 @@
 // --- SECTION 10: ENVIRONMENTAL & SAFETY ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 10 #h(8pt) Environmental & Safety]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 10 #h(8pt) Environmental & Safety]
   ]
   #v(6pt)
 
@@ -292,7 +292,7 @@
 // --- SECTION 11: COMMON AREA & SERVICES ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 5pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8.5pt, weight: "bold", fill: white)[Section 11 #h(8pt) Common Area & Services]
+    #text(font: "Inter", size: 8.5pt, weight: "bold", fill: white)[Section 11 #h(8pt) Common Area & Services]
   ]
   #v(6pt)
 
