@@ -68,6 +68,88 @@ function loadTemplate(docType: DocumentType): string {
 }
 
 /**
+ * Format a number string with commas (US standard).
+ * If the value looks like a dollar amount (starts with $), formats the numeric part
+ * with commas and 2 decimal places. If it's a plain number >= 1000, adds commas.
+ * Non-numeric values are returned as-is.
+ */
+function formatNumber(value: string): string {
+  if (!value || value === "N/A") return value;
+
+  // Dollar amount: $1234.56 → $1,234.56
+  const dollarMatch = value.match(/^\$?\s*(-?\d[\d,]*\.?\d*)$/);
+  if (dollarMatch) {
+    const raw = dollarMatch[1].replace(/,/g, "");
+    const num = parseFloat(raw);
+    if (isNaN(num)) return value;
+    const hasDollarSign = value.trimStart().startsWith("$");
+    const formatted = num.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return hasDollarSign ? `$${formatted}` : formatted;
+  }
+
+  // Plain integer >= 1000: 1775 → 1,775
+  const intMatch = value.match(/^(-?\d+)$/);
+  if (intMatch) {
+    const num = parseInt(intMatch[1], 10);
+    if (Math.abs(num) >= 1000) {
+      return num.toLocaleString("en-US");
+    }
+  }
+
+  return value;
+}
+
+/**
+ * Fields that contain dollar amounts — format with commas + 2 decimal places.
+ */
+const DOLLAR_FIELDS = new Set([
+  // Resale certificate
+  "monthly_assessment", "current_balance_due", "special_assessments_due",
+  "transfer_fee", "capital_contribution", "other_fees", "prorated_assessment",
+  "total_due_at_closing", "general_liability", "fidelity_bond",
+  "reserve_balance", "annual_budget",
+  // Payoff statement
+  "regular_assessments_due", "past_due_assessments", "late_fees", "interest",
+  "collection_legal_fees", "return_check_fees", "lien_recording_fees",
+  "other_charges", "total_payoff_amount", "per_diem_amount",
+  // Lender questionnaire
+  "annual_reserve_contribution",
+  "umbrella_coverage",
+]);
+
+/**
+ * Fields that contain plain numbers (counts, pages) — format with commas if >= 1000.
+ */
+const NUMERIC_FIELDS = new Set([
+  "total_units", "owner_occupied_units", "investor_owned_units",
+  "units_single_entity", "developer_held_units", "delinquent_units",
+  "total_pages",
+  "ccr_pages", "ccr_amendments_pages", "bylaws_pages", "bylaws_amendments_pages",
+  "articles_pages", "rules_pages", "architectural_guidelines_pages",
+  "budget_pages", "financial_statement_pages", "reserve_study_pages",
+  "insurance_cert_pages", "meeting_minutes_pages", "plat_map_pages",
+]);
+
+/**
+ * Pre-process data values: add commas to financial figures and large numbers.
+ * Applied BEFORE Typst interpolation so templates stay clean.
+ */
+function formatDataValues(data: Record<string, string>): Record<string, string> {
+  const formatted: Record<string, string> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (DOLLAR_FIELDS.has(key) || NUMERIC_FIELDS.has(key)) {
+      formatted[key] = formatNumber(value);
+    } else {
+      formatted[key] = value;
+    }
+  }
+  return formatted;
+}
+
+/**
  * Escape characters that are special in Typst markup.
  *
  * Key Typst-special chars that break compilation when injected raw:
@@ -123,7 +205,8 @@ export async function generatePdf(
   );
 
   const template = loadTemplate(docType);
-  const typstSource = interpolateTemplate(template, data);
+  const formattedData = formatDataValues(data);
+  const typstSource = interpolateTemplate(template, formattedData);
 
   // Load embedded font files as buffers
   const fontBlobs = loadFontBlobs();
