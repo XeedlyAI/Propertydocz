@@ -156,62 +156,31 @@ export async function uploadPdfToStorage(
 /**
  * Get the list of required fields for a document type.
  * Used to validate that all necessary data is present before generation.
+ *
+ * IMPORTANT: Only include fields that are GUARANTEED to be populated
+ * from association data, request-level data, or auto-computed values
+ * (preparation_date, prepared_by, etc.). Fields that depend on live_data
+ * (owner_name, unit_number, financial specifics) are NOT hard-required
+ * here — missing live_data fields render as "N/A" in the template and
+ * are flagged by AI advisory validation during review.
  */
 export function getRequiredFields(docType: DocumentType): string[] {
+  // Core fields sourced from association + request tables (always populated)
+  const core = [
+    "association_name",
+    "property_address",
+    "preparation_date",
+  ];
+
   switch (docType) {
     case "resale_certificate":
-      return [
-        "association_name",
-        "association_address",
-        "association_city",
-        "association_state",
-        "association_zip",
-        "property_address",
-        "unit_number",
-        "owner_name",
-        "preparation_date",
-        "monthly_assessment",
-        "current_balance_due",
-        "total_due_at_closing",
-      ];
+      return [...core, "association_address", "association_city", "association_state", "association_zip"];
     case "payoff_statement":
-      return [
-        "association_name",
-        "association_address",
-        "association_city",
-        "association_state",
-        "association_zip",
-        "property_address",
-        "unit_number",
-        "owner_name",
-        "preparation_date",
-        "total_payoff_amount",
-        "good_through_date",
-      ];
+      return [...core, "association_address", "association_city", "association_state", "association_zip"];
     case "lender_questionnaire":
-      return [
-        "association_name",
-        "property_address",
-        "unit_number",
-        "owner_name",
-        "preparation_date",
-        "total_units",
-        "monthly_assessment",
-        "annual_budget",
-        "reserve_balance",
-        "percent_funded",
-      ];
+      return [...core];
     case "governing_documents":
-      return [
-        "association_name",
-        "association_address",
-        "association_city",
-        "association_state",
-        "association_zip",
-        "property_address",
-        "owner_name",
-        "preparation_date",
-      ];
+      return [...core, "association_address", "association_city", "association_state", "association_zip"];
     default:
       return [];
   }

@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch the document request with association data
-    const { data: docRequest } = await supabase
+    const { data: docRequest, error: fetchError } = await supabase
       .from("document_requests")
       .select(
         `*, associations(name, legal_name, address, city, state, zip,
@@ -71,6 +71,14 @@ export async function POST(request: NextRequest) {
       .eq("tenant_id", profile.tenant_id)
       .single();
 
+    if (fetchError) {
+      console.error("Document request fetch error:", fetchError);
+      return NextResponse.json(
+        { error: `Failed to fetch request: ${fetchError.message}` },
+        { status: 500 }
+      );
+    }
+
     if (!docRequest) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -88,6 +96,12 @@ export async function POST(request: NextRequest) {
 
     const liveData = (docRequest.live_data as Record<string, string>) || {};
     const documentTypes = docRequest.document_types as DocumentType[];
+
+    // Debug logging — helps diagnose data pipeline issues
+    console.log(`[documents] Request ${requestId}: association=${association ? 'loaded' : 'NULL'}, liveData keys=${Object.keys(liveData).length}, docTypes=${documentTypes.join(',')}`);
+    if (!association) {
+      console.warn(`[documents] No association data for request ${requestId}. Check RLS policies and associations join.`);
+    }
 
     // Merge association data + live data into a flat data object
     const baseData: Record<string, string> = {
