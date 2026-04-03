@@ -269,6 +269,47 @@ export async function POST(request: NextRequest) {
         console.warn("Dropbox sync before generation skipped:", err);
         // Non-fatal — continue with whatever docs we have
       }
+
+      // Populate cover page checklist from synced governing documents
+      const { data: govDocs } = await serviceClient
+        .from("governing_documents")
+        .select("document_category")
+        .eq("association_id", docRequest.association_id);
+
+      const availableCategories = new Set<string>();
+      if (govDocs) {
+        for (const doc of govDocs) {
+          availableCategories.add(doc.document_category);
+        }
+      }
+
+      // Map each checklist row to its DB category
+      const checklistMapping: Record<string, string> = {
+        ccr: "ccrs",
+        ccr_amendments: "amendment",
+        bylaws: "bylaws",
+        bylaws_amendments: "amendment",
+        articles: "articles",
+        rules: "rules",
+        architectural_guidelines: "rules",
+        budget: "budget",
+        financial_statement: "financial_statement",
+        reserve_study: "reserve_analysis",
+        insurance_cert: "insurance_cert",
+        meeting_minutes: "minutes",
+        plat_map: "plat",
+      };
+
+      let includedCount = 0;
+      for (const [fieldPrefix, category] of Object.entries(checklistMapping)) {
+        const found = availableCategories.has(category);
+        baseData[`${fieldPrefix}_status`] = found ? "Included" : "Not Available";
+        baseData[`${fieldPrefix}_pages`] = found ? "—" : "—";
+        if (found) includedCount++;
+      }
+      baseData.total_pages = `${includedCount} documents`;
+      baseData.package_notes = baseData.package_notes
+        || `${includedCount} of ${Object.keys(checklistMapping).length} governing documents are included in this package.`;
     }
 
     const generatedDocs: {
