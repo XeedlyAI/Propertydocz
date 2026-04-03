@@ -27,6 +27,7 @@ import { LiveDataForm } from "@/components/admin/live-data-form";
 import { StatusActions } from "@/components/admin/status-actions";
 import { GenerateDocumentsButton } from "@/components/admin/generate-documents-button";
 import { GeneratedDocumentsCard } from "@/components/admin/generated-documents-card";
+import { GapAnalysisDisplay } from "@/components/admin/gap-analysis-display";
 
 const WORKFLOW_STAGES: { key: RequestStatus; label: string }[] = [
   { key: "received", label: "Received" },
@@ -239,6 +240,47 @@ export default async function RequestDetailPage({
               </div>
             </CardContent>
           </Card>
+
+          {/* Gap Analysis Display */}
+          {(request.status === "awaiting_data" ||
+            request.status === "ready_for_generation" ||
+            request.status === "pending_review") && (
+            <GapAnalysisDisplay
+              requestId={request.id}
+              gapAnalysis={
+                (request.gap_analysis as {
+                  missing_fields: string[];
+                  stale_fields: string[];
+                  suspicious_fields: Array<{
+                    field_key: string;
+                    current_value: string;
+                    concern: string;
+                  }>;
+                  compliance_flags: string[];
+                  completeness_score: number;
+                  recommended_status: string;
+                  summary: string;
+                } | null) ?? null
+              }
+              completenessScore={request.completeness_score as number | null}
+              fieldsTotal={
+                (request.gap_analysis as { missing_fields?: string[] } | null)
+                  ? ((request.missing_fields as string[] | null)?.length ?? 0) +
+                    Object.keys(
+                      (request.live_data as Record<string, string> | null) || {}
+                    ).length
+                  : 0
+              }
+              fieldsFilled={
+                Object.keys(
+                  (request.live_data as Record<string, string> | null) || {}
+                ).filter(
+                  (k) =>
+                    (request.live_data as Record<string, string>)[k]?.trim()
+                ).length
+              }
+            />
+          )}
 
           {/* Live Data Input (when awaiting_data) */}
           {request.status === "awaiting_data" && (
