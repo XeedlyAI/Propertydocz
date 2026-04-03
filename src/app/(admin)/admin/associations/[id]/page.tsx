@@ -4,6 +4,7 @@ import { getAdminUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { AssociationForm } from "@/components/admin/association-form";
 import { AssociationDropboxSection } from "@/components/admin/association-dropbox-section";
+import { OnboardingStatus } from "@/components/admin/onboarding-status";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -48,6 +49,19 @@ export default async function AssociationDetailPage({
     .eq("association_id", id)
     .order("document_category");
 
+  // Count populated field values for onboarding status
+  const { count: fieldsPopulated } = await serviceClient
+    .from("association_field_values")
+    .select("id", { count: "exact", head: true })
+    .eq("association_id", id)
+    .not("value", "is", null);
+
+  // Count total extractable fields (static + periodic)
+  const { count: fieldsTotal } = await serviceClient
+    .from("field_definitions")
+    .select("id", { count: "exact", head: true })
+    .in("tier", ["static", "periodic"]);
+
   return (
     <div className="space-y-6">
       <Link
@@ -76,8 +90,17 @@ export default async function AssociationDetailPage({
           />
         </div>
 
-        {/* Right column: Dropbox integration */}
+        {/* Right column: Dropbox + Onboarding */}
         <div className="space-y-4">
+          {/* Onboarding Status */}
+          <OnboardingStatus
+            associationId={id}
+            onboardingStatus={association.onboarding_status}
+            hasDropboxFolder={!!association.dropbox_folder_path}
+            fieldsPopulated={fieldsPopulated ?? 0}
+            fieldsTotal={fieldsTotal ?? 0}
+          />
+
           <h2 className="text-lg font-semibold">Document Sources</h2>
           <AssociationDropboxSection
             associationId={id}
