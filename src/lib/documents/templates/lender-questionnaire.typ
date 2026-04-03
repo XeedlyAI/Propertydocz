@@ -157,13 +157,9 @@
 #text(size: 11pt, weight: "bold")[Section 8 — Litigation]
 #v(6pt)
 
-#{if in_litigation == "true" [
-  *Is the HOA involved in any current litigation?* Yes \
-  *Nature of Litigation:* #{litigation_details} \
-  *Is the litigation related to safety, structural integrity, or habitability?* #{litigation_safety_related}
-] else [
-  *Is the HOA involved in any current litigation?* No
-]}
+*Is the HOA involved in any current litigation?* #{in_litigation} \
+*Nature of Litigation:* #{litigation_details} \
+*Is the litigation related to safety, structural integrity, or habitability?* #{litigation_safety_related}
 
 #v(10pt)
 

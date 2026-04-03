@@ -109,11 +109,18 @@ Respond in JSON format only:
       warnings: string[];
     };
 
+    // AI validation is ALWAYS advisory — never a hard block.
+    // Only missing required fields (checked above) can prevent generation.
+    const allWarnings = result.warnings || [];
+    if (!result.valid) {
+      allWarnings.unshift(`AI flagged concerns: ${result.notes}`);
+    }
+
     return {
-      valid: result.valid,
+      valid: true, // Always proceed — AI concerns are advisory only
       notes: result.notes,
       missingFields: [],
-      warnings: result.warnings || [],
+      warnings: allWarnings,
     };
   } catch (error) {
     console.error("Claude validation error:", error);

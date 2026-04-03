@@ -97,12 +97,10 @@
 #v(12pt)
 
 // --- NOTES ---
-#{if package_notes != "" [
-  #text(size: 11pt, weight: "bold")[Notes]
-  #v(6pt)
-  #{package_notes}
-  #v(12pt)
-]}
+#text(size: 11pt, weight: "bold")[Notes]
+#v(6pt)
+#{package_notes}
+#v(12pt)
 
 // --- TOTAL PAGES ---
 #align(center)[

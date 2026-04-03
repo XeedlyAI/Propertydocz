@@ -73,11 +73,7 @@
 #v(6pt)
 *Status:* #{account_status}
 #v(4pt)
-#{if outstanding_violations != "" [
-  *Outstanding Violations:* #{outstanding_violations}
-] else [
-  *Outstanding Violations:* None
-]}
+*Outstanding Violations:* #{outstanding_violations}
 
 #v(12pt)
 
@@ -149,10 +145,8 @@
   [*Right of First Refusal:* #{right_of_first_refusal}],
 )
 
-#{if unit_restrictions != "" [
-  #v(4pt)
-  *Unit-Specific Restrictions:* #{unit_restrictions}
-]}
+#v(4pt)
+*Unit-Specific Restrictions:* #{unit_restrictions}
 
 #v(12pt)
 
@@ -160,12 +154,8 @@
 #text(size: 11pt, weight: "bold")[Litigation Status]
 #v(6pt)
 
-#{if in_litigation == "true" [
-  *Pending Litigation:* Yes \
-  *Details:* #{litigation_details}
-] else [
-  *Pending Litigation:* None
-]}
+*Pending Litigation:* #{in_litigation} \
+*Details:* #{litigation_details}
 
 #v(20pt)
 #line(length: 100%, stroke: 1pt + rgb("#333"))

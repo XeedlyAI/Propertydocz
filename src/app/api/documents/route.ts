@@ -202,12 +202,14 @@ export async function POST(request: NextRequest) {
     // Generate each requested document type
     for (const docType of documentTypes) {
       try {
-        // Step 1: Validate with Claude
+        // Step 1: Validate — only missing required fields block generation.
+        // AI validation concerns are advisory (always valid=true from Claude).
         const validation = await validateDocumentData(docType, baseData);
 
         if (!validation.valid) {
+          // Only triggers when required fields are missing
           errors.push(
-            `${docType}: Validation failed — ${validation.notes}`
+            `${docType}: Missing required fields — ${validation.missingFields.join(", ")}`
           );
           continue;
         }

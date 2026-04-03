@@ -1,6 +1,5 @@
-import { readFileSync, writeFileSync, unlinkSync, mkdtempSync } from "fs";
+import { readFileSync, writeFileSync, unlinkSync, mkdtempSync, existsSync, mkdirSync, rmdirSync } from "fs";
 import { join } from "path";
-import { tmpdir } from "os";
 import type { DocumentType } from "@/lib/types";
 
 // Template file mapping
@@ -58,8 +57,15 @@ export async function generatePdf(
   const template = loadTemplate(docType);
   const typstSource = interpolateTemplate(template, data);
 
-  // Write to a temp file — the compiler reads from disk
-  const tempDir = mkdtempSync(join(tmpdir(), "propertydocz-"));
+  // The Typst NodeCompiler requires temp files to be within its workspace
+  // (defaults to process.cwd()). Using OS tmpdir fails with "entry file
+  // is not in workspace". So we create a .tmp dir inside the project root.
+  const projectRoot = process.cwd();
+  const tmpBase = join(projectRoot, ".tmp");
+  if (!existsSync(tmpBase)) {
+    mkdirSync(tmpBase, { recursive: true });
+  }
+  const tempDir = mkdtempSync(join(tmpBase, "gen-"));
   const tempFile = join(tempDir, "document.typ");
 
   try {
@@ -74,9 +80,10 @@ export async function generatePdf(
 
     return Buffer.from(pdfBuffer);
   } finally {
-    // Clean up temp file
+    // Clean up temp file and directory
     try {
       unlinkSync(tempFile);
+      rmdirSync(tempDir);
     } catch {
       // Ignore cleanup errors
     }
