@@ -9,6 +9,7 @@ import {
 import { Building2, Plus, MapPin } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { AssociationsHeader } from "@/components/admin/associations-header";
 
 export default async function AssociationsPage() {
   const user = await getAdminUser();
@@ -45,23 +46,10 @@ export default async function AssociationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Associations</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage HOA communities for {user.tenantName}
-          </p>
-        </div>
-        <Link href="/admin/associations/new">
-          <Button
-            size="sm"
-            className="rounded-[6px] bg-[#38b6ff] text-white font-medium hover:bg-[#1DA8F0]"
-          >
-            <Plus className="size-4" />
-            Add Association
-          </Button>
-        </Link>
-      </div>
+      <AssociationsHeader
+        tenantId={user.tenantId}
+        tenantName={user.tenantName}
+      />
 
       {!associations || associations.length === 0 ? (
         <Card>
