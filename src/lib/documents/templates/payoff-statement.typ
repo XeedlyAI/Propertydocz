@@ -7,7 +7,7 @@
   margin: (top: 0.75in, bottom: 1in, left: 0.75in, right: 0.75in),
   numbering: "1",
   footer: context [
-    #set text(font: "Inter", size: 7pt, fill: rgb("#999"))
+    #set text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 7pt, fill: rgb("#999"))
     #line(length: 100%, stroke: 0.5pt + rgb("#E0E0E0"))
     #v(4pt)
     #grid(
@@ -18,7 +18,7 @@
     )
   ],
 )
-#set text(font: "Inter", size: 9.5pt, fill: rgb("#1A1A2E"))
+#set text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 9.5pt, fill: rgb("#1A1A2E"))
 #set par(justify: true, leading: 0.65em)
 
 // --- HEADER BAR ---
@@ -31,14 +31,14 @@
   #grid(
     columns: (1fr, auto),
     [
-      #text(font: "Inter", size: 14pt, weight: "bold", fill: white)[PAYOFF STATEMENT]
+      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 14pt, weight: "bold", fill: white)[PAYOFF STATEMENT]
       #v(2pt)
-      #text(font: "Inter", size: 8pt, fill: rgb("#38b6ff"))[Pursuant to Utah Code \u{00A7}57-8a-106 & \u{00A7}57-8a-311]
+      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8pt, fill: rgb("#38b6ff"))[Pursuant to Utah Code \u{00A7}57-8a-106 & \u{00A7}57-8a-311]
     ],
     align(right)[
-      #text(font: "Inter", size: 8pt, fill: rgb("#8899AA"))[Preparation Date]
+      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8pt, fill: rgb("#8899AA"))[Preparation Date]
       #v(1pt)
-      #text(font: "Inter", size: 10pt, weight: "bold", fill: white)[#{preparation_date}]
+      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 10pt, weight: "bold", fill: white)[#{preparation_date}]
     ],
   )
 ]
@@ -88,7 +88,7 @@
     fill: rgb("#1A1A2E"),
     radius: 2pt,
   )[
-    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Section 1 #h(8pt) Itemized Amount Due]
+    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 9pt, weight: "bold", fill: white)[Section 1 #h(8pt) Itemized Amount Due]
   ]
   #v(8pt)
 
@@ -101,18 +101,17 @@
       table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Item]],
       table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Amount]],
     ),
-    [Regular Assessments Due], [#text(font: "JetBrains Mono", size: 9pt)[#{regular_assessments_due}]],
-    [Past Due Assessments], [#text(font: "JetBrains Mono", size: 9pt)[#{past_due_assessments}]],
-    [Late Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{late_fees}]],
-    [Interest], [#text(font: "JetBrains Mono", size: 9pt)[#{interest}]],
-    [Special Assessments Due], [#text(font: "JetBrains Mono", size: 9pt)[#{special_assessments_due}]],
-    [Collection / Legal Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{collection_legal_fees}]],
-    [Return Check Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{return_check_fees}]],
-    [Lien Recording Fees], [#text(font: "JetBrains Mono", size: 9pt)[#{lien_recording_fees}]],
-    [Other Charges], [#text(font: "JetBrains Mono", size: 9pt)[#{other_charges}]],
-    [Payoff Statement Fee], [#text(font: "JetBrains Mono", size: 9pt)[#{payoff_statement_fee}]],
+    [Regular Assessments Due], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{regular_assessments_due}]],
+    [Past Due Assessments], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{past_due_assessments}]],
+    [Late Fees], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{late_fees}]],
+    [Interest], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{interest}]],
+    [Special Assessments Due], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{special_assessments_due}]],
+    [Collection / Legal Fees], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{collection_legal_fees}]],
+    [Return Check Fees], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{return_check_fees}]],
+    [Lien Recording Fees], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{lien_recording_fees}]],
+    [Other Charges], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{other_charges}]],
     table.cell(fill: rgb("#E8F4FD"))[#text(weight: "bold")[Total Payoff Amount]],
-    table.cell(fill: rgb("#E8F4FD"))[#text(font: "JetBrains Mono", size: 10pt, weight: "bold", fill: rgb("#1A1A2E"))[#{total_payoff_amount}]],
+    table.cell(fill: rgb("#E8F4FD"))[#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 10pt, weight: "bold", fill: rgb("#1A1A2E"))[#{total_payoff_amount}]],
   )
 
   #v(6pt)
@@ -140,7 +139,7 @@
     fill: rgb("#1A1A2E"),
     radius: 2pt,
   )[
-    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Section 2 #h(8pt) Per Diem & Validity]
+    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 9pt, weight: "bold", fill: white)[Section 2 #h(8pt) Per Diem & Validity]
   ]
   #v(8pt)
 
@@ -150,7 +149,7 @@
     [
       #text(weight: "bold", size: 8pt)[Daily Per Diem Amount]
       #v(2pt)
-      #text(font: "JetBrains Mono", size: 11pt, weight: "bold", fill: rgb("#1A1A2E"))[#{per_diem_amount}]
+      #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 11pt, weight: "bold", fill: rgb("#1A1A2E"))[#{per_diem_amount}]
       #v(2pt)
       #text(size: 8pt, fill: rgb("#777"))[Effective: #{per_diem_start_date}]
     ],
@@ -165,7 +164,7 @@
         #align(center)[
           #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[GOOD THROUGH DATE]
           #v(2pt)
-          #text(font: "JetBrains Mono", size: 13pt, weight: "bold", fill: rgb("#1A1A2E"))[#{good_through_date}]
+          #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 13pt, weight: "bold", fill: rgb("#1A1A2E"))[#{good_through_date}]
         ]
       ]
     ],
@@ -187,7 +186,7 @@
     fill: rgb("#1A1A2E"),
     radius: 2pt,
   )[
-    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Section 3 #h(8pt) Payment Instructions]
+    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 9pt, weight: "bold", fill: white)[Section 3 #h(8pt) Payment Instructions]
   ]
   #v(8pt)
 
@@ -226,8 +225,8 @@
         #text(size: 8.5pt)[
           Bank: *#{wire_bank_name}* \
           #v(2pt)
-          Routing: #text(font: "JetBrains Mono")[#{wire_routing_number}] \
-          Account: #text(font: "JetBrains Mono")[#{wire_account_number}] \
+          Routing: #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"))[#{wire_routing_number}] \
+          Account: #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"))[#{wire_account_number}] \
           #v(2pt)
           Reference: #{owner_name} — #{unit_number}
         ]

@@ -7,7 +7,7 @@
   margin: (top: 0.75in, bottom: 1in, left: 0.75in, right: 0.75in),
   numbering: "1",
   footer: context [
-    #set text(font: "Inter", size: 7pt, fill: rgb("#999"))
+    #set text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 7pt, fill: rgb("#999"))
     #line(length: 100%, stroke: 0.5pt + rgb("#E0E0E0"))
     #v(4pt)
     #grid(
@@ -18,7 +18,7 @@
     )
   ],
 )
-#set text(font: "Inter", size: 9.5pt, fill: rgb("#1A1A2E"))
+#set text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 9.5pt, fill: rgb("#1A1A2E"))
 #set par(justify: true, leading: 0.65em)
 
 // --- HEADER BAR ---
@@ -31,14 +31,14 @@
   #grid(
     columns: (1fr, auto),
     [
-      #text(font: "Inter", size: 14pt, weight: "bold", fill: white)[GOVERNING DOCUMENTS PACKAGE]
+      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 14pt, weight: "bold", fill: white)[GOVERNING DOCUMENTS PACKAGE]
       #v(2pt)
-      #text(font: "Inter", size: 8pt, fill: rgb("#38b6ff"))[Association Governing Document Compilation]
+      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8pt, fill: rgb("#38b6ff"))[Association Governing Document Compilation]
     ],
     align(right)[
-      #text(font: "Inter", size: 8pt, fill: rgb("#8899AA"))[Preparation Date]
+      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 8pt, fill: rgb("#8899AA"))[Preparation Date]
       #v(1pt)
-      #text(font: "Inter", size: 10pt, weight: "bold", fill: white)[#{preparation_date}]
+      #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 10pt, weight: "bold", fill: white)[#{preparation_date}]
     ],
   )
 ]
@@ -88,7 +88,7 @@
 // --- DOCUMENT CHECKLIST ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 6pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Document Checklist]
+    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 9pt, weight: "bold", fill: white)[Document Checklist]
   ]
   #v(4pt)
   #text(size: 8pt, fill: rgb("#777"))[The following documents are included in or referenced by this package.]
@@ -105,19 +105,19 @@
       table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Status]],
       table.cell(fill: rgb("#38b6ff"))[#text(size: 8pt, weight: "bold", fill: white)[Pages]],
     ),
-    [1], [Declaration of CC&Rs], [#{ccr_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{ccr_pages}]],
-    [2], [CC&R Amendments], [#{ccr_amendments_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{ccr_amendments_pages}]],
-    [3], [Bylaws], [#{bylaws_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{bylaws_pages}]],
-    [4], [Bylaws Amendments], [#{bylaws_amendments_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{bylaws_amendments_pages}]],
-    [5], [Articles of Incorporation], [#{articles_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{articles_pages}]],
-    [6], [Rules & Regulations], [#{rules_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{rules_pages}]],
-    [7], [Architectural Guidelines], [#{architectural_guidelines_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{architectural_guidelines_pages}]],
-    [8], [Current Year Budget], [#{budget_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{budget_pages}]],
-    [9], [Most Recent Financial Statement], [#{financial_statement_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{financial_statement_pages}]],
-    [10], [Reserve Study], [#{reserve_study_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{reserve_study_pages}]],
-    [11], [Insurance Certificate], [#{insurance_cert_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{insurance_cert_pages}]],
-    [12], [Meeting Minutes (most recent)], [#{meeting_minutes_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{meeting_minutes_pages}]],
-    [13], [Plat/Survey Map], [#{plat_map_status}], [#text(font: "JetBrains Mono", size: 9pt)[#{plat_map_pages}]],
+    [1], [Declaration of CC&Rs], [#{ccr_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{ccr_pages}]],
+    [2], [CC&R Amendments], [#{ccr_amendments_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{ccr_amendments_pages}]],
+    [3], [Bylaws], [#{bylaws_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{bylaws_pages}]],
+    [4], [Bylaws Amendments], [#{bylaws_amendments_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{bylaws_amendments_pages}]],
+    [5], [Articles of Incorporation], [#{articles_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{articles_pages}]],
+    [6], [Rules & Regulations], [#{rules_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{rules_pages}]],
+    [7], [Architectural Guidelines], [#{architectural_guidelines_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{architectural_guidelines_pages}]],
+    [8], [Current Year Budget], [#{budget_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{budget_pages}]],
+    [9], [Most Recent Financial Statement], [#{financial_statement_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{financial_statement_pages}]],
+    [10], [Reserve Study], [#{reserve_study_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{reserve_study_pages}]],
+    [11], [Insurance Certificate], [#{insurance_cert_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{insurance_cert_pages}]],
+    [12], [Meeting Minutes (most recent)], [#{meeting_minutes_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{meeting_minutes_pages}]],
+    [13], [Plat/Survey Map], [#{plat_map_status}], [#text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 9pt)[#{plat_map_pages}]],
   )
 ]
 
@@ -149,7 +149,7 @@
 // --- NOTES ---
 #block(breakable: false)[
   #rect(width: 100%, inset: (x: 10pt, y: 6pt), fill: rgb("#1A1A2E"), radius: 2pt)[
-    #text(font: "Inter", size: 9pt, weight: "bold", fill: white)[Notes]
+    #text(font: ("Liberation Sans", "DejaVu Sans", "Noto Sans"), size: 9pt, weight: "bold", fill: white)[Notes]
   ]
   #v(6pt)
   #text(size: 9pt)[#{package_notes}]
@@ -170,7 +170,7 @@
       #align(center)[
         #text(size: 8pt, weight: "bold", fill: rgb("#38b6ff"))[TOTAL PACKAGE]
         #v(2pt)
-        #text(font: "JetBrains Mono", size: 14pt, weight: "bold", fill: rgb("#1A1A2E"))[#{total_pages} pages]
+        #text(font: ("DejaVu Sans Mono", "Liberation Mono", "Courier New"), size: 14pt, weight: "bold", fill: rgb("#1A1A2E"))[#{total_pages} pages]
       ]
     ]
   ]
