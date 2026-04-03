@@ -9,11 +9,12 @@ import {
 import { Settings } from "lucide-react";
 import { DropboxStatus } from "@/components/admin/dropbox-status";
 import { SignatureUpload } from "@/components/admin/signature-upload";
+import { StripeConnectStatus } from "@/components/admin/stripe-connect-status";
 
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ dropbox?: string }>;
+  searchParams: Promise<{ dropbox?: string; stripe?: string }>;
 }) {
   const user = await getAdminUser();
   const params = await searchParams;
@@ -22,7 +23,7 @@ export default async function SettingsPage({
   const serviceClient = await createServiceClient();
   const { data: tenant } = await serviceClient
     .from("tenants")
-    .select("dropbox_access_token, dropbox_refresh_token, signature_image_url")
+    .select("dropbox_access_token, dropbox_refresh_token, signature_image_url, stripe_account_id")
     .eq("id", user.tenantId)
     .single();
 
@@ -107,11 +108,18 @@ export default async function SettingsPage({
         status={dropboxStatus}
       />
 
+      {/* Stripe Connect */}
+      <StripeConnectStatus
+        isConnected={!!tenant?.stripe_account_id}
+        stripeAccountId={tenant?.stripe_account_id || null}
+        status={params.stripe === "connected" ? "connected" : null}
+      />
+
       <Card>
         <CardContent className="py-6 text-center">
           <Settings className="mx-auto size-8 text-muted-foreground/50" />
           <p className="mt-2 text-xs text-muted-foreground">
-            Stripe Connect, email templates, and branding options coming soon.
+            Email templates and branding options coming soon.
           </p>
         </CardContent>
       </Card>
