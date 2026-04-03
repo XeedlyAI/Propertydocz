@@ -4,6 +4,7 @@ import { orderFormSchema } from "@/lib/schemas";
 import { calculateOrderTotal, DOCUMENT_LABELS } from "@/lib/pricing";
 import { createCheckoutSession } from "@/lib/stripe";
 import { sendOrderConfirmation, sendAdminNotification } from "@/lib/email/send";
+import { runRequestIntelligence } from "@/lib/services/request-intelligence";
 import type { DocumentType } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
@@ -129,6 +130,19 @@ export async function POST(request: NextRequest) {
         tenant.name
       );
 
+      // Run intelligence pipeline (auto-fill, delta check, gap analysis)
+      try {
+        await runRequestIntelligence(
+          docRequest.id,
+          data.association_id,
+          tenantId,
+          data.document_types
+        );
+      } catch (err) {
+        console.error("Intelligence pipeline failed (bill-to-closing):", err);
+        // Non-blocking — request is still created
+      }
+
       return NextResponse.json({
         id: docRequest.id,
         message: "Order submitted successfully",
@@ -180,6 +194,18 @@ export async function POST(request: NextRequest) {
       tenant.contact_email,
       tenant.name
     );
+
+    // Run intelligence pipeline (auto-fill, delta check, gap analysis)
+    try {
+      await runRequestIntelligence(
+        docRequest.id,
+        data.association_id,
+        tenantId,
+        data.document_types
+      );
+    } catch (err) {
+      console.error("Intelligence pipeline failed (no-stripe):", err);
+    }
 
     return NextResponse.json({
       id: docRequest.id,

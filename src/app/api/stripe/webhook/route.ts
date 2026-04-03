@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe";
 import { sendOrderConfirmation, sendAdminNotification } from "@/lib/email/send";
+import { runRequestIntelligence } from "@/lib/services/request-intelligence";
 
 /**
  * POST /api/stripe/webhook
@@ -107,6 +108,28 @@ export async function POST(request: NextRequest) {
             }
           } catch (emailErr) {
             console.error("Failed to send admin notification:", emailErr);
+          }
+
+          // Run intelligence pipeline (auto-fill, delta check, gap analysis)
+          try {
+            // Fetch association_id for the request
+            const { data: reqForAssoc } = await serviceClient
+              .from("document_requests")
+              .select("association_id")
+              .eq("id", requestId)
+              .single();
+
+            if (reqForAssoc?.association_id) {
+              await runRequestIntelligence(
+                requestId,
+                reqForAssoc.association_id,
+                docRequest.tenant_id,
+                docRequest.document_types as string[]
+              );
+            }
+          } catch (err) {
+            console.error("Intelligence pipeline failed (webhook):", err);
+            // Non-blocking — request stays in awaiting_data
           }
         }
         break;
