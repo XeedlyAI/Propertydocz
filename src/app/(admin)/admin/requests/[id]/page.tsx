@@ -3,14 +3,13 @@ import { getAdminUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
 import type { DocumentType, RequestStatus } from "@/lib/types";
+import type { GapAnalysisResult } from "@/lib/types/fields";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   User,
@@ -19,7 +18,6 @@ import {
   Clock,
   Zap,
   CheckCircle2,
-  XCircle,
   ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,6 +26,8 @@ import { StatusActions } from "@/components/admin/status-actions";
 import { GenerateDocumentsButton } from "@/components/admin/generate-documents-button";
 import { GeneratedDocumentsCard } from "@/components/admin/generated-documents-card";
 import { GapAnalysisDisplay } from "@/components/admin/gap-analysis-display";
+import { getFieldsForDocumentType } from "@/lib/services/field-registry";
+import { getAssociationFieldValues } from "@/lib/services/association-data";
 
 const WORKFLOW_STAGES: { key: RequestStatus; label: string }[] = [
   { key: "received", label: "Received" },
@@ -80,6 +80,46 @@ export default async function RequestDetailPage({
   const association = Array.isArray(request.associations)
     ? request.associations[0]
     : request.associations;
+
+  // Fetch field definitions and association field values in parallel for the form
+  const docTypes = request.document_types as string[];
+  const primaryDocType = docTypes[0] ?? "resale_certificate";
+
+  const [fieldDefinitions, associationFieldValues] = await Promise.all([
+    getFieldsForDocumentType(primaryDocType),
+    request.association_id
+      ? getAssociationFieldValues(request.association_id)
+      : Promise.resolve([]),
+  ]);
+
+  // Serialize for client component (strip any non-serializable data)
+  const serializedFieldDefs = fieldDefinitions.map((fd) => ({
+    id: fd.id,
+    field_key: fd.field_key,
+    label: fd.label,
+    tier: fd.tier,
+    value_type: fd.value_type,
+    section: fd.section,
+    document_types: fd.document_types,
+    validation_rules: fd.validation_rules,
+    staleness_days: fd.staleness_days,
+    extraction_hints: fd.extraction_hints,
+    display_order: fd.display_order,
+    help_text: fd.help_text,
+  }));
+
+  const serializedFieldValues = associationFieldValues.map((fv) => ({
+    id: fv.id,
+    association_id: fv.association_id,
+    field_key: fv.field_key,
+    value: fv.value,
+    confidence: fv.confidence,
+    source: fv.source,
+    source_document: fv.source_document,
+    last_verified_at: fv.last_verified_at,
+    last_verified_by: fv.last_verified_by,
+    previous_value: fv.previous_value,
+  }));
 
   return (
     <div className="space-y-6">
@@ -282,29 +322,34 @@ export default async function RequestDetailPage({
             />
           )}
 
-          {/* Live Data Input (when awaiting_data) */}
-          {request.status === "awaiting_data" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Live Data Input</CardTitle>
-                <CardDescription>
-                  Fill in the current data needed for this request. These fields
-                  require up-to-date information from your records.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <LiveDataForm
-                  requestId={request.id}
-                  documentTypes={request.document_types as DocumentType[]}
-                  missingFields={
-                    (request.missing_fields as string[] | null) || []
-                  }
-                  existingData={
-                    (request.live_data as Record<string, string> | null) || {}
-                  }
-                />
-              </CardContent>
-            </Card>
+          {/* Live Data Input (when awaiting_data or ready_for_generation) */}
+          {(request.status === "awaiting_data" ||
+            request.status === "ready_for_generation") && (
+            <div>
+              <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+                <FileText className="size-4" />
+                Data Review
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Review and confirm all fields below. Green fields are verified,
+                yellow fields need confirmation, and red fields need data input.
+              </p>
+              <LiveDataForm
+                requestId={request.id}
+                documentTypes={request.document_types as DocumentType[]}
+                existingData={
+                  (request.live_data as Record<string, string> | null) || {}
+                }
+                fieldDefinitions={serializedFieldDefs}
+                associationFieldValues={serializedFieldValues}
+                gapAnalysis={
+                  (request.gap_analysis as GapAnalysisResult | null) ?? null
+                }
+                missingFields={
+                  (request.missing_fields as string[] | null) || []
+                }
+              />
+            </div>
           )}
 
           {/* Generate Documents — renders in ready_for_generation AND pending_review
