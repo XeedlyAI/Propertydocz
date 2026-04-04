@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe";
 import { sendOrderConfirmation, sendAdminNotification } from "@/lib/email/send";
 import { runRequestIntelligence } from "@/lib/services/request-intelligence";
+import { findAgentByEmail, recordUsage } from "@/lib/services/usage-tracking";
 
 /**
  * POST /api/stripe/webhook
@@ -161,6 +162,20 @@ export async function POST(request: NextRequest) {
           } catch (err) {
             console.error("Intelligence pipeline failed (webhook):", err);
             // Non-blocking — request stays in awaiting_data
+          }
+
+          // Track usage against agent membership (if requester is an agent)
+          try {
+            const agentId = await findAgentByEmail(
+              docRequest.requester_email,
+              docRequest.tenant_id
+            );
+            if (agentId) {
+              await recordUsage(agentId, requestId);
+            }
+          } catch (err) {
+            console.error("Usage tracking failed:", err);
+            // Non-blocking
           }
         }
         break;

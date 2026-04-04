@@ -5,6 +5,7 @@ import { calculateOrderTotal, DOCUMENT_LABELS } from "@/lib/pricing";
 import { createCheckoutSession } from "@/lib/stripe";
 import { sendOrderConfirmation, sendAdminNotification } from "@/lib/email/send";
 import { runRequestIntelligence } from "@/lib/services/request-intelligence";
+import { findAgentByEmail, recordUsage } from "@/lib/services/usage-tracking";
 import type { DocumentType } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
@@ -143,6 +144,16 @@ export async function POST(request: NextRequest) {
         // Non-blocking — request is still created
       }
 
+      // Track usage against agent membership
+      try {
+        const agentId = await findAgentByEmail(data.requester_email, tenantId);
+        if (agentId) {
+          await recordUsage(agentId, docRequest.id);
+        }
+      } catch (err) {
+        console.error("Usage tracking failed (bill-to-closing):", err);
+      }
+
       return NextResponse.json({
         id: docRequest.id,
         message: "Order submitted successfully",
@@ -205,6 +216,16 @@ export async function POST(request: NextRequest) {
       );
     } catch (err) {
       console.error("Intelligence pipeline failed (no-stripe):", err);
+    }
+
+    // Track usage against agent membership
+    try {
+      const agentId = await findAgentByEmail(data.requester_email, tenantId);
+      if (agentId) {
+        await recordUsage(agentId, docRequest.id);
+      }
+    } catch (err) {
+      console.error("Usage tracking failed (no-stripe):", err);
     }
 
     return NextResponse.json({
