@@ -1,5 +1,13 @@
 import { LoginForm } from "@/components/admin/login-form";
 import { FileStack } from "lucide-react";
+import { buildMetadata } from "@/lib/metadata";
+
+export const metadata = buildMetadata({
+  title: "Sign In",
+  description: "Sign in to your PropertyDocz admin dashboard.",
+  path: "/login",
+  noIndex: true,
+});
 
 export default function LoginPage() {
   return (

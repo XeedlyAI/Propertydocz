@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { buildMetadata } from "@/lib/metadata";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -15,11 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "PropertyDocz — HOA Document Ordering",
-  description:
-    "Multi-tenant HOA document ordering and fulfillment platform. Order resale certificates, payoff statements, governing documents, and lender questionnaires.",
-};
+export const metadata: Metadata = buildMetadata({});
 
 // Inline script to prevent dark mode flash (runs before React hydrates)
 const themeScript = `
