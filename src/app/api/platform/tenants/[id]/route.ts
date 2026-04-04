@@ -50,7 +50,7 @@ export async function GET(
     // Associations
     const { data: associations } = await serviceClient
       .from("associations")
-      .select("id, name, address, city, state, total_units")
+      .select("id, name, address, city, state, zip, total_units, project_type, dropbox_folder_path")
       .eq("tenant_id", id)
       .order("name");
 
