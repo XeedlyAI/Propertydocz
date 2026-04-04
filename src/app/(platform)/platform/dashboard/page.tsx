@@ -9,6 +9,10 @@ import {
   DollarSign,
   Users,
   TrendingUp,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -56,6 +60,13 @@ export default async function PlatformDashboardPage() {
       "id, created_at, tenant_id, requester_name, requester_email, property_address, document_types, status, total_price_cents, payment_status"
     )
     .order("created_at", { ascending: false });
+
+  // Cron runs (last 20)
+  const { data: cronRuns } = await serviceClient
+    .from("cron_runs")
+    .select("id, job_name, started_at, finished_at, status, records_processed, error_message, metadata")
+    .order("started_at", { ascending: false })
+    .limit(20);
 
   const allRequests = requests || [];
   const now = new Date();
@@ -389,6 +400,110 @@ export default async function PlatformDashboardPage() {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Cron Job History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="size-4 text-[#38b6ff]" />
+            Background Jobs
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!cronRuns || cronRuns.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              No cron runs recorded yet.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left">
+                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Job
+                    </th>
+                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Started
+                    </th>
+                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Duration
+                    </th>
+                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Status
+                    </th>
+                    <th className="pb-3 pr-4 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Records
+                    </th>
+                    <th className="pb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Details
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cronRuns.map((run) => {
+                    const duration =
+                      run.finished_at && run.started_at
+                        ? `${((new Date(run.finished_at).getTime() - new Date(run.started_at).getTime()) / 1000).toFixed(1)}s`
+                        : "—";
+
+                    const metadata = (run.metadata || {}) as Record<string, unknown>;
+                    const detailParts: string[] = [];
+                    if (metadata.emails_sent) detailParts.push(`${metadata.emails_sent} emails`);
+                    if (metadata.tenants_affected) detailParts.push(`${metadata.tenants_affected} tenants`);
+                    if (metadata.expired_accounts) detailParts.push(`${metadata.expired_accounts} expired`);
+                    if (metadata.old_cron_runs_deleted) detailParts.push(`${metadata.old_cron_runs_deleted} cleaned`);
+
+                    return (
+                      <tr
+                        key={run.id}
+                        className="border-b border-border/50 last:border-0 transition-colors hover:bg-muted/50"
+                      >
+                        <td className="py-3 pr-4">
+                          <span className="inline-flex items-center rounded-md border border-border px-2 py-0.5 text-xs font-medium font-data">
+                            {run.job_name}
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4 text-muted-foreground font-data text-xs">
+                          {new Date(run.started_at).toLocaleString()}
+                        </td>
+                        <td className="py-3 pr-4 font-data text-xs text-muted-foreground">
+                          {duration}
+                        </td>
+                        <td className="py-3 pr-4">
+                          {run.status === "success" ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 className="size-3.5" />
+                              Success
+                            </span>
+                          ) : run.status === "error" ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400" title={run.error_message || undefined}>
+                              <XCircle className="size-3.5" />
+                              Error
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+                              <Loader2 className="size-3.5 animate-spin" />
+                              Running
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 pr-4 text-right font-data text-xs">
+                          {run.records_processed ?? 0}
+                        </td>
+                        <td className="py-3 text-xs text-muted-foreground">
+                          {run.error_message
+                            ? <span className="text-red-500">{run.error_message.slice(0, 60)}</span>
+                            : detailParts.join(", ") || "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
