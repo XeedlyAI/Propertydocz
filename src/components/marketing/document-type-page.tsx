@@ -32,7 +32,7 @@ export function DocumentTypePage({
   faqs,
 }: DocumentTypePageProps) {
   return (
-    <div className="space-y-16 py-16 sm:py-24">
+    <div className="space-y-16 px-4 py-16 sm:px-6 sm:py-24">
       {/* Hero */}
       <section className="text-center">
         <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl bg-[#38b6ff]/10">

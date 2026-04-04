@@ -354,7 +354,7 @@ function MembershipTeaser() {
                   View Plans <ArrowRight className="size-3.5" />
                 </Link>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   { tier: "Agent Pro", price: "$149", packages: "3" },
                   { tier: "Broker Office", price: "$399", packages: "10" },
