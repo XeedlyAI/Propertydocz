@@ -16,6 +16,7 @@ import {
   FileStack,
   Shield,
   Users,
+  Wand2,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -27,6 +28,7 @@ interface PlatformSidebarProps {
 const NAV_ITEMS = [
   { href: "/platform/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/platform/tenants", label: "Tenants", icon: Building2 },
+  { href: "/platform/onboard", label: "Onboard", icon: Wand2 },
   { href: "/platform/agents", label: "Agents", icon: Users },
   { href: "/platform/revenue", label: "Revenue", icon: DollarSign },
   { href: "/platform/settings", label: "Settings", icon: Settings },
