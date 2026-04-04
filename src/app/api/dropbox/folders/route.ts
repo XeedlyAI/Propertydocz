@@ -25,11 +25,18 @@ export async function GET(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("tenant_id")
+      .select("tenant_id, role")
       .eq("id", user.id)
       .single();
 
-    if (!profile?.tenant_id) {
+    // Platform admin can browse any tenant's storage via ?tenant_id=xxx
+    const queryTenantId = request.nextUrl.searchParams.get("tenant_id");
+    const tenantId =
+      profile?.role === "platform_admin" && queryTenantId
+        ? queryTenantId
+        : profile?.tenant_id;
+
+    if (!tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -37,7 +44,7 @@ export async function GET(request: NextRequest) {
     const serviceClient = await createServiceClient();
     const storageCreds = await getTenantStorageCredentials(
       serviceClient,
-      profile.tenant_id
+      tenantId
     );
 
     if (!storageCreds) {
@@ -59,7 +66,7 @@ export async function GET(request: NextRequest) {
       if (adapter.currentAccessToken !== storageCreds.accessToken) {
         await persistRefreshedToken(
           serviceClient,
-          profile.tenant_id,
+          tenantId,
           adapter.currentAccessToken,
           storageCreds.connectionId
         );

@@ -6,6 +6,10 @@ import { exchangeCodeForTokens } from "@/lib/dropbox";
  * GET /api/dropbox/callback
  * Handles the OAuth callback from Dropbox. Exchanges the authorization code
  * for tokens and saves them to the tenant record.
+ *
+ * Supports two contexts:
+ * 1. Normal tenant settings flow → redirect to /admin/settings
+ * 2. Platform wizard flow (state.wizard=true) → redirect to /platform/onboard
  */
 export async function GET(request: NextRequest) {
   try {
@@ -14,36 +18,42 @@ export async function GET(request: NextRequest) {
     const stateParam = searchParams.get("state");
     const error = searchParams.get("error");
 
+    // Decode state first to determine redirect target
+    let tenantId: string | null = null;
+    let isWizard = false;
+    let returnStep = "2";
+
+    if (stateParam) {
+      try {
+        const stateData = JSON.parse(
+          Buffer.from(stateParam, "base64url").toString()
+        );
+        tenantId = stateData.tenant_id || null;
+        isWizard = !!stateData.wizard;
+        returnStep = stateData.return_step || "2";
+      } catch {
+        // Invalid state — fall through to error
+      }
+    }
+
+    // Build redirect URLs based on context
+    function getRedirectUrl(status: "connected" | "denied" | "error") {
+      if (isWizard && tenantId) {
+        return new URL(
+          `/platform/onboard?tenant_id=${tenantId}&step=${returnStep}&dropbox=${status}`,
+          request.url
+        );
+      }
+      return new URL(`/admin/settings?dropbox=${status}`, request.url);
+    }
+
     // User denied access
     if (error) {
-      return NextResponse.redirect(
-        new URL("/admin/settings?dropbox=denied", request.url)
-      );
+      return NextResponse.redirect(getRedirectUrl("denied"));
     }
 
-    if (!code || !stateParam) {
-      return NextResponse.redirect(
-        new URL("/admin/settings?dropbox=error", request.url)
-      );
-    }
-
-    // Decode state to get tenant_id
-    let tenantId: string;
-    try {
-      const stateData = JSON.parse(
-        Buffer.from(stateParam, "base64url").toString()
-      );
-      tenantId = stateData.tenant_id;
-    } catch {
-      return NextResponse.redirect(
-        new URL("/admin/settings?dropbox=error", request.url)
-      );
-    }
-
-    if (!tenantId) {
-      return NextResponse.redirect(
-        new URL("/admin/settings?dropbox=error", request.url)
-      );
+    if (!code || !stateParam || !tenantId) {
+      return NextResponse.redirect(getRedirectUrl("error"));
     }
 
     // Exchange the code for tokens — redirect_uri must match what /auth sent
@@ -64,14 +74,10 @@ export async function GET(request: NextRequest) {
 
     if (updateError) {
       console.error("Failed to save Dropbox tokens:", updateError);
-      return NextResponse.redirect(
-        new URL("/admin/settings?dropbox=error", request.url)
-      );
+      return NextResponse.redirect(getRedirectUrl("error"));
     }
 
-    return NextResponse.redirect(
-      new URL("/admin/settings?dropbox=connected", request.url)
-    );
+    return NextResponse.redirect(getRedirectUrl("connected"));
   } catch (error) {
     console.error("Dropbox callback error:", error);
     return NextResponse.redirect(
