@@ -35,7 +35,7 @@ export type PaymentStatus =
   | "bill_to_closing";
 
 // User roles
-export type UserRole = "platform_admin" | "tenant_admin" | "tenant_staff";
+export type UserRole = "platform_admin" | "tenant_admin" | "tenant_staff" | "agent";
 
 // Project types for associations
 export type ProjectType = "condo" | "townhome" | "pud" | "co-op";
