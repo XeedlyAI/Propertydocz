@@ -16,6 +16,7 @@ import {
   XCircle,
   DollarSign,
   FileText,
+  Wand2,
 } from "lucide-react";
 import Link from "next/link";
 import type { DocumentType, RequestStatus } from "@/lib/types";
@@ -277,28 +278,43 @@ export default async function TenantDetailPage({
                     Connected
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <XCircle className="size-3.5" />
-                    Not connected
-                  </span>
+                  <Link
+                    href={`/platform/onboard?tenant_id=${tenant.id}&step=1`}
+                    className="text-xs font-medium text-[#38b6ff] hover:underline"
+                  >
+                    Connect Stripe →
+                  </Link>
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm">Dropbox</span>
+                <span className="text-sm">Document Storage</span>
                 {hasDropbox ? (
                   <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
                     <CheckCircle2 className="size-3.5" />
                     Connected
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <XCircle className="size-3.5" />
-                    Not connected
-                  </span>
+                  <Link
+                    href={`/platform/onboard?tenant_id=${tenant.id}&step=2`}
+                    className="text-xs font-medium text-[#38b6ff] hover:underline"
+                  >
+                    Connect Storage →
+                  </Link>
                 )}
               </div>
             </CardContent>
           </Card>
+
+          {/* Continue Onboarding */}
+          {(!hasStripe || !hasDropbox || (associations || []).length === 0 || (admins || []).length === 0) && (
+            <Link
+              href={`/platform/onboard?tenant_id=${tenant.id}`}
+              className="flex items-center gap-2 rounded-lg border border-[#38b6ff]/30 bg-[#38b6ff]/5 px-4 py-3 text-sm font-medium text-[#38b6ff] hover:bg-[#38b6ff]/10 transition-colors"
+            >
+              <Wand2 className="size-4" />
+              Continue Onboarding Wizard
+            </Link>
+          )}
         </div>
       </div>
 
