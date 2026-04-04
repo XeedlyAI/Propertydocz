@@ -23,17 +23,33 @@ export function LoginForm() {
 
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data: authData, error: authError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
       if (authError) {
         setError(authError.message);
         return;
       }
 
-      router.push("/admin/dashboard");
+      // Route based on user role
+      if (authData.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", authData.user.id)
+          .single();
+
+        if (profile?.role === "agent") {
+          router.push("/agent/dashboard");
+        } else {
+          router.push("/admin/dashboard");
+        }
+      } else {
+        router.push("/admin/dashboard");
+      }
       router.refresh();
     } catch {
       setError("An unexpected error occurred");
