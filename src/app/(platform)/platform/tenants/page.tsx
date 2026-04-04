@@ -7,8 +7,35 @@ import {
   Plus,
   CheckCircle2,
   XCircle,
+  Wand2,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+
+/** Calculate onboarding checklist for a tenant */
+function getOnboardingStatus(tenant: {
+  id: string;
+  stripe_account_id: string | null;
+  dropbox_access_token: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
+  adminCount: number;
+  associationCount: number;
+}) {
+  const checks = {
+    hasAdmin: tenant.adminCount > 0,
+    hasStripe: !!tenant.stripe_account_id,
+    hasStorage: !!tenant.dropbox_access_token,
+    hasAssociations: tenant.associationCount > 0,
+    hasBranding: !!(tenant.logo_url || tenant.primary_color),
+  };
+
+  const completed = Object.values(checks).filter(Boolean).length;
+  const total = Object.keys(checks).length;
+  const isComplete = completed === total;
+
+  return { checks, completed, total, isComplete };
+}
 
 export default async function PlatformTenantsPage() {
   await getPlatformUser();
@@ -24,6 +51,17 @@ export default async function PlatformTenantsPage() {
   const { data: requests } = await serviceClient
     .from("document_requests")
     .select("tenant_id, total_price_cents, payment_status");
+
+  // Admin counts per tenant
+  const { data: profiles } = await serviceClient
+    .from("profiles")
+    .select("tenant_id")
+    .in("role", ["tenant_admin", "tenant_staff"]);
+
+  // Association counts per tenant
+  const { data: associations } = await serviceClient
+    .from("associations")
+    .select("tenant_id");
 
   const tenantStats = new Map<
     string,
@@ -41,6 +79,18 @@ export default async function PlatformTenantsPage() {
     tenantStats.set(req.tenant_id, existing);
   }
 
+  const adminCounts = new Map<string, number>();
+  for (const p of profiles || []) {
+    if (p.tenant_id) {
+      adminCounts.set(p.tenant_id, (adminCounts.get(p.tenant_id) || 0) + 1);
+    }
+  }
+
+  const assocCounts = new Map<string, number>();
+  for (const a of associations || []) {
+    assocCounts.set(a.tenant_id, (assocCounts.get(a.tenant_id) || 0) + 1);
+  }
+
   const allTenants = tenants || [];
 
   return (
@@ -52,13 +102,22 @@ export default async function PlatformTenantsPage() {
             Manage HOA management companies on the platform
           </p>
         </div>
-        <Link
-          href="/platform/tenants/new"
-          className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium bg-[#38b6ff] hover:bg-[#1DA8F0] active:bg-[#0A8FD4] text-white transition-colors"
-        >
-          <Plus className="size-4" />
-          Add Tenant
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/platform/onboard"
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium border border-[#38b6ff] text-[#38b6ff] hover:bg-[#38b6ff]/10 transition-colors"
+          >
+            <Wand2 className="size-4" />
+            Onboard Wizard
+          </Link>
+          <Link
+            href="/platform/tenants/new"
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium bg-[#38b6ff] hover:bg-[#1DA8F0] active:bg-[#0A8FD4] text-white transition-colors"
+          >
+            <Plus className="size-4" />
+            Add Tenant
+          </Link>
+        </div>
       </div>
 
       <Card>
@@ -84,6 +143,9 @@ export default async function PlatformTenantsPage() {
                     <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Subdomain
                     </th>
+                    <th className="pb-3 pr-4 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Onboarding
+                    </th>
                     <th className="pb-3 pr-4 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Requests
                     </th>
@@ -97,7 +159,7 @@ export default async function PlatformTenantsPage() {
                       Stripe
                     </th>
                     <th className="pb-3 pr-4 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Dropbox
+                      Storage
                     </th>
                     <th className="pb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Created
@@ -112,6 +174,12 @@ export default async function PlatformTenantsPage() {
                     };
                     const hasStripe = !!t.stripe_account_id;
                     const hasDropbox = !!t.dropbox_access_token;
+                    const onboarding = getOnboardingStatus({
+                      ...t,
+                      adminCount: adminCounts.get(t.id) || 0,
+                      associationCount: assocCounts.get(t.id) || 0,
+                    });
+
                     return (
                       <tr
                         key={t.id}
@@ -134,6 +202,23 @@ export default async function PlatformTenantsPage() {
                           <span className="font-data text-xs text-muted-foreground">
                             {t.slug}.propertydocz.com
                           </span>
+                        </td>
+                        <td className="py-3 pr-4 text-center">
+                          {onboarding.isComplete ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 className="size-3" />
+                              Complete
+                            </span>
+                          ) : (
+                            <Link
+                              href={`/platform/tenants/${t.id}`}
+                              className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors"
+                              title={`${onboarding.completed}/${onboarding.total} steps complete`}
+                            >
+                              <AlertCircle className="size-3" />
+                              {onboarding.completed}/{onboarding.total}
+                            </Link>
+                          )}
                         </td>
                         <td className="py-3 pr-4 text-right font-data">
                           {stats.requestCount}
