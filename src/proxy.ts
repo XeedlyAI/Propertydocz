@@ -35,6 +35,8 @@ export async function proxy(request: NextRequest) {
     pathname === "/how-it-works" ||
     pathname === "/for-management-companies" ||
     pathname === "/for-agents" ||
+    pathname.startsWith("/agent/register") ||
+    pathname.startsWith("/api/auth/register") ||
     pathname.startsWith("/api/checkout") ||
     pathname.startsWith("/api/stripe/webhook")
   ) {
@@ -105,6 +107,15 @@ export async function proxy(request: NextRequest) {
 
   // Platform routes require authentication
   if (pathname.startsWith("/platform")) {
+    if (!user) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // Agent dashboard routes require authentication (registration is public)
+  if (pathname.startsWith("/agent") && !pathname.startsWith("/agent/register")) {
     if (!user) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/login";
