@@ -51,11 +51,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
     }
 
+    // If account already exists, check if onboarding is complete.
+    // If complete, block re-onboarding. If incomplete, generate a new link.
     if (tenant.stripe_account_id) {
-      return NextResponse.json(
-        { error: "Stripe already connected" },
-        { status: 400 }
-      );
+      try {
+        const stripe = (await import("@/lib/stripe")).getStripe();
+        const account = await stripe.accounts.retrieve(tenant.stripe_account_id);
+
+        if (account.details_submitted) {
+          return NextResponse.json(
+            { error: "Stripe account already connected and verified" },
+            { status: 400 }
+          );
+        }
+
+        // Incomplete onboarding — generate a new account link
+        const proto = request.headers.get("x-forwarded-proto") || "https";
+        const host = request.headers.get("host") || "localhost:3000";
+        const baseUrl = `${proto}://${host}`;
+
+        const link = await stripe.accountLinks.create({
+          account: tenant.stripe_account_id,
+          return_url: `${baseUrl}/api/stripe/connect/callback?tenant_id=${tenantId}`,
+          refresh_url: `${baseUrl}/admin/settings?stripe_refresh=true`,
+          type: "account_onboarding",
+        });
+
+        return NextResponse.json({ url: link.url });
+      } catch (err) {
+        console.error("Error checking existing Stripe account:", err);
+        // Account may have been deleted on Stripe side — clear it and proceed
+        await serviceClient
+          .from("tenants")
+          .update({ stripe_account_id: null })
+          .eq("id", tenantId);
+      }
     }
 
     const proto = request.headers.get("x-forwarded-proto") || "https";
@@ -63,7 +93,9 @@ export async function POST(request: NextRequest) {
     const baseUrl = `${proto}://${host}`;
 
     const returnUrl = `${baseUrl}/api/stripe/connect/callback?tenant_id=${tenantId}`;
-    const refreshUrl = `${baseUrl}/api/stripe/connect?tenant_id=${tenantId}`;
+    // refreshUrl must be a user-facing page (not an API endpoint) so the user
+    // can restart onboarding if Stripe redirects them back early.
+    const refreshUrl = `${baseUrl}/admin/settings?stripe_refresh=true`;
 
     const { accountId, url } = await createConnectOnboardingLink(
       tenantId,
@@ -79,11 +111,25 @@ export async function POST(request: NextRequest) {
       .eq("id", tenantId);
 
     return NextResponse.json({ url });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Stripe connect error:", error);
-    return NextResponse.json(
-      { error: "Failed to initiate Stripe Connect" },
-      { status: 500 }
-    );
+
+    // Surface the actual Stripe error message for debugging
+    let message = "Failed to initiate Stripe Connect";
+    if (error instanceof Error) {
+      message = error.message;
+    }
+    // Stripe SDK errors have a `type` and `raw` property
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "type" in error &&
+      typeof (error as Record<string, unknown>).type === "string"
+    ) {
+      const stripeErr = error as { type: string; message?: string };
+      message = stripeErr.message || `Stripe error: ${stripeErr.type}`;
+    }
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
