@@ -1,5 +1,6 @@
 import { MarketingLayout } from "@/components/marketing/marketing-layout";
 import { HowItWorksPage } from "@/components/marketing/how-it-works-page";
+import { HowToJsonLd } from "@/components/marketing/json-ld";
 import { buildMetadata } from "@/lib/metadata";
 
 export const metadata = buildMetadata({
@@ -12,6 +13,7 @@ export const metadata = buildMetadata({
 export default function Page() {
   return (
     <MarketingLayout>
+      <HowToJsonLd />
       <HowItWorksPage />
     </MarketingLayout>
   );

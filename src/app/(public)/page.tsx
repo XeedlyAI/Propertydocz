@@ -5,6 +5,10 @@ import { OrderForm } from "@/components/forms/order-form";
 import { FileStack } from "lucide-react";
 import { MarketingLayout } from "@/components/marketing/marketing-layout";
 import { HomePage } from "@/components/marketing/home-page";
+import {
+  OrganizationJsonLd,
+  SoftwareApplicationJsonLd,
+} from "@/components/marketing/json-ld";
 
 export default async function PublicPage() {
   const headersList = await headers();
@@ -15,6 +19,8 @@ export default async function PublicPage() {
   if (!tenantSlug) {
     return (
       <MarketingLayout>
+        <OrganizationJsonLd />
+        <SoftwareApplicationJsonLd />
         <HomePage />
       </MarketingLayout>
     );
