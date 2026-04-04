@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         // Update payment status and advance workflow
         const { data: docRequest } = await serviceClient
           .from("document_requests")
-          .select("id, status, tenant_id, requester_name, requester_email, document_types, total_price_cents, property_address")
+          .select("id, status, tenant_id, association_id, requester_name, requester_email, document_types, total_price_cents, property_address")
           .eq("id", requestId)
           .single();
 
@@ -110,19 +110,12 @@ export async function POST(request: NextRequest) {
             console.error("Failed to send admin notification:", emailErr);
           }
 
-          // Run intelligence pipeline (auto-fill, delta check, gap analysis)
+          // Run intelligence pipeline (auto-fill, sync, gap analysis)
           try {
-            // Fetch association_id for the request
-            const { data: reqForAssoc } = await serviceClient
-              .from("document_requests")
-              .select("association_id")
-              .eq("id", requestId)
-              .single();
-
-            if (reqForAssoc?.association_id) {
+            if (docRequest.association_id) {
               await runRequestIntelligence(
                 requestId,
-                reqForAssoc.association_id,
+                docRequest.association_id,
                 docRequest.tenant_id,
                 docRequest.document_types as string[]
               );
