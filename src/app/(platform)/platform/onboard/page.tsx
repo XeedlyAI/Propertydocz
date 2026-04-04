@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { getPlatformUser } from "@/lib/auth";
 import { OnboardingWizard } from "@/components/platform/onboarding-wizard";
+import { Loader2 } from "lucide-react";
 
 export default async function OnboardPage() {
   const user = await getPlatformUser();
@@ -11,11 +13,19 @@ export default async function OnboardPage() {
           Onboard New Tenant
         </h1>
         <p className="text-sm text-muted-foreground">
-          Set up a new management company in 7 steps
+          Set up a new management company in 8 steps
         </p>
       </div>
 
-      <OnboardingWizard platformUserId={user.id} />
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          </div>
+        }
+      >
+        <OnboardingWizard platformUserId={user.id} />
+      </Suspense>
     </div>
   );
 }

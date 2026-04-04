@@ -25,8 +25,9 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Ensure tenant_id matches user's tenant
-    if (body.tenant_id !== profile.tenant_id) {
+    // Platform admins can create associations for any tenant;
+    // tenant admins can only create for their own tenant.
+    if (profile.role !== "platform_admin" && body.tenant_id !== profile.tenant_id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

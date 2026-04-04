@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { tenant_id, name, address, city, state, zip } = body;
+    const { tenant_id, name, address, city, state, zip, total_units, project_type } = body;
 
     if (!tenant_id || !name?.trim()) {
       return NextResponse.json(
@@ -69,8 +69,11 @@ export async function POST(request: NextRequest) {
         city: city || null,
         state: state || null,
         zip: zip || null,
+        total_units: total_units || null,
+        project_type: project_type || null,
+        onboarding_status: "pending",
       })
-      .select("id, name")
+      .select("id, name, address, city, state, zip, total_units, project_type")
       .single();
 
     if (insertError) {
