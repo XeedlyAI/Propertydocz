@@ -115,32 +115,41 @@ function getFieldDisplayState(
   const isMissing = missingFields.includes(def.field_key);
   const isStale = staleFields.includes(def.field_key);
   const hasValue = liveValue.trim() !== "";
+  const hasAssocValue = assocValue?.value != null && assocValue.value.trim() !== "";
 
-  // If the field has no value and is in missing_fields → needs_input (red)
-  if (!hasValue && isMissing) return "needs_input";
+  // If the field has no value anywhere and is in missing_fields → needs_input (red)
+  if (!hasValue && !hasAssocValue && isMissing) return "needs_input";
 
-  // If the field has no value and is optional → optional_empty (gray)
-  if (!hasValue) return "optional_empty";
+  // If the field has no value anywhere and is optional → optional_empty (gray)
+  if (!hasValue && !hasAssocValue) return "optional_empty";
 
-  // If there's a value but it's stale or confidence is not verified → needs_verification (yellow)
+  // From here, the field has a value (either in form or association)
+
+  // If it's stale → needs_verification (yellow)
   if (isStale) return "needs_verification";
+
+  // If association value exists but confidence is not verified → needs_verification (yellow)
   if (assocValue && assocValue.confidence !== "verified" && def.tier !== "transaction") {
     return "needs_verification";
   }
 
-  // Tier 1 (static) fields with a verified association value → verified (green)
+  // Tier 1 (static) with a verified association value → verified (green)
   if (def.tier === "static" && assocValue?.confidence === "verified") return "verified";
 
-  // Tier 2 (periodic) with recent verification → verified (green)
+  // Tier 1 (static) with a value but no association record → needs_verification
+  // (value exists from form but hasn't been confirmed at association level)
+  if (def.tier === "static" && hasValue && !assocValue) return "needs_verification";
+
+  // Tier 2 (periodic) with recent verified value → verified (green)
   if (def.tier === "periodic" && assocValue?.confidence === "verified" && !isStale) return "verified";
 
-  // Tier 3 (transaction) always needs fresh input unless admin manually entered it
+  // Tier 2 (periodic) with value but not verified → needs_verification (yellow)
+  if (def.tier === "periodic" && hasValue) return "needs_verification";
+
+  // Tier 3 (transaction) always needs fresh input unless admin entered it
   if (def.tier === "transaction") {
     return hasValue ? "needs_verification" : "needs_input";
   }
-
-  // Default: if there's a value but no association-level confirmation
-  if (hasValue && !assocValue) return "needs_verification";
 
   return hasValue ? "verified" : "optional_empty";
 }
@@ -231,11 +240,31 @@ export function LiveDataForm({
     return map;
   }, [gapAnalysis]);
 
-  // Form state — initialize from existingData (live_data on request)
+  // Form state — initialize from existingData (live_data), falling back to
+  // association field values. This ensures fields populated during onboarding
+  // or via Dropbox sync show their real values even if auto-fill hasn't run
+  // on this specific request yet.
   const [formData, setFormData] = useState<Record<string, string>>(() => {
+    // Build a quick lookup for association values
+    const assocMap = new Map<string, string>();
+    for (const v of associationFieldValues) {
+      if (v.value) assocMap.set(v.field_key, v.value);
+    }
+
     const initial: Record<string, string> = {};
     for (const def of fieldDefinitions) {
-      initial[def.field_key] = existingData[def.field_key] ?? "";
+      if (existingData[def.field_key]) {
+        // Priority 1: live_data on the request (admin edits, auto-fill output)
+        initial[def.field_key] = existingData[def.field_key];
+      } else if (def.tier !== "transaction" && assocMap.has(def.field_key)) {
+        // Priority 2: association field values (for static/periodic fields)
+        initial[def.field_key] = assocMap.get(def.field_key)!;
+      } else if (def.field_key === "preparation_date") {
+        // Auto-fill preparation_date with today's date
+        initial[def.field_key] = new Date().toISOString().split("T")[0];
+      } else {
+        initial[def.field_key] = "";
+      }
     }
     return initial;
   });
@@ -676,7 +705,9 @@ function FieldRow({
   const style = STATE_STYLES[field.displayState];
   const Icon = style.icon;
 
-  const inputType = def.value_type === "number" || def.value_type === "currency"
+  const isCurrency = def.value_type === "currency";
+  // Currency fields use text input (so we can show $1,234.56 formatting)
+  const inputType = def.value_type === "number"
     ? "number"
     : def.value_type === "date"
       ? "date"
@@ -684,6 +715,18 @@ function FieldRow({
 
   const isTextarea = def.value_type === "text_array" || (def.help_text?.includes("list") ?? false);
   const showConfirm = field.displayState === "needs_verification" && value.trim() !== "";
+
+  // Format currency for display (but store raw value)
+  const displayValue = isCurrency ? formatCurrencyDisplay(value) : value;
+
+  // Placeholder: use a generic prompt, NOT the field label
+  const placeholder = isCurrency
+    ? "$0.00"
+    : def.value_type === "date"
+      ? "YYYY-MM-DD"
+      : def.value_type === "number"
+        ? "0"
+        : "Enter value...";
 
   return (
     <div className={`rounded-lg border p-3 transition-colors ${style.border} ${style.bg}`}>
@@ -746,9 +789,31 @@ function FieldRow({
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 onChange(def.field_key, e.target.value)
               }
-              placeholder={def.label}
+              placeholder={placeholder}
               rows={2}
               className="text-sm min-h-[60px]"
+            />
+          ) : isCurrency ? (
+            <Input
+              id={def.field_key}
+              type="text"
+              value={displayValue}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                // Strip formatting, keep raw value for storage
+                const raw = e.target.value.replace(/[^0-9.\-]/g, "");
+                onChange(def.field_key, raw);
+              }}
+              onBlur={() => {
+                // Re-format on blur
+                if (value.trim()) {
+                  const formatted = formatCurrencyRaw(value);
+                  if (formatted !== value) {
+                    onChange(def.field_key, formatted);
+                  }
+                }
+              }}
+              placeholder={placeholder}
+              className="text-sm"
             />
           ) : (
             <Input
@@ -758,7 +823,7 @@ function FieldRow({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 onChange(def.field_key, e.target.value)
               }
-              placeholder={def.label}
+              placeholder={placeholder}
               step={inputType === "number" ? "0.01" : undefined}
               className="text-sm"
             />
@@ -803,4 +868,43 @@ function FieldRow({
       </div>
     </div>
   );
+}
+
+// ════════════════════════════════════════
+// Currency formatting helpers
+// ════════════════════════════════════════
+
+/**
+ * Format a value for display in currency fields.
+ * Handles values that are already formatted ($1,234.56) or raw (1234.56).
+ */
+function formatCurrencyDisplay(value: string): string {
+  if (!value || value.trim() === "") return "";
+
+  // If already has $ sign, return as-is (already formatted from DB)
+  if (value.startsWith("$")) return value;
+
+  // Try to parse as number and format
+  const num = parseFloat(value.replace(/[^0-9.\-]/g, ""));
+  if (isNaN(num)) return value;
+
+  return "$" + num.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
+ * Normalize a raw currency input to a clean numeric string.
+ * Used on blur to clean up user input.
+ */
+function formatCurrencyRaw(value: string): string {
+  if (!value || value.trim() === "") return "";
+
+  // Strip everything except digits, dots, minus
+  const cleaned = value.replace(/[^0-9.\-]/g, "");
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return value;
+
+  return num.toFixed(2);
 }

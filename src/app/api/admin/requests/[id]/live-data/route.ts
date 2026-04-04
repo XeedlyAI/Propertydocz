@@ -41,9 +41,12 @@ export async function POST(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    if (docRequest.status !== "awaiting_data") {
+    if (
+      docRequest.status !== "awaiting_data" &&
+      docRequest.status !== "ready_for_generation"
+    ) {
       return NextResponse.json(
-        { error: "Request is not in awaiting_data status" },
+        { error: "Request is not in a data-entry status" },
         { status: 400 }
       );
     }
