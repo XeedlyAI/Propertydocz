@@ -92,10 +92,17 @@ export async function POST(request: NextRequest) {
     const host = request.headers.get("host") || "localhost:3000";
     const baseUrl = `${proto}://${host}`;
 
-    const returnUrl = `${baseUrl}/api/stripe/connect/callback?tenant_id=${tenantId}`;
+    // Support wizard context — pass wizard params through to callback
+    const isWizard = body.wizard === true;
+    const wizardParams = isWizard
+      ? `&wizard=true&return_step=${body.return_step || "1"}`
+      : "";
+    const returnUrl = `${baseUrl}/api/stripe/connect/callback?tenant_id=${tenantId}${wizardParams}`;
     // refreshUrl must be a user-facing page (not an API endpoint) so the user
     // can restart onboarding if Stripe redirects them back early.
-    const refreshUrl = `${baseUrl}/admin/settings?stripe_refresh=true`;
+    const refreshUrl = isWizard
+      ? `${baseUrl}/platform/onboard?tenant_id=${tenantId}&step=1&stripe_refresh=true`
+      : `${baseUrl}/admin/settings?stripe_refresh=true`;
 
     const { accountId, url } = await createConnectOnboardingLink(
       tenantId,
