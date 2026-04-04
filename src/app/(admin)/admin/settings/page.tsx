@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Settings } from "lucide-react";
-import { DropboxStatus } from "@/components/admin/dropbox-status";
+import { StorageStatus } from "@/components/admin/storage-status";
 import { SignatureUpload } from "@/components/admin/signature-upload";
 import { StripeConnectStatus } from "@/components/admin/stripe-connect-status";
 import { TenantLogoUpload } from "@/components/admin/tenant-logo-upload";
@@ -110,10 +110,11 @@ export default async function SettingsPage({
         currentFontStyle={tenant?.signature_font_style || null}
       />
 
-      {/* Dropbox Integration */}
-      <DropboxStatus
-        isConnected={isDropboxConnected}
-        status={dropboxStatus}
+      {/* Document Storage */}
+      <StorageStatus
+        connectedProvider={isDropboxConnected ? "dropbox" : null}
+        isDropboxConnected={isDropboxConnected}
+        dropboxStatus={dropboxStatus}
       />
 
       {/* Stripe Connect */}
