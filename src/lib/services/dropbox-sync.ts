@@ -15,11 +15,12 @@
 
 import { createServiceClient } from "@/lib/supabase/server";
 import {
-  getValidAccessToken,
-  listFolder,
-  downloadFile,
-  type DropboxEntry,
-} from "@/lib/dropbox";
+  getTenantStorageCredentials,
+  getStorageAdapter,
+  persistRefreshedToken,
+  DropboxAdapter,
+} from "./storage-providers";
+import type { StorageFile } from "./storage-providers";
 import { categorizeDocuments } from "./document-categorizer";
 import {
   extractFromDocument,
@@ -115,32 +116,40 @@ export async function syncAssociationDocuments(
       return result; // No folder mapped — nothing to sync
     }
 
-    // ── 2. Get tenant's Dropbox credentials ────
-    const { data: tenant } = await supabase
-      .from("tenants")
-      .select("dropbox_access_token, dropbox_refresh_token")
-      .eq("id", tenantId)
-      .single();
+    // ── 2. Get tenant's storage credentials ────
+    const storageCreds = await getTenantStorageCredentials(supabase, tenantId);
 
-    if (!tenant?.dropbox_access_token || !tenant?.dropbox_refresh_token) {
+    if (!storageCreds) {
       result.sync_completed_at = new Date().toISOString();
-      return result; // Dropbox not connected
+      return result; // No storage connected
     }
 
-    // ── 3. Get valid access token ──────────────
-    const accessToken = await getValidAccessToken(
-      supabase,
-      tenantId,
-      tenant.dropbox_access_token,
-      tenant.dropbox_refresh_token
+    // ── 3. Get storage adapter with valid credentials ─
+    const adapter = getStorageAdapter(
+      storageCreds.provider,
+      storageCreds.accessToken,
+      storageCreds.refreshToken
     );
 
-    // ── 4. List all files in Dropbox folder ────
-    const entries = await listFolder(accessToken, association.dropbox_folder_path);
-    const dropboxFiles = entries.filter(
-      (e: DropboxEntry) =>
-        e[".tag"] === "file" &&
-        SUPPORTED_EXTENSIONS.some((ext) => e.name.toLowerCase().endsWith(ext))
+    // For Dropbox, validate and persist refreshed token
+    if (adapter instanceof DropboxAdapter) {
+      await adapter.getValidToken();
+      if (adapter.currentAccessToken !== storageCreds.accessToken) {
+        await persistRefreshedToken(
+          supabase,
+          tenantId,
+          adapter.currentAccessToken,
+          storageCreds.connectionId
+        );
+      }
+    }
+
+    // ── 4. List all files in storage folder ────
+    const allFiles = await adapter.listFiles(association.dropbox_folder_path);
+    const dropboxFiles = allFiles.filter(
+      (f: StorageFile) =>
+        !f.is_folder &&
+        SUPPORTED_EXTENSIONS.some((ext) => f.name.toLowerCase().endsWith(ext))
     );
 
     result.files_total = dropboxFiles.length;
@@ -161,32 +170,29 @@ export async function syncAssociationDocuments(
     }
 
     // ── 6. Classify files ──────────────────────
-    const newFiles: DropboxEntry[] = [];
-    const modifiedFiles: DropboxEntry[] = [];
-    const unchangedFiles: DropboxEntry[] = [];
+    const newFiles: StorageFile[] = [];
+    const modifiedFiles: StorageFile[] = [];
+    const unchangedFiles: StorageFile[] = [];
 
-    const dropboxFileIds = new Set<string>();
+    const storageFileIds = new Set<string>();
 
     for (const file of dropboxFiles) {
-      dropboxFileIds.add(file.id);
+      storageFileIds.add(file.id);
       const existing = syncMap.get(file.id);
 
       if (!existing || existing.deleted_at) {
-        // File not in sync log, or was previously deleted and is back
         newFiles.push(file);
       } else if (force) {
-        // Force full sync — treat everything as modified
         modifiedFiles.push(file);
       } else if (
-        file.server_modified &&
-        existing.file_modified_at !== file.server_modified
+        file.modified_at &&
+        existing.file_modified_at !== file.modified_at
       ) {
-        // File was modified in Dropbox since last sync
         modifiedFiles.push(file);
       } else if (
-        file.server_modified &&
+        file.modified_at &&
         existing.file_hash &&
-        existing.file_hash !== file.server_modified
+        existing.file_hash !== file.modified_at
       ) {
         // Legacy comparison (file_hash stored server_modified in Phase C)
         modifiedFiles.push(file);
@@ -201,7 +207,7 @@ export async function syncAssociationDocuments(
 
     // ── 7. Detect deleted files ────────────────
     for (const [fileId, logEntry] of syncMap.entries()) {
-      if (!dropboxFileIds.has(fileId) && !logEntry.deleted_at) {
+      if (!storageFileIds.has(fileId) && !logEntry.deleted_at) {
         // File was in sync log but no longer in Dropbox
         result.files_deleted++;
         try {
@@ -243,7 +249,6 @@ export async function syncAssociationDocuments(
     }
 
     // ── 10. Process each changed file ──────────
-    const isNew = new Set(newFiles.map((f) => f.id));
 
     for (const file of filesToProcess) {
       const category = categoryMap.get(file.name) ?? "other";
@@ -256,8 +261,8 @@ export async function syncAssociationDocuments(
       }
 
       try {
-        // Download from Dropbox
-        const { buffer, name } = await downloadFile(accessToken, file.path_lower);
+        // Download from storage provider
+        const { buffer, name } = await adapter.downloadFile(file.path);
 
         // Extract text
         const { text, requiresOCR } = await getDocumentText(buffer, name);
@@ -355,13 +360,13 @@ export async function syncAssociationDocuments(
 
 /**
  * Upsert a sync log entry for a processed file.
- * Uses file_modified_at (Dropbox's timestamp) for proper change detection.
+ * Accepts the generic StorageFile type.
  */
 async function upsertSyncLog(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   associationId: string,
-  file: DropboxEntry,
+  file: StorageFile,
   category: string,
   status: "completed" | "failed",
   extractedFields: Record<string, string> | null
@@ -371,11 +376,11 @@ async function upsertSyncLog(
       {
         association_id: associationId,
         dropbox_file_id: file.id,
-        dropbox_path: file.path_lower,
+        dropbox_path: file.path,
         file_name: file.name,
         category,
-        file_hash: file.server_modified || null,
-        file_modified_at: file.server_modified || null,
+        file_hash: file.modified_at || null,
+        file_modified_at: file.modified_at || null,
         last_synced_at: new Date().toISOString(),
         extraction_status: status,
         extracted_fields: extractedFields,

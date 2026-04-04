@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { detectDocCategory } from "@/lib/dropbox";
 import {
-  getValidAccessToken,
-  listFolder,
-  downloadFile,
-  detectDocCategory,
-} from "@/lib/dropbox";
+  getTenantStorageCredentials,
+  getStorageAdapter,
+  persistRefreshedToken,
+  DropboxAdapter,
+} from "@/lib/services/storage-providers";
 
 const SUPPORTED_EXTENSIONS = [".pdf", ".doc", ".docx", ".txt", ".rtf"];
 
@@ -64,33 +65,44 @@ export async function POST(
       );
     }
 
-    // Get tenant's Dropbox tokens
-    const { data: tenant } = await serviceClient
-      .from("tenants")
-      .select("dropbox_access_token, dropbox_refresh_token")
-      .eq("id", profile.tenant_id)
-      .single();
+    // Get tenant's storage credentials via abstraction
+    const storageCreds = await getTenantStorageCredentials(
+      serviceClient,
+      profile.tenant_id
+    );
 
-    if (!tenant?.dropbox_access_token || !tenant?.dropbox_refresh_token) {
+    if (!storageCreds) {
       return NextResponse.json(
-        { error: "Dropbox not connected" },
+        { error: "No storage provider connected" },
         { status: 400 }
       );
     }
 
-    const accessToken = await getValidAccessToken(
-      serviceClient,
-      profile.tenant_id,
-      tenant.dropbox_access_token,
-      tenant.dropbox_refresh_token
+    const adapter = getStorageAdapter(
+      storageCreds.provider,
+      storageCreds.accessToken,
+      storageCreds.refreshToken
     );
 
+    // Validate and persist refreshed token for Dropbox
+    if (adapter instanceof DropboxAdapter) {
+      await adapter.getValidToken();
+      if (adapter.currentAccessToken !== storageCreds.accessToken) {
+        await persistRefreshedToken(
+          serviceClient,
+          profile.tenant_id,
+          adapter.currentAccessToken,
+          storageCreds.connectionId
+        );
+      }
+    }
+
     // List all files in the mapped folder
-    const entries = await listFolder(accessToken, association.dropbox_folder_path);
-    const files = entries.filter(
-      (e) =>
-        e[".tag"] === "file" &&
-        SUPPORTED_EXTENSIONS.some((ext) => e.name.toLowerCase().endsWith(ext))
+    const allFiles = await adapter.listFiles(association.dropbox_folder_path);
+    const files = allFiles.filter(
+      (f) =>
+        !f.is_folder &&
+        SUPPORTED_EXTENSIONS.some((ext) => f.name.toLowerCase().endsWith(ext))
     );
 
     if (files.length === 0) {
@@ -117,8 +129,8 @@ export async function POST(
 
     for (const file of files) {
       try {
-        // Download file from Dropbox
-        const { buffer, name } = await downloadFile(accessToken, file.path_lower);
+        // Download file from storage
+        const { buffer, name } = await adapter.downloadFile(file.path);
 
         // Upload to Supabase Storage
         const storagePath = `governing-docs/${profile.tenant_id}/${associationId}/${name}`;
@@ -143,7 +155,7 @@ export async function POST(
         const category = detectDocCategory(name);
 
         // Check if this file already exists
-        const existing = existingByPath.get(file.path_lower);
+        const existing = existingByPath.get(file.path);
 
         if (existing) {
           // Update existing record
@@ -165,8 +177,8 @@ export async function POST(
             document_category: category,
             file_url: publicUrl,
             file_name: name,
-            source: "dropbox",
-            dropbox_path: file.path_lower,
+            source: storageCreds.provider,
+            dropbox_path: file.path,
             last_synced_at: new Date().toISOString(),
           });
         }

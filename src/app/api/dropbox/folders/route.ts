@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { createServiceClient } from "@/lib/supabase/server";
-import { listFolder, getValidAccessToken } from "@/lib/dropbox";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import {
+  getTenantStorageCredentials,
+  getStorageAdapter,
+  persistRefreshedToken,
+  DropboxAdapter,
+} from "@/lib/services/storage-providers";
 
 /**
  * GET /api/dropbox/folders?path=/some/folder
- * Lists folder contents in the tenant's connected Dropbox account.
+ * Lists folder contents in the tenant's connected storage account.
  * Used by the folder browser component.
  */
 export async function GET(request: NextRequest) {
@@ -29,38 +33,59 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get tenant's Dropbox tokens
+    // Get tenant's storage credentials via the abstraction
     const serviceClient = await createServiceClient();
-    const { data: tenant } = await serviceClient
-      .from("tenants")
-      .select("dropbox_access_token, dropbox_refresh_token")
-      .eq("id", profile.tenant_id)
-      .single();
+    const storageCreds = await getTenantStorageCredentials(
+      serviceClient,
+      profile.tenant_id
+    );
 
-    if (!tenant?.dropbox_access_token || !tenant?.dropbox_refresh_token) {
+    if (!storageCreds) {
       return NextResponse.json(
-        { error: "Dropbox not connected" },
+        { error: "No storage provider connected" },
         { status: 400 }
       );
     }
 
-    // Get a valid access token (refreshes if expired)
-    const accessToken = await getValidAccessToken(
-      serviceClient,
-      profile.tenant_id,
-      tenant.dropbox_access_token,
-      tenant.dropbox_refresh_token
+    const adapter = getStorageAdapter(
+      storageCreds.provider,
+      storageCreds.accessToken,
+      storageCreds.refreshToken
     );
+
+    // Validate and persist refreshed token for Dropbox
+    if (adapter instanceof DropboxAdapter) {
+      await adapter.getValidToken();
+      if (adapter.currentAccessToken !== storageCreds.accessToken) {
+        await persistRefreshedToken(
+          serviceClient,
+          profile.tenant_id,
+          adapter.currentAccessToken,
+          storageCreds.connectionId
+        );
+      }
+    }
 
     // List folder contents
     const path = request.nextUrl.searchParams.get("path") || "/";
-    const entries = await listFolder(accessToken, path);
+    const files = await adapter.listFiles(path);
+
+    // Return in a format compatible with the existing folder browser component
+    const entries = files.map((f) => ({
+      ".tag": f.is_folder ? "folder" : "file",
+      name: f.name,
+      path_lower: f.path,
+      path_display: f.path,
+      id: f.id,
+      size: f.size,
+      server_modified: f.modified_at,
+    }));
 
     return NextResponse.json({ entries });
   } catch (error) {
-    console.error("Dropbox folders error:", error);
+    console.error("Storage folders error:", error);
     return NextResponse.json(
-      { error: "Failed to list Dropbox folders" },
+      { error: "Failed to list folders" },
       { status: 500 }
     );
   }

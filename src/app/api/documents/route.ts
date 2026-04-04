@@ -3,12 +3,13 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { generatePdf, uploadPdfToStorage } from "@/lib/documents/generate";
 import { validateDocumentData } from "@/lib/documents/validate";
+import { detectDocCategory } from "@/lib/dropbox";
 import {
-  getValidAccessToken,
-  listFolder,
-  downloadFile,
-  detectDocCategory,
-} from "@/lib/dropbox";
+  getTenantStorageCredentials,
+  getStorageAdapter,
+  persistRefreshedToken,
+  DropboxAdapter,
+} from "@/lib/services/storage-providers";
 import type { DocumentType } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
@@ -428,12 +429,12 @@ function formatCentsToDisplay(cents: number | null | undefined): string {
 const SUPPORTED_EXTENSIONS = [".pdf", ".doc", ".docx", ".txt", ".rtf"];
 
 /**
- * Auto-sync governing documents from Dropbox before generation.
- * Downloads new/updated files from the association's mapped Dropbox folder.
+ * Auto-sync governing documents from storage before generation.
+ * Downloads new/updated files from the association's mapped folder.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function syncDropboxDocs(serviceClient: any, tenantId: string, associationId: string) {
-  // Get association's Dropbox folder path
+  // Get association's folder path
   const { data: assoc } = await serviceClient
     .from("associations")
     .select("dropbox_folder_path")
@@ -442,27 +443,34 @@ async function syncDropboxDocs(serviceClient: any, tenantId: string, association
 
   if (!assoc?.dropbox_folder_path) return;
 
-  // Get tenant's Dropbox tokens
-  const { data: tenant } = await serviceClient
-    .from("tenants")
-    .select("dropbox_access_token, dropbox_refresh_token")
-    .eq("id", tenantId)
-    .single();
+  // Get storage credentials via abstraction
+  const storageCreds = await getTenantStorageCredentials(serviceClient, tenantId);
+  if (!storageCreds) return;
 
-  if (!tenant?.dropbox_access_token || !tenant?.dropbox_refresh_token) return;
-
-  const accessToken = await getValidAccessToken(
-    serviceClient,
-    tenantId,
-    tenant.dropbox_access_token,
-    tenant.dropbox_refresh_token
+  const adapter = getStorageAdapter(
+    storageCreds.provider,
+    storageCreds.accessToken,
+    storageCreds.refreshToken
   );
 
-  const entries = await listFolder(accessToken, assoc.dropbox_folder_path);
-  const files = entries.filter(
-    (e) =>
-      e[".tag"] === "file" &&
-      SUPPORTED_EXTENSIONS.some((ext) => e.name.toLowerCase().endsWith(ext))
+  // Validate and persist refreshed token
+  if (adapter instanceof DropboxAdapter) {
+    await adapter.getValidToken();
+    if (adapter.currentAccessToken !== storageCreds.accessToken) {
+      await persistRefreshedToken(
+        serviceClient,
+        tenantId,
+        adapter.currentAccessToken,
+        storageCreds.connectionId
+      );
+    }
+  }
+
+  const allFiles = await adapter.listFiles(assoc.dropbox_folder_path);
+  const files = allFiles.filter(
+    (f) =>
+      !f.is_folder &&
+      SUPPORTED_EXTENSIONS.some((ext) => f.name.toLowerCase().endsWith(ext))
   );
 
   // Get existing docs
@@ -474,9 +482,9 @@ async function syncDropboxDocs(serviceClient: any, tenantId: string, association
   const existingPaths = new Set((existingDocs || []).map((d: { dropbox_path: string }) => d.dropbox_path));
 
   for (const file of files) {
-    if (existingPaths.has(file.path_lower)) continue; // Already synced
+    if (existingPaths.has(file.path)) continue; // Already synced
 
-    const { buffer, name } = await downloadFile(accessToken, file.path_lower);
+    const { buffer, name } = await adapter.downloadFile(file.path);
     const storagePath = `governing-docs/${tenantId}/${associationId}/${name}`;
 
     await serviceClient.storage.from("documents").upload(storagePath, buffer, {
@@ -495,8 +503,8 @@ async function syncDropboxDocs(serviceClient: any, tenantId: string, association
       document_category: detectDocCategory(name),
       file_url: publicUrl,
       file_name: name,
-      source: "dropbox",
-      dropbox_path: file.path_lower,
+      source: storageCreds.provider,
+      dropbox_path: file.path,
       last_synced_at: new Date().toISOString(),
     });
   }

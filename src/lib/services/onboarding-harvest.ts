@@ -11,11 +11,12 @@
 
 import { createServiceClient } from "@/lib/supabase/server";
 import {
-  getValidAccessToken,
-  listFolder,
-  downloadFile,
-  type DropboxEntry,
-} from "@/lib/dropbox";
+  getTenantStorageCredentials,
+  getStorageAdapter,
+  persistRefreshedToken,
+  DropboxAdapter,
+} from "./storage-providers";
+import type { StorageFile } from "./storage-providers";
 import {
   categorizeDocuments,
   type CategorizationResult,
@@ -26,7 +27,7 @@ import {
   type ExtractionResult,
 } from "./document-extractor";
 import { upsertFieldValue } from "./association-data";
-import { getFieldsByTier, getAllFields } from "./field-registry";
+import { getAllFields } from "./field-registry";
 
 /** Supported file extensions for harvest */
 const SUPPORTED_EXTENSIONS = [".pdf", ".doc", ".docx", ".txt", ".rtf"];
@@ -94,18 +95,14 @@ export async function harvestAssociationData(
       .update({ onboarding_status: "harvesting" })
       .eq("id", associationId);
 
-    // 2. Get tenant's Dropbox credentials
-    const { data: tenant } = await supabase
-      .from("tenants")
-      .select("dropbox_access_token, dropbox_refresh_token")
-      .eq("id", tenantId)
-      .single();
+    // 2. Get tenant's storage credentials
+    const storageCreds = await getTenantStorageCredentials(supabase, tenantId);
 
-    if (!tenant?.dropbox_access_token || !tenant?.dropbox_refresh_token) {
-      throw new Error("Dropbox not connected for this tenant");
+    if (!storageCreds) {
+      throw new Error("No storage provider connected for this tenant");
     }
 
-    // 3. Get association's Dropbox folder path and name
+    // 3. Get association's folder path and name
     const { data: association } = await supabase
       .from("associations")
       .select("name, dropbox_folder_path")
@@ -113,23 +110,35 @@ export async function harvestAssociationData(
       .single();
 
     if (!association?.dropbox_folder_path) {
-      throw new Error("No Dropbox folder mapped for this association");
+      throw new Error("No storage folder mapped for this association");
     }
 
-    // 4. Get a valid access token
-    const accessToken = await getValidAccessToken(
-      supabase,
-      tenantId,
-      tenant.dropbox_access_token,
-      tenant.dropbox_refresh_token
+    // 4. Get storage adapter with valid credentials
+    const adapter = getStorageAdapter(
+      storageCreds.provider,
+      storageCreds.accessToken,
+      storageCreds.refreshToken
     );
 
+    // For Dropbox, validate and persist refreshed token
+    if (adapter instanceof DropboxAdapter) {
+      await adapter.getValidToken();
+      if (adapter.currentAccessToken !== storageCreds.accessToken) {
+        await persistRefreshedToken(
+          supabase,
+          tenantId,
+          adapter.currentAccessToken,
+          storageCreds.connectionId
+        );
+      }
+    }
+
     // 5. List all files in the folder
-    const entries = await listFolder(accessToken, association.dropbox_folder_path);
-    const files = entries.filter(
-      (e: DropboxEntry) =>
-        e[".tag"] === "file" &&
-        SUPPORTED_EXTENSIONS.some((ext) => e.name.toLowerCase().endsWith(ext))
+    const allFiles = await adapter.listFiles(association.dropbox_folder_path);
+    const files = allFiles.filter(
+      (f: StorageFile) =>
+        !f.is_folder &&
+        SUPPORTED_EXTENSIONS.some((ext) => f.name.toLowerCase().endsWith(ext))
     );
 
     report.documents_found = files.length;
@@ -143,7 +152,7 @@ export async function harvestAssociationData(
     }
 
     // 6. Categorize files
-    const filenames = files.map((f: DropboxEntry) => f.name);
+    const filenames = files.map((f: StorageFile) => f.name);
     const categorization = await categorizeDocuments(filenames);
     report.categorization = categorization;
 
@@ -174,8 +183,8 @@ export async function harvestAssociationData(
       }
 
       try {
-        // Download file from Dropbox
-        const { buffer, name } = await downloadFile(accessToken, file.path_lower);
+        // Download file from storage provider
+        const { buffer, name } = await adapter.downloadFile(file.path);
 
         // Extract text
         const { text, requiresOCR } = await getDocumentText(buffer, name);
@@ -288,7 +297,7 @@ async function logDocumentSync(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   associationId: string,
-  file: DropboxEntry,
+  file: StorageFile,
   category: string,
   status: "completed" | "failed",
   extraction: ExtractionResult | null
@@ -298,10 +307,10 @@ async function logDocumentSync(
       {
         association_id: associationId,
         dropbox_file_id: file.id,
-        dropbox_path: file.path_lower,
+        dropbox_path: file.path,
         file_name: file.name,
         category,
-        file_hash: file.server_modified || null,
+        file_hash: file.modified_at || null,
         last_synced_at: new Date().toISOString(),
         extraction_status: status,
         extracted_fields: extraction?.extracted || null,
