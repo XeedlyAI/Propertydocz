@@ -39,6 +39,44 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object;
+
+        // Handle subscription checkout (agent membership)
+        if (session.mode === "subscription" && session.metadata?.agent_account_id) {
+          const agentAccountId = session.metadata.agent_account_id;
+          const subscriptionId =
+            typeof session.subscription === "string"
+              ? session.subscription
+              : null;
+
+          if (subscriptionId) {
+            // Fetch subscription details for period dates
+            const sub = await stripe.subscriptions.retrieve(subscriptionId) as unknown as {
+              current_period_start: number;
+              current_period_end: number;
+            };
+
+            await serviceClient
+              .from("agent_accounts")
+              .update({
+                stripe_subscription_id: subscriptionId,
+                stripe_customer_id:
+                  typeof session.customer === "string"
+                    ? session.customer
+                    : undefined,
+                subscription_status: "active",
+                current_period_start: new Date(
+                  sub.current_period_start * 1000
+                ).toISOString(),
+                current_period_end: new Date(
+                  sub.current_period_end * 1000
+                ).toISOString(),
+              })
+              .eq("id", agentAccountId);
+          }
+          break;
+        }
+
+        // Handle one-time payment checkout (document order)
         const requestId = session.metadata?.request_id;
 
         if (!requestId) break;
@@ -124,6 +162,74 @@ export async function POST(request: NextRequest) {
             console.error("Intelligence pipeline failed (webhook):", err);
             // Non-blocking — request stays in awaiting_data
           }
+        }
+        break;
+      }
+
+      // === SUBSCRIPTION LIFECYCLE ===
+      case "customer.subscription.updated": {
+        const sub = event.data.object as unknown as {
+          metadata?: Record<string, string>;
+          status: string;
+          current_period_start: number;
+          current_period_end: number;
+        };
+        const agentAccountId = sub.metadata?.agent_account_id;
+
+        if (agentAccountId) {
+          await serviceClient
+            .from("agent_accounts")
+            .update({
+              subscription_status: sub.status === "active" ? "active" : sub.status,
+              current_period_start: new Date(
+                sub.current_period_start * 1000
+              ).toISOString(),
+              current_period_end: new Date(
+                sub.current_period_end * 1000
+              ).toISOString(),
+            })
+            .eq("id", agentAccountId);
+        }
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as unknown as {
+          metadata?: Record<string, string>;
+        };
+        const agentAccountId = sub.metadata?.agent_account_id;
+
+        if (agentAccountId) {
+          // Revert to free tier
+          const { data: freeTier } = await serviceClient
+            .from("membership_tiers")
+            .select("id")
+            .eq("slug", "pay_per_order")
+            .single();
+
+          await serviceClient
+            .from("agent_accounts")
+            .update({
+              subscription_status: "canceled",
+              stripe_subscription_id: null,
+              tier_id: freeTier?.id || undefined,
+            })
+            .eq("id", agentAccountId);
+        }
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as unknown as {
+          subscription: string | null;
+        };
+        const subId = invoice.subscription || null;
+
+        if (subId) {
+          await serviceClient
+            .from("agent_accounts")
+            .update({ subscription_status: "past_due" })
+            .eq("stripe_subscription_id", subId);
         }
         break;
       }
