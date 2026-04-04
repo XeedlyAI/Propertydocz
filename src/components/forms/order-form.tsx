@@ -46,6 +46,7 @@ interface OrderFormProps {
   tenantId: string;
   tenantName: string;
   associations: Association[];
+  brandColor?: string;
 }
 
 const DOCUMENT_TYPES: DocumentType[] = [
@@ -76,6 +77,7 @@ export function OrderForm({
   tenantId,
   tenantName,
   associations,
+  brandColor = "#38b6ff",
 }: OrderFormProps) {
   const router = useRouter();
 
@@ -164,13 +166,26 @@ export function OrderForm({
     }
   }
 
+  // Brand color utilities
+  const bc = brandColor;
+  const selectedStyle = {
+    borderColor: bc,
+    backgroundColor: `${bc}0D`, // ~5% opacity
+    boxShadow: `0 0 0 1px ${bc}33`, // ring ~20% opacity
+  };
+  const hoverBorderColor = `${bc}66`; // ~40% opacity
+  const focusRingStyle = {
+    borderColor: bc,
+    boxShadow: `0 0 0 2px ${bc}33`,
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Association Selector */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Building2 className="size-5 text-[#38b6ff]" />
+            <Building2 className="size-5" style={{ color: bc }} />
             Association
           </CardTitle>
           <CardDescription>
@@ -181,7 +196,10 @@ export function OrderForm({
           <select
             value={associationId}
             onChange={(e) => setAssociationId(e.target.value)}
-            className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors focus-visible:border-[#38b6ff] focus-visible:ring-2 focus-visible:ring-[#38b6ff]/20 dark:bg-input/30"
+            className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors dark:bg-input/30"
+            style={{ "--focus-color": bc } as React.CSSProperties}
+            onFocus={(e) => Object.assign(e.target.style, focusRingStyle)}
+            onBlur={(e) => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
             aria-invalid={!!errors.association}
           >
             <option value="">Select an association...</option>
@@ -204,7 +222,7 @@ export function OrderForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="size-5 text-[#38b6ff]" />
+            <FileText className="size-5" style={{ color: bc }} />
             Documents Requested
           </CardTitle>
           <CardDescription>
@@ -219,9 +237,12 @@ export function OrderForm({
                 key={doc}
                 className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all duration-150 ${
                   isSelected
-                    ? "border-[#38b6ff] bg-[#38b6ff]/5 ring-1 ring-[#38b6ff]/20"
-                    : "border-border hover:border-[#38b6ff]/40 hover:bg-muted/50"
+                    ? ""
+                    : "border-border hover:bg-muted/50"
                 }`}
+                style={isSelected ? selectedStyle : undefined}
+                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.borderColor = hoverBorderColor; }}
+                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.borderColor = ""; }}
               >
                 <Checkbox
                   checked={isSelected}
@@ -233,7 +254,7 @@ export function OrderForm({
                     <span className="text-sm font-medium">
                       {DOCUMENT_LABELS[doc]}
                     </span>
-                    <span className="font-data text-sm font-semibold text-[#38b6ff]">
+                    <span className="font-data text-sm font-semibold" style={{ color: bc }}>
                       {formatCents(DOCUMENT_PRICES[doc])}
                     </span>
                   </div>
@@ -291,7 +312,7 @@ export function OrderForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <User className="size-5 text-[#38b6ff]" />
+            <User className="size-5" style={{ color: bc }} />
             Your Information
           </CardTitle>
         </CardHeader>
@@ -354,7 +375,9 @@ export function OrderForm({
                 onChange={(e) =>
                   setRequesterType(e.target.value as RequesterType)
                 }
-                className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors focus-visible:border-[#38b6ff] focus-visible:ring-2 focus-visible:ring-[#38b6ff]/20 dark:bg-input/30"
+                className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors dark:bg-input/30"
+                onFocus={(e) => Object.assign(e.target.style, focusRingStyle)}
+                onBlur={(e) => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
               >
                 {(
                   Object.entries(REQUESTER_TYPE_LABELS) as [
@@ -376,7 +399,7 @@ export function OrderForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Clock className="size-5 text-[#38b6ff]" />
+            <Clock className="size-5" style={{ color: bc }} />
             Turnaround Time
           </CardTitle>
         </CardHeader>
@@ -385,9 +408,12 @@ export function OrderForm({
             <label
               className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-all duration-150 ${
                 turnaround === "standard"
-                  ? "border-[#38b6ff] bg-[#38b6ff]/5 ring-1 ring-[#38b6ff]/20"
-                  : "border-border hover:border-[#38b6ff]/40 hover:bg-muted/50"
+                  ? ""
+                  : "border-border hover:bg-muted/50"
               }`}
+              style={turnaround === "standard" ? selectedStyle : undefined}
+              onMouseEnter={(e) => { if (turnaround !== "standard") e.currentTarget.style.borderColor = hoverBorderColor; }}
+              onMouseLeave={(e) => { if (turnaround !== "standard") e.currentTarget.style.borderColor = ""; }}
             >
               <input
                 type="radio"
@@ -395,7 +421,8 @@ export function OrderForm({
                 value="standard"
                 checked={turnaround === "standard"}
                 onChange={() => setTurnaround("standard")}
-                className="size-4 accent-[#38b6ff]"
+                className="size-4"
+                style={{ accentColor: bc }}
               />
               <div>
                 <div className="flex items-center gap-2">
@@ -410,9 +437,12 @@ export function OrderForm({
             <label
               className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-all duration-150 ${
                 turnaround === "rush"
-                  ? "border-[#38b6ff] bg-[#38b6ff]/5 ring-1 ring-[#38b6ff]/20"
-                  : "border-border hover:border-[#38b6ff]/40 hover:bg-muted/50"
+                  ? ""
+                  : "border-border hover:bg-muted/50"
               }`}
+              style={turnaround === "rush" ? selectedStyle : undefined}
+              onMouseEnter={(e) => { if (turnaround !== "rush") e.currentTarget.style.borderColor = hoverBorderColor; }}
+              onMouseLeave={(e) => { if (turnaround !== "rush") e.currentTarget.style.borderColor = ""; }}
             >
               <input
                 type="radio"
@@ -420,7 +450,8 @@ export function OrderForm({
                 value="rush"
                 checked={turnaround === "rush"}
                 onChange={() => setTurnaround("rush")}
-                className="size-4 accent-[#38b6ff]"
+                className="size-4"
+                style={{ accentColor: bc }}
               />
               <div>
                 <div className="flex items-center gap-2">
@@ -518,7 +549,7 @@ export function OrderForm({
                 <span className="text-base font-semibold text-white">
                   Total
                 </span>
-                <span className="font-data text-xl font-bold text-[#38b6ff]">
+                <span className="font-data text-xl font-bold" style={{ color: bc }}>
                   {billToClosing
                     ? "Bill to Closing"
                     : formatCents(totalCents)}
@@ -545,7 +576,8 @@ export function OrderForm({
         type="submit"
         size="lg"
         disabled={submitting || selectedDocs.length === 0}
-        className="w-full h-11 rounded-[6px] bg-[#38b6ff] text-white font-semibold hover:bg-[#1DA8F0] active:bg-[#0A8FD4] transition-colors"
+        className="w-full h-11 rounded-[6px] text-white font-semibold transition-colors"
+        style={{ backgroundColor: bc }}
       >
         {submitting ? (
           <>

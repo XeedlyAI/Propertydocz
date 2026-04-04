@@ -50,13 +50,32 @@ export default async function PublicPage() {
     .eq("tenant_id", tenant.id)
     .order("name");
 
+  // Use tenant brand color or default blue
+  const brandColor = tenant.primary_color || "#38b6ff";
+
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:py-12">
+    <main
+      className="mx-auto w-full max-w-2xl px-4 py-8 sm:py-12"
+      style={{ "--brand-color": brandColor } as React.CSSProperties}
+    >
       {/* Header */}
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-[#38b6ff]/10">
-          <FileStack className="size-6 text-[#38b6ff]" />
-        </div>
+        {tenant.logo_url ? (
+          <div className="mx-auto mb-4 flex h-16 items-center justify-center">
+            <img
+              src={tenant.logo_url}
+              alt={`${tenant.name} logo`}
+              className="h-12 w-auto max-w-[200px] object-contain sm:h-16"
+            />
+          </div>
+        ) : (
+          <div
+            className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl"
+            style={{ backgroundColor: `${brandColor}15` }}
+          >
+            <FileStack className="size-6" style={{ color: brandColor }} />
+          </div>
+        )}
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
           {tenant.name}
         </h1>
@@ -69,6 +88,7 @@ export default async function PublicPage() {
         tenantId={tenant.id}
         tenantName={tenant.name}
         associations={associations || []}
+        brandColor={brandColor}
       />
     </main>
   );

@@ -10,6 +10,7 @@ import { Settings } from "lucide-react";
 import { DropboxStatus } from "@/components/admin/dropbox-status";
 import { SignatureUpload } from "@/components/admin/signature-upload";
 import { StripeConnectStatus } from "@/components/admin/stripe-connect-status";
+import { TenantLogoUpload } from "@/components/admin/tenant-logo-upload";
 
 export default async function SettingsPage({
   searchParams,
@@ -23,7 +24,7 @@ export default async function SettingsPage({
   const serviceClient = await createServiceClient();
   const { data: tenant } = await serviceClient
     .from("tenants")
-    .select("dropbox_access_token, dropbox_refresh_token, signature_image_url, signature_font_style, stripe_account_id")
+    .select("dropbox_access_token, dropbox_refresh_token, signature_image_url, signature_font_style, stripe_account_id, logo_url")
     .eq("id", user.tenantId)
     .single();
 
@@ -89,6 +90,12 @@ export default async function SettingsPage({
           </div>
         </CardContent>
       </Card>
+
+      {/* Company Logo */}
+      <TenantLogoUpload
+        tenantId={user.tenantId}
+        currentLogoUrl={tenant?.logo_url || null}
+      />
 
       {/* Signature Upload */}
       <SignatureUpload
