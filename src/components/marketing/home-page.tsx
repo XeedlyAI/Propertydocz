@@ -6,7 +6,6 @@ import {
   DollarSign,
   ClipboardList,
   BookOpen,
-  Zap,
   Shield,
   Brain,
   Clock,
@@ -35,30 +34,20 @@ function HeroSection() {
         {/* Left column — content (~55%) */}
         <div className="md:col-span-7 text-center md:text-left">
           <FadeUp>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
-              <Zap className="size-3.5 text-[#38b6ff]" />
-              <span className="text-xs font-medium text-white/70">
-                AI-Powered HOA Document Platform
-              </span>
-            </div>
-          </FadeUp>
-          <FadeUp delay={0.1}>
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl">
-              Property Documents.
+              HOA Documents.
               <br />
               <span className="text-[#38b6ff]">Ordered in Seconds.</span>
-              <br />
-              Delivered with Precision.
             </h1>
           </FadeUp>
-          <FadeUp delay={0.2}>
+          <FadeUp delay={0.1}>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/60 sm:text-xl md:mx-0 mx-auto">
-              The modern platform for HOA management companies, agents, and
+              The modern platform for management companies, agents, and
               lenders. AI-generated resale certificates, payoff statements, and
               more — compliant with Utah law, delivered digitally.
             </p>
           </FadeUp>
-          <FadeUp delay={0.3}>
+          <FadeUp delay={0.2}>
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row md:justify-start sm:justify-center">
               <Link
                 href="/for-management-companies"
@@ -81,9 +70,9 @@ function HeroSection() {
         </div>
 
         {/* Right column — illustration (~45%) */}
-        <div className="md:col-span-5 flex items-center justify-center min-h-[300px] md:min-h-[350px] lg:min-h-[450px]">
-          <FadeUp delay={0.4}>
-            <HeroIllustration className="w-full h-auto max-w-[600px] opacity-90 drop-shadow-2xl" />
+        <div className="md:col-span-5 flex items-center justify-center w-full h-full">
+          <FadeUp delay={0.3}>
+            <HeroIllustration className="w-full h-auto opacity-90 drop-shadow-2xl" />
           </FadeUp>
         </div>
       </div>
