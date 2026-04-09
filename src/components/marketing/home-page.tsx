@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { MeshGradient } from "./mesh-gradient";
 import { HeroIllustration } from "@/components/landing/HeroIllustration";
+import { RevenueCalculator } from "./revenue-calculator";
 import {
   FadeUp,
   StaggerContainer,
@@ -393,6 +394,30 @@ function MembershipTeaser() {
   );
 }
 
+/* ───────── REVENUE CALCULATOR ───────── */
+function RevenueCalculatorSection() {
+  return (
+    <section className="relative py-24 sm:py-32">
+      <div className="topo-bg absolute inset-0 pointer-events-none" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <FadeUp>
+          <div className="text-center mb-14">
+            <p className="text-sm font-semibold uppercase tracking-wider text-[#38b6ff]">
+              Revenue Calculator
+            </p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
+              See your document revenue potential
+            </h2>
+          </div>
+        </FadeUp>
+        <FadeUp delay={0.1}>
+          <RevenueCalculator />
+        </FadeUp>
+      </div>
+    </section>
+  );
+}
+
 /* ───────── AI INTELLIGENCE ───────── */
 const AI_FEATURES = [
   {
@@ -536,6 +561,7 @@ export function HomePage() {
       <AudienceSplitSection />
       <DocumentTypesSection />
       <MembershipTeaser />
+      <RevenueCalculatorSection />
       <AIIntelligenceSection />
       <SocialProofSection />
       <FinalCTASection />
