@@ -24,11 +24,15 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100"
-          : "bg-transparent"
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      style={{
+        backgroundColor: scrolled ? "rgba(255,255,255,0.95)" : "#0f172a",
+        backdropFilter: scrolled ? "blur(12px)" : undefined,
+        boxShadow: scrolled
+          ? "0 1px 3px rgba(0,0,0,0.06)"
+          : undefined,
+        borderBottom: scrolled ? "1px solid #e5e7eb" : "1px solid transparent",
+      }}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         {/* Logo */}
@@ -37,9 +41,8 @@ export function Navbar() {
             <FileStack className="size-4 text-[#38b6ff]" />
           </div>
           <span
-            className={`text-lg font-bold tracking-tight transition-colors ${
-              scrolled ? "text-[#1A1A2E]" : "text-white"
-            }`}
+            className="text-lg font-bold tracking-tight transition-colors"
+            style={{ color: scrolled ? "#1A1A2E" : "#ffffff" }}
           >
             PropertyDocz
           </span>
@@ -51,9 +54,12 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-[#38b6ff] ${
-                scrolled ? "text-[#1A1A2E]/70" : "text-white/80"
-              }`}
+              className="text-sm font-medium transition-colors hover:text-[#38b6ff]"
+              style={{
+                color: scrolled
+                  ? "rgba(26,26,46,0.7)"
+                  : "rgba(255,255,255,0.8)",
+              }}
             >
               {link.label}
             </Link>
@@ -64,9 +70,12 @@ export function Navbar() {
         <div className="hidden lg:flex items-center gap-3">
           <Link
             href="/login"
-            className={`text-sm font-medium transition-colors hover:text-[#38b6ff] ${
-              scrolled ? "text-[#1A1A2E]/70" : "text-white/80"
-            }`}
+            className="text-sm font-medium transition-colors hover:text-[#38b6ff]"
+            style={{
+              color: scrolled
+                ? "rgba(26,26,46,0.7)"
+                : "rgba(255,255,255,0.8)",
+            }}
           >
             Log In
           </Link>
@@ -81,11 +90,10 @@ export function Navbar() {
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className={`lg:hidden p-2 rounded-lg transition-colors ${
-            scrolled
-              ? "text-[#1A1A2E] hover:bg-gray-100"
-              : "text-white hover:bg-white/10"
-          }`}
+          className="lg:hidden p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          style={{
+            color: scrolled ? "#1A1A2E" : "#ffffff",
+          }}
           aria-label="Toggle menu"
         >
           {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -99,7 +107,8 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden overflow-hidden bg-white border-b border-gray-100"
+            className="lg:hidden overflow-hidden border-b border-gray-100"
+            style={{ backgroundColor: scrolled ? "#ffffff" : "#0f172a" }}
           >
             <div className="px-6 py-4 space-y-1">
               {NAV_LINKS.map((link) => (
@@ -107,23 +116,40 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-3 py-2.5 text-sm font-medium text-[#1A1A2E]/80 hover:bg-gray-50 hover:text-[#38b6ff]"
+                  className="block rounded-lg px-3 py-3 text-sm font-medium transition-colors min-h-[44px] flex items-center"
+                  style={{
+                    color: scrolled
+                      ? "rgba(26,26,46,0.8)"
+                      : "rgba(255,255,255,0.8)",
+                  }}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="pt-3 border-t border-gray-100 mt-3 space-y-2">
+              <div
+                className="pt-3 mt-3 space-y-2"
+                style={{
+                  borderTop: scrolled
+                    ? "1px solid #e5e7eb"
+                    : "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-3 py-2.5 text-sm font-medium text-[#1A1A2E]/70 hover:bg-gray-50"
+                  className="block rounded-lg px-3 py-3 text-sm font-medium min-h-[44px] flex items-center"
+                  style={{
+                    color: scrolled
+                      ? "rgba(26,26,46,0.7)"
+                      : "rgba(255,255,255,0.7)",
+                  }}
                 >
                   Log In
                 </Link>
                 <Link
                   href="/for-agents"
                   onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg bg-[#38b6ff] px-3 py-2.5 text-center text-sm font-semibold text-white"
+                  className="block rounded-lg bg-[#38b6ff] px-3 py-3 text-center text-sm font-semibold text-white min-h-[44px]"
                 >
                   Order Documents
                 </Link>

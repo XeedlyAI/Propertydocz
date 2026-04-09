@@ -180,6 +180,15 @@ Full reference: `XEEDLY_STANDARDS.md` (project root)
 | PageTransition | `src/components/shared/PageTransition.tsx` | FadeUp, StaggerContainer, FadeUpChild |
 | EmptyState | `src/components/shared/EmptyState.tsx` | Brand-consistent empty states |
 | useCountUp | `src/hooks/useCountUp.ts` | Animated count-up for KPI numbers |
+| RequestPipeline | `src/components/admin/request-pipeline.tsx` | Horizontal bar chart pipeline visualization |
+| PlatformHealth | `src/components/admin/platform-health.tsx` | Revenue, turnaround, completion metrics |
+| TenantHealth | `src/components/platform/tenant-health.tsx` | Per-tenant status overview |
+| PlatformAlerts | `src/components/platform/platform-alerts.tsx` | Auto-generated platform alert cards |
+
+### Admin vs Platform Accent Colors
+- **Admin sidebar**: Blue `#38b6ff` — tenant operator context
+- **Platform sidebar**: Purple `#8b5cf6` — platform admin context
+- Both use 3px left-border active indicators and categorized nav groups
 
 ### Page Information Hierarchy
 Every dashboard page follows this order:
@@ -188,10 +197,31 @@ Every dashboard page follows this order:
 3. **Content** — cards, tables, detail views
 
 ### CSS Utilities
-- `.dash-card` — card shadow + hover elevation (use on all dashboard cards)
-- `.topo-bg` — topographical background pattern (landing page)
+- `.dash-card` — card shadow + hover elevation (use on all dashboard cards), dark mode adjusted
+- `.topo-bg` — topographical background pattern (landing page sections), dimmed in dark mode
 - `.table-scroll-mobile` — horizontal scroll for tables on mobile
 - `.font-data` — JetBrains Mono with tabular numbers
+- `.status-urgent/attention/good/info` — left-border accent classes
+
+### Landing Page Pattern
+- Navbar: dark bg (#0f172a) initially, transitions to white on scroll (inline styles to avoid JIT issues)
+- Footer: dark bg (#0f172a)
+- Alternating section backgrounds: white (topo visible) → #f0f4f8 (cool blue-grey, opaque) → #f5f5f0 (warm grey, opaque)
+- CTAs always `#38b6ff`, headings always dark slate
+- Checkmarks use teal `#14b8a6` (not green)
+
+### Mobile Optimization Patterns
+- Tables: `hidden sm:table-cell` / `hidden md:table-cell` / `hidden lg:table-cell` for progressive column hiding
+- Buttons: `w-full sm:w-auto`, `min-h-[44px]` touch targets
+- Page headers: `flex-col sm:flex-row` for title + action stacking
+- KPI tickers: 2-col grid on mobile via `PageKpiTickerMobile`
+- Cards: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` responsive grids
+
+### Common Debugging Patterns
+- **RLS errors**: Check `tenant_id` scope, use `createServiceClient()` for cross-tenant queries
+- **Tailwind JIT issues**: Use `style={{}}` for dynamic colors that JIT can't detect (especially in navbar)
+- **Dark mode**: Check both themes — shadows need adjustment (`.dark .dash-card`), topo opacity reduced
+- **Hydration mismatch**: Theme script in `<head>` prevents flash, use `suppressHydrationWarning`
 
 ## Reference
 - Full build plan: PROPERTYDOCZ_BUILD_PLAN.md

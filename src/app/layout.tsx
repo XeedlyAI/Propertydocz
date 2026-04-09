@@ -16,7 +16,14 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = buildMetadata({});
+export const metadata: Metadata = {
+  ...buildMetadata({}),
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
+};
 
 // Inline script to prevent dark mode flash (runs before React hydrates)
 const themeScript = `

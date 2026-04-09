@@ -59,7 +59,7 @@ function HeroSection() {
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/for-management-companies"
-              className="group flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-[#1A1A2E] shadow-2xl transition-all hover:shadow-white/20 hover:scale-[1.02]"
+              className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-[#1A1A2E] shadow-2xl transition-all hover:shadow-white/20 hover:scale-[1.02] min-h-[44px]"
             >
               <Building2 className="size-4" />
               I&apos;m a Management Company
@@ -67,7 +67,7 @@ function HeroSection() {
             </Link>
             <Link
               href="/for-agents"
-              className="group flex items-center gap-2 rounded-xl border border-[#38b6ff]/30 bg-[#38b6ff]/10 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-[#38b6ff]/20 hover:border-[#38b6ff]/50"
+              className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-[#38b6ff]/30 bg-[#38b6ff]/10 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-[#38b6ff]/20 hover:border-[#38b6ff]/50 min-h-[44px]"
             >
               <FileText className="size-4" />
               I Need Documents
@@ -96,27 +96,29 @@ const STEPS = [
     title: "AI Generates",
     desc: "Our AI engine pulls association data, validates against Utah code, and generates compliant documents.",
     icon: Brain,
-    color: "bg-emerald-500/10 text-emerald-500",
+    color: "bg-[#38b6ff]/10 text-[#38b6ff]",
   },
   {
     num: "03",
     title: "Delivered Digitally",
     desc: "Receive your documents via email — typically within hours, not days. Rush available for same-day.",
     icon: Send,
-    color: "bg-violet-500/10 text-violet-500",
+    color: "bg-[#38b6ff]/10 text-[#38b6ff]",
   },
 ];
 
 function HowItWorksSection() {
   return (
-    <section className="py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="relative py-24 sm:py-32">
+      {/* Topo background overlay */}
+      <div className="topo-bg absolute inset-0 pointer-events-none" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
         <FadeUp>
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-wider text-[#38b6ff]">
               How It Works
             </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1A1A2E] sm:text-4xl">
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
               Three steps to your documents
             </h2>
           </div>
@@ -135,7 +137,7 @@ function HowItWorksSection() {
                     {step.num}
                   </span>
                 </div>
-                <h3 className="mt-6 text-lg font-semibold text-[#1A1A2E]">
+                <h3 className="mt-6 text-lg font-semibold text-slate-800">
                   {step.title}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-gray-500">
@@ -153,25 +155,28 @@ function HowItWorksSection() {
 /* ───────── TWO AUDIENCE SPLIT ───────── */
 function AudienceSplitSection() {
   return (
-    <section className="bg-[#F4F5F7] py-24 sm:py-32">
+    <section
+      className="py-24 sm:py-32"
+      style={{ backgroundColor: "#f0f4f8" }}
+    >
       <div className="mx-auto max-w-7xl px-6">
         <FadeUp>
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-wider text-[#38b6ff]">
               Built for Everyone in the Transaction
             </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1A1A2E] sm:text-4xl">
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
               Two sides. One platform.
             </h2>
           </div>
         </FadeUp>
         <div className="mt-16 grid gap-8 lg:grid-cols-2">
           <FadeUp delay={0.1}>
-            <div className="group relative overflow-hidden rounded-2xl bg-white p-10 shadow-sm border border-gray-100 transition-all hover:shadow-lg">
+            <div className="group relative overflow-hidden rounded-2xl bg-white p-8 sm:p-10 shadow-sm border border-gray-100 transition-all hover:shadow-lg h-full">
               <div className="flex size-14 items-center justify-center rounded-2xl bg-[#1A1A2E]">
                 <Building2 className="size-6 text-[#38b6ff]" />
               </div>
-              <h3 className="mt-6 text-xl font-bold text-[#1A1A2E]">
+              <h3 className="mt-6 text-xl font-bold text-slate-800">
                 Management Companies
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-gray-500">
@@ -191,7 +196,7 @@ function AudienceSplitSection() {
                     key={item}
                     className="flex items-center gap-2.5 text-sm text-gray-600"
                   >
-                    <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+                    <CheckCircle2 className="size-4 shrink-0 text-[#14b8a6]" />
                     {item}
                   </li>
                 ))}
@@ -205,11 +210,11 @@ function AudienceSplitSection() {
             </div>
           </FadeUp>
           <FadeUp delay={0.2}>
-            <div className="group relative overflow-hidden rounded-2xl bg-white p-10 shadow-sm border border-gray-100 transition-all hover:shadow-lg">
+            <div className="group relative overflow-hidden rounded-2xl bg-white p-8 sm:p-10 shadow-sm border border-gray-100 transition-all hover:shadow-lg h-full">
               <div className="flex size-14 items-center justify-center rounded-2xl bg-[#38b6ff]/10">
                 <Users className="size-6 text-[#38b6ff]" />
               </div>
-              <h3 className="mt-6 text-xl font-bold text-[#1A1A2E]">
+              <h3 className="mt-6 text-xl font-bold text-slate-800">
                 Agents, Lenders &amp; Title Companies
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-gray-500">
@@ -229,7 +234,7 @@ function AudienceSplitSection() {
                     key={item}
                     className="flex items-center gap-2.5 text-sm text-gray-600"
                   >
-                    <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+                    <CheckCircle2 className="size-4 shrink-0 text-[#14b8a6]" />
                     {item}
                   </li>
                 ))}
@@ -278,14 +283,15 @@ const DOC_TYPES = [
 
 function DocumentTypesSection() {
   return (
-    <section className="py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="relative py-24 sm:py-32">
+      <div className="topo-bg absolute inset-0 pointer-events-none" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
         <FadeUp>
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-wider text-[#38b6ff]">
               Document Types
             </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1A1A2E] sm:text-4xl">
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
               Everything you need for the transaction
             </h2>
           </div>
@@ -298,11 +304,11 @@ function DocumentTypesSection() {
                   <div className="flex size-11 items-center justify-center rounded-xl bg-[#38b6ff]/10">
                     <doc.icon className="size-5 text-[#38b6ff]" />
                   </div>
-                  <span className="font-mono text-lg font-bold text-[#1A1A2E]">
+                  <span className="font-mono text-lg font-bold text-slate-800">
                     {doc.price}
                   </span>
                 </div>
-                <h3 className="mt-5 text-base font-semibold text-[#1A1A2E]">
+                <h3 className="mt-5 text-base font-semibold text-slate-800">
                   {doc.title}
                 </h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-gray-500">
@@ -330,10 +336,13 @@ function DocumentTypesSection() {
 /* ───────── MEMBERSHIP TEASER ───────── */
 function MembershipTeaser() {
   return (
-    <section className="bg-[#F4F5F7] py-24 sm:py-32">
+    <section
+      className="py-24 sm:py-32"
+      style={{ backgroundColor: "#f5f5f0" }}
+    >
       <div className="mx-auto max-w-5xl px-6">
         <FadeUp>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1A1A2E] to-[#0C0F14] p-10 sm:p-14 shadow-2xl">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1A1A2E] to-[#0C0F14] p-8 sm:p-14 shadow-2xl">
             <div className="absolute -top-20 -right-20 size-64 rounded-full bg-[#38b6ff]/10 blur-[80px]" />
             <div className="relative z-10 grid gap-10 lg:grid-cols-2 lg:items-center">
               <div>
@@ -349,7 +358,7 @@ function MembershipTeaser() {
                 </p>
                 <Link
                   href="/pricing"
-                  className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#38b6ff] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#38b6ff]/25 hover:bg-[#1DA8F0] transition-all"
+                  className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#38b6ff] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#38b6ff]/25 hover:bg-[#1DA8F0] transition-all min-h-[44px]"
                 >
                   View Plans <ArrowRight className="size-3.5" />
                 </Link>
@@ -410,15 +419,18 @@ const AI_FEATURES = [
 
 function AIIntelligenceSection() {
   return (
-    <section className="py-24 sm:py-32">
+    <section
+      className="py-24 sm:py-32"
+      style={{ backgroundColor: "#f0f4f8" }}
+    >
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
+        <div className="grid gap-12 lg:gap-16 lg:grid-cols-2 lg:items-center">
           <FadeUp>
             <div>
               <p className="text-sm font-semibold uppercase tracking-wider text-[#38b6ff]">
                 AI Intelligence
               </p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1A1A2E] sm:text-4xl">
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
                 Powered by AI that understands Utah HOA law
               </h2>
               <p className="mt-4 text-base leading-relaxed text-gray-500">
@@ -436,7 +448,7 @@ function AIIntelligenceSection() {
                   <div className="flex size-10 items-center justify-center rounded-lg bg-[#38b6ff]/10">
                     <feat.icon className="size-5 text-[#38b6ff]" />
                   </div>
-                  <h3 className="mt-4 text-sm font-semibold text-[#1A1A2E]">
+                  <h3 className="mt-4 text-sm font-semibold text-slate-800">
                     {feat.title}
                   </h3>
                   <p className="mt-1.5 text-xs leading-relaxed text-gray-500">
@@ -455,10 +467,11 @@ function AIIntelligenceSection() {
 /* ───────── SOCIAL PROOF ───────── */
 function SocialProofSection() {
   return (
-    <section className="bg-[#F4F5F7] py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="relative py-20 sm:py-24">
+      <div className="topo-bg absolute inset-0 pointer-events-none" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
         <FadeUp>
-          <div className="grid gap-8 text-center sm:grid-cols-4">
+          <div className="grid gap-8 text-center grid-cols-2 sm:grid-cols-4">
             {[
               { stat: "500+", label: "Documents Generated" },
               { stat: "50+", label: "Properties Served" },
@@ -466,7 +479,7 @@ function SocialProofSection() {
               { stat: "100%", label: "Utah Code Compliant" },
             ].map((item) => (
               <div key={item.label}>
-                <p className="font-mono text-4xl font-bold text-[#1A1A2E]">
+                <p className="font-mono text-3xl sm:text-4xl font-bold text-slate-800">
                   {item.stat}
                 </p>
                 <p className="mt-2 text-sm text-gray-500">{item.label}</p>
@@ -482,8 +495,8 @@ function SocialProofSection() {
 /* ───────── FINAL CTA ───────── */
 function FinalCTASection() {
   return (
-    <section className="relative overflow-hidden bg-[#1A1A2E] py-24 sm:py-32">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A2E] via-[#0C0F14] to-[#1A1A2E]" />
+    <section className="relative overflow-hidden py-24 sm:py-32" style={{ backgroundColor: "#0f172a" }}>
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#0C0F14] to-[#0f172a]" />
       <div className="absolute -top-40 left-1/2 -translate-x-1/2 size-[600px] rounded-full bg-[#38b6ff]/5 blur-[120px]" />
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
         <FadeUp>
@@ -497,13 +510,13 @@ function FinalCTASection() {
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/for-management-companies"
-              className="rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-[#1A1A2E] shadow-2xl transition-all hover:scale-[1.02]"
+              className="w-full sm:w-auto rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-[#1A1A2E] shadow-2xl transition-all hover:scale-[1.02] text-center min-h-[44px]"
             >
               Partner With Us
             </Link>
             <Link
               href="/for-agents"
-              className="rounded-xl border border-[#38b6ff]/30 bg-[#38b6ff]/10 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-[#38b6ff]/20"
+              className="w-full sm:w-auto rounded-xl border border-[#38b6ff]/30 bg-[#38b6ff]/10 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-[#38b6ff]/20 text-center min-h-[44px]"
             >
               Order Documents
             </Link>

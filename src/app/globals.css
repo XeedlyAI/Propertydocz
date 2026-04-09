@@ -207,6 +207,17 @@
   background-position: top center;
   opacity: 0.45;
 }
+.dark .topo-bg {
+  opacity: 0.15;
+}
+
+/* Dark mode dash-card shadow adjustment */
+.dark .dash-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.dark .dash-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+}
 
 /* Mobile table horizontal scroll */
 @media (max-width: 640px) {

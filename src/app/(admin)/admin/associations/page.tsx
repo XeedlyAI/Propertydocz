@@ -10,6 +10,7 @@ import { Building2, Plus, MapPin } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AssociationsHeader } from "@/components/admin/associations-header";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 export default async function AssociationsPage() {
   const user = await getAdminUser();
@@ -52,31 +53,31 @@ export default async function AssociationsPage() {
       />
 
       {!associations || associations.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Building2 className="mx-auto size-10 text-muted-foreground" />
-            <h3 className="mt-4 text-sm font-semibold">
-              No associations yet
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Add your first HOA community to get started.
-            </p>
-            <Link href="/admin/associations/new">
-              <Button
-                size="sm"
-                className="mt-4 rounded-[6px] bg-[#38b6ff] text-white font-medium hover:bg-[#1DA8F0]"
-              >
-                <Plus className="size-4" />
-                Add Association
-              </Button>
-            </Link>
+        <Card className="dash-card">
+          <CardContent className="py-4">
+            <EmptyState
+              icon={Building2}
+              title="No associations yet"
+              description="Add your first HOA community to get started."
+              action={
+                <Link href="/admin/associations/new">
+                  <Button
+                    size="sm"
+                    className="rounded-[6px] bg-[#38b6ff] text-white font-medium hover:bg-[#1DA8F0] min-h-[44px]"
+                  >
+                    <Plus className="size-4" />
+                    Add Association
+                  </Button>
+                </Link>
+              }
+            />
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {associations.map((assoc) => (
             <Link key={assoc.id} href={`/admin/associations/${assoc.id}`}>
-              <Card className="cursor-pointer transition-all duration-150 hover:shadow-md hover:border-[#38b6ff]/30 h-full">
+              <Card className="dash-card cursor-pointer h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Building2 className="size-4 text-[#38b6ff]" />
@@ -95,13 +96,13 @@ export default async function AssociationsPage() {
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     {assoc.total_units && (
-                      <span className="font-data inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      <span className="font-mono inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                         {assoc.total_units} units
                       </span>
                     )}
-                    <span className="font-data inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    <span className="font-mono inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                       {propertyCounts[assoc.id] || 0} properties
                     </span>
                     {assoc.project_type && (
