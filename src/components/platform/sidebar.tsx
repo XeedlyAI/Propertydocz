@@ -25,14 +25,26 @@ interface PlatformSidebarProps {
   userName: string;
 }
 
-const NAV_ITEMS = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+}
+
+const PLATFORM_ITEMS: NavItem[] = [
   { href: "/platform/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/platform/tenants", label: "Tenants", icon: Building2 },
   { href: "/platform/onboard", label: "Onboard", icon: Wand2 },
   { href: "/platform/agents", label: "Agents", icon: Users },
   { href: "/platform/revenue", label: "Revenue", icon: DollarSign },
+];
+
+const SYSTEM_ITEMS: NavItem[] = [
   { href: "/platform/settings", label: "Settings", icon: Settings },
 ];
+
+// Platform uses purple accent
+const ACCENT = "#8b5cf6";
 
 export function PlatformSidebar({ userName }: PlatformSidebarProps) {
   const pathname = usePathname();
@@ -46,12 +58,32 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
     router.refresh();
   }
 
+  function NavLink({ item }: { item: NavItem }) {
+    const isActive =
+      pathname === item.href || pathname.startsWith(item.href + "/");
+    return (
+      <Link
+        href={item.href}
+        onClick={() => setMobileOpen(false)}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 border-l-[3px]",
+          isActive
+            ? `border-[${ACCENT}] bg-[${ACCENT}]/10 text-[${ACCENT}]`
+            : `border-transparent text-[#6B7280] dark:text-[#94A3B8] hover:bg-[${ACCENT}]/5 hover:text-foreground`
+        )}
+      >
+        <item.icon className="size-[18px]" />
+        {item.label}
+      </Link>
+    );
+  }
+
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-white dark:bg-[#1A1D26] border-r border-[#E5E7EB] dark:border-white/8">
+    <div className="flex h-full flex-col bg-white dark:bg-[#0C0F14] border-r border-[#E5E7EB] dark:border-white/8">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2.5 border-b border-[#E5E7EB] dark:border-white/8 px-5">
-        <div className="flex size-7 items-center justify-center rounded-lg bg-[#38b6ff]/15">
-          <FileStack className="size-4 text-[#38b6ff]" />
+        <div className="flex size-7 items-center justify-center rounded-lg bg-[#8b5cf6]/15">
+          <FileStack className="size-4 text-[#8b5cf6]" />
         </div>
         <span className="text-sm font-semibold tracking-tight text-foreground">
           PropertyDocz
@@ -61,45 +93,44 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
       {/* Platform badge */}
       <div className="border-b border-[#E5E7EB] dark:border-white/8 px-5 py-3">
         <div className="flex items-center gap-1.5">
-          <Shield className="size-3.5 text-[#38b6ff]" />
-          <p className="text-[10px] font-medium uppercase tracking-wider text-[#38b6ff]">
+          <Shield className="size-3.5 text-[#8b5cf6]" />
+          <p className="text-[10px] font-medium uppercase tracking-wider text-[#8b5cf6]">
             Platform Admin
           </p>
         </div>
-        <p className="mt-0.5 text-sm font-medium text-foreground">
-          XeedlyAI
-        </p>
+        <p className="mt-0.5 text-sm font-medium text-foreground">XeedlyAI</p>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-0.5 px-3 py-3">
-        {NAV_ITEMS.map((item) => {
-          const isActive =
-            pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 border-l-2",
-                isActive
-                  ? "border-[#38b6ff] bg-[#38b6ff]/10 text-[#38b6ff]"
-                  : "border-transparent text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#F4F5F7] dark:hover:bg-white/5 hover:text-foreground"
-              )}
-            >
-              <item.icon className="size-4" />
-              {item.label}
-            </Link>
-          );
-        })}
+      {/* Navigation — Platform */}
+      <nav className="flex-1 flex flex-col px-3 py-3">
+        <div className="space-y-0.5">
+          <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
+            Platform
+          </p>
+          {PLATFORM_ITEMS.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
+
+        {/* Spacer pushes System to bottom */}
+        <div className="flex-1" />
+
+        {/* Navigation — System */}
+        <div className="space-y-0.5">
+          <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
+            System
+          </p>
+          {SYSTEM_ITEMS.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
       </nav>
 
-      {/* Divider — switch to tenant admin */}
+      {/* Switch to Tenant Admin */}
       <div className="px-3 pb-2">
         <Link
           href="/admin/dashboard"
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-[#F4F5F7] dark:hover:bg-white/5 hover:text-foreground transition-colors"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-[#38b6ff]/5 hover:text-[#38b6ff] transition-colors"
         >
           <LayoutDashboard className="size-3.5" />
           Switch to Tenant Admin
@@ -110,7 +141,7 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
       <div className="border-t border-[#E5E7EB] dark:border-white/8 p-3">
         <div className="mb-2 flex items-center justify-between px-3">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#38b6ff]/15 text-xs font-medium text-[#38b6ff]">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#8b5cf6]/15 text-xs font-medium text-[#8b5cf6]">
               {userName
                 .split(" ")
                 .map((n) => n[0])
@@ -125,7 +156,7 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
         </div>
         <button
           onClick={handleSignOut}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#6B7280] dark:text-[#94A3B8] transition-colors hover:bg-[#F4F5F7] dark:hover:bg-white/5 hover:text-foreground"
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#6B7280] dark:text-[#94A3B8] transition-colors hover:bg-[#8b5cf6]/5 hover:text-foreground"
         >
           <LogOut className="size-4" />
           Sign Out
@@ -152,8 +183,8 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
             )}
           </Button>
           <div className="flex items-center gap-2">
-            <div className="flex size-6 items-center justify-center rounded-md bg-[#38b6ff]/15">
-              <FileStack className="size-3.5 text-[#38b6ff]" />
+            <div className="flex size-6 items-center justify-center rounded-md bg-[#8b5cf6]/15">
+              <FileStack className="size-3.5 text-[#8b5cf6]" />
             </div>
             <span className="text-sm font-semibold">Platform Admin</span>
           </div>
