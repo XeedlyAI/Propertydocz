@@ -6,6 +6,10 @@ import { createCheckoutSession } from "@/lib/stripe";
 import { sendOrderConfirmation, sendAdminNotification } from "@/lib/email/send";
 import { runRequestIntelligence } from "@/lib/services/request-intelligence";
 import { findAgentByEmail, recordUsage } from "@/lib/services/usage-tracking";
+import {
+  calculateOrderPricing,
+  type SubscriptionInfo,
+} from "@/lib/services/pricing.service";
 import type { DocumentType } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
@@ -77,11 +81,72 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate total
-    const totalPriceCents = calculateOrderTotal(
+    // Calculate base total
+    const baseTotalCents = calculateOrderTotal(
       data.document_types,
       data.turnaround === "rush"
     );
+
+    // ── Subscription pricing ──
+    const customerId: string | undefined = body.customer_id;
+    const subscriptionId: string | undefined = body.subscription_id;
+
+    let subscription: SubscriptionInfo | null = null;
+    if (subscriptionId) {
+      const { data: sub } = await supabase
+        .from("customer_subscription")
+        .select(
+          "id, tier, status, packages_included, packages_used, overage_discount_percent, billing_cycle_start, billing_cycle_end"
+        )
+        .eq("id", subscriptionId)
+        .single();
+
+      if (sub) {
+        subscription = {
+          id: sub.id,
+          tier: sub.tier,
+          status: sub.status,
+          packages_included: sub.packages_included,
+          packages_used: sub.packages_used,
+          overage_discount_percent: sub.overage_discount_percent,
+          billing_cycle_start: sub.billing_cycle_start,
+          billing_cycle_end: sub.billing_cycle_end,
+        };
+      }
+    }
+
+    const pricing = calculateOrderPricing(baseTotalCents, subscription);
+    const totalPriceCents = data.bill_to_closing ? baseTotalCents : pricing.finalPrice;
+
+    // ── Guest customer account creation ──
+    let resolvedCustomerId = customerId;
+    if (!resolvedCustomerId && data.requester_email) {
+      // Check if account exists by email
+      const { data: existing } = await supabase
+        .from("customer_account")
+        .select("id")
+        .eq("email", data.requester_email.toLowerCase().trim())
+        .single();
+
+      if (existing) {
+        resolvedCustomerId = existing.id;
+      } else {
+        // Create new customer account for guest
+        const { data: newCustomer } = await supabase
+          .from("customer_account")
+          .insert({
+            email: data.requester_email.toLowerCase().trim(),
+            full_name: data.requester_name,
+            phone: data.requester_phone || null,
+            company_name: body.requester_company || null,
+            customer_type: data.requester_type === "owner" ? "homeowner" : data.requester_type,
+          })
+          .select("id")
+          .single();
+
+        resolvedCustomerId = newCustomer?.id;
+      }
+    }
 
     // Build property address string
     const propertyAddress = data.unit_number
@@ -104,8 +169,19 @@ export async function POST(request: NextRequest) {
         rush_notes: data.rush_notes || null,
         total_price_cents: totalPriceCents,
         bill_to_closing: data.bill_to_closing,
-        payment_status: data.bill_to_closing ? "bill_to_closing" : "pending",
-        status: "received",
+        payment_status: data.bill_to_closing
+          ? "bill_to_closing"
+          : pricing.pricingType === "subscription"
+            ? "paid" // Covered by plan = paid
+            : "pending",
+        status: data.bill_to_closing || pricing.pricingType === "subscription"
+          ? "awaiting_data"
+          : "received",
+        // Subscription fields
+        customer_id: resolvedCustomerId || null,
+        subscription_id: subscriptionId || null,
+        pricing_type: pricing.pricingType,
+        discount_applied: pricing.discountAmount,
       })
       .select("id")
       .single();
@@ -116,6 +192,62 @@ export async function POST(request: NextRequest) {
         { error: "Failed to create order. Please try again." },
         { status: 500 }
       );
+    }
+
+    // ── Track subscription usage ──
+    if (
+      subscriptionId &&
+      subscription &&
+      (pricing.pricingType === "subscription" || pricing.pricingType === "overage")
+    ) {
+      // Increment packages_used
+      await supabase
+        .from("customer_subscription")
+        .update({
+          packages_used: pricing.packagesUsed,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", subscriptionId);
+
+      // Create usage record
+      await supabase.from("customer_subscription_usage").insert({
+        subscription_id: subscriptionId,
+        document_request_id: docRequest.id,
+        billing_cycle_start: subscription.billing_cycle_start,
+        was_overage: pricing.pricingType === "overage",
+        overage_amount: pricing.pricingType === "overage" ? pricing.finalPrice : 0,
+      });
+    }
+
+    // ── If order is fully covered by subscription, skip payment ──
+    if (pricing.pricingType === "subscription" && !data.bill_to_closing) {
+      await sendNotifications(
+        docRequest.id,
+        data.requester_email,
+        data.requester_name,
+        propertyAddress,
+        data.document_types,
+        0, // No charge
+        tenant.contact_email,
+        tenant.name
+      );
+
+      // Run intelligence pipeline
+      try {
+        await runRequestIntelligence(
+          docRequest.id,
+          data.association_id,
+          tenantId,
+          data.document_types
+        );
+      } catch (err) {
+        console.error("Intelligence pipeline failed (subscription):", err);
+      }
+
+      return NextResponse.json({
+        id: docRequest.id,
+        message: "Order submitted — covered by your subscription",
+      });
     }
 
     // If bill-to-closing, skip payment and send notifications
@@ -131,7 +263,6 @@ export async function POST(request: NextRequest) {
         tenant.name
       );
 
-      // Run intelligence pipeline (auto-fill, delta check, gap analysis)
       try {
         await runRequestIntelligence(
           docRequest.id,
@@ -141,7 +272,6 @@ export async function POST(request: NextRequest) {
         );
       } catch (err) {
         console.error("Intelligence pipeline failed (bill-to-closing):", err);
-        // Non-blocking — request is still created
       }
 
       // Track usage against agent membership
@@ -206,7 +336,7 @@ export async function POST(request: NextRequest) {
       tenant.name
     );
 
-    // Run intelligence pipeline (auto-fill, delta check, gap analysis)
+    // Run intelligence pipeline
     try {
       await runRequestIntelligence(
         docRequest.id,

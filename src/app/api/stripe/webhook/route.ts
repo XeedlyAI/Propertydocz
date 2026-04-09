@@ -41,7 +41,47 @@ export async function POST(request: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object;
 
-        // Handle subscription checkout (agent membership)
+        // Handle subscription checkout (customer subscription)
+        if (session.mode === "subscription" && session.metadata?.customer_account_id) {
+          const customerAccountId = session.metadata.customer_account_id;
+          const tier = session.metadata.tier || "agent_pro";
+          const stripeSubId =
+            typeof session.subscription === "string"
+              ? session.subscription
+              : null;
+          const stripeCustomerId =
+            typeof session.customer === "string"
+              ? session.customer
+              : null;
+
+          if (stripeSubId) {
+            const sub = await stripe.subscriptions.retrieve(stripeSubId) as unknown as {
+              current_period_start: number;
+              current_period_end: number;
+            };
+
+            const { SUBSCRIPTION_TIERS } = await import("@/lib/subscriptions");
+            const tierConfig = SUBSCRIPTION_TIERS[tier as keyof typeof SUBSCRIPTION_TIERS];
+
+            // Create customer_subscription record
+            await serviceClient.from("customer_subscription").insert({
+              customer_id: customerAccountId,
+              tier,
+              status: "active",
+              stripe_subscription_id: stripeSubId,
+              stripe_customer_id: stripeCustomerId,
+              billing_cycle_start: new Date(sub.current_period_start * 1000).toISOString().split("T")[0],
+              billing_cycle_end: new Date(sub.current_period_end * 1000).toISOString().split("T")[0],
+              packages_included: tierConfig?.packagesPerMonth || 0,
+              packages_used: 0,
+              overage_discount_percent: tierConfig?.overageDiscount || 0,
+              monthly_price: tierConfig?.priceCents || 0,
+            });
+          }
+          break;
+        }
+
+        // Handle legacy agent membership subscription
         if (session.mode === "subscription" && session.metadata?.agent_account_id) {
           const agentAccountId = session.metadata.agent_account_id;
           const subscriptionId =
@@ -50,7 +90,6 @@ export async function POST(request: NextRequest) {
               : null;
 
           if (subscriptionId) {
-            // Fetch subscription details for period dates
             const sub = await stripe.subscriptions.retrieve(subscriptionId) as unknown as {
               current_period_start: number;
               current_period_end: number;
@@ -184,13 +223,38 @@ export async function POST(request: NextRequest) {
       // === SUBSCRIPTION LIFECYCLE ===
       case "customer.subscription.updated": {
         const sub = event.data.object as unknown as {
+          id: string;
           metadata?: Record<string, string>;
           status: string;
           current_period_start: number;
           current_period_end: number;
         };
-        const agentAccountId = sub.metadata?.agent_account_id;
 
+        // Handle customer_subscription updates
+        const csCustomerAccountId = sub.metadata?.customer_account_id;
+        if (csCustomerAccountId) {
+          const newTier = sub.metadata?.tier;
+          const { SUBSCRIPTION_TIERS } = await import("@/lib/subscriptions");
+          const tierConfig = newTier ? SUBSCRIPTION_TIERS[newTier as keyof typeof SUBSCRIPTION_TIERS] : null;
+
+          await serviceClient
+            .from("customer_subscription")
+            .update({
+              status: sub.status === "active" ? "active" : sub.status,
+              tier: newTier || undefined,
+              billing_cycle_start: new Date(sub.current_period_start * 1000).toISOString().split("T")[0],
+              billing_cycle_end: new Date(sub.current_period_end * 1000).toISOString().split("T")[0],
+              packages_included: tierConfig?.packagesPerMonth || undefined,
+              overage_discount_percent: tierConfig?.overageDiscount || undefined,
+              monthly_price: tierConfig?.priceCents || undefined,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("stripe_subscription_id", sub.id);
+          break;
+        }
+
+        // Legacy agent_accounts handling
+        const agentAccountId = sub.metadata?.agent_account_id;
         if (agentAccountId) {
           await serviceClient
             .from("agent_accounts")
@@ -210,12 +274,27 @@ export async function POST(request: NextRequest) {
 
       case "customer.subscription.deleted": {
         const sub = event.data.object as unknown as {
+          id: string;
           metadata?: Record<string, string>;
         };
-        const agentAccountId = sub.metadata?.agent_account_id;
 
+        // Handle customer_subscription deletion
+        const csCustomerId = sub.metadata?.customer_account_id;
+        if (csCustomerId) {
+          await serviceClient
+            .from("customer_subscription")
+            .update({
+              status: "cancelled",
+              cancelled_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("stripe_subscription_id", sub.id);
+          break;
+        }
+
+        // Legacy agent_accounts handling
+        const agentAccountId = sub.metadata?.agent_account_id;
         if (agentAccountId) {
-          // Revert to free tier
           const { data: freeTier } = await serviceClient
             .from("membership_tiers")
             .select("id")
@@ -234,6 +313,35 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case "invoice.paid": {
+        // Subscription renewal — reset usage for customer_subscription
+        const invoice = event.data.object as unknown as {
+          subscription: string | null;
+          billing_reason: string;
+        };
+
+        if (invoice.subscription && invoice.billing_reason === "subscription_cycle") {
+          const stripeSub = await stripe.subscriptions.retrieve(invoice.subscription) as unknown as {
+            current_period_start: number;
+            current_period_end: number;
+            metadata?: Record<string, string>;
+          };
+
+          if (stripeSub.metadata?.customer_account_id) {
+            await serviceClient
+              .from("customer_subscription")
+              .update({
+                packages_used: 0,
+                billing_cycle_start: new Date(stripeSub.current_period_start * 1000).toISOString().split("T")[0],
+                billing_cycle_end: new Date(stripeSub.current_period_end * 1000).toISOString().split("T")[0],
+                updated_at: new Date().toISOString(),
+              })
+              .eq("stripe_subscription_id", invoice.subscription);
+          }
+        }
+        break;
+      }
+
       case "invoice.payment_failed": {
         const invoice = event.data.object as unknown as {
           subscription: string | null;
@@ -241,6 +349,16 @@ export async function POST(request: NextRequest) {
         const subId = invoice.subscription || null;
 
         if (subId) {
+          // Update customer_subscription
+          await serviceClient
+            .from("customer_subscription")
+            .update({
+              status: "past_due",
+              updated_at: new Date().toISOString(),
+            })
+            .eq("stripe_subscription_id", subId);
+
+          // Legacy: update agent_accounts
           await serviceClient
             .from("agent_accounts")
             .update({ subscription_status: "past_due" })

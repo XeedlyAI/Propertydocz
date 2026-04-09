@@ -5,13 +5,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CreateAccountPrompt } from "./create-account-prompt";
 
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ request_id?: string }>;
+  searchParams: Promise<{ request_id?: string; guest?: string; email?: string }>;
 }) {
-  const { request_id } = await searchParams;
+  const { request_id, guest, email } = await searchParams;
+  const isGuest = guest === "true";
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center px-4 py-12 bg-background">
@@ -76,6 +78,11 @@ export default async function SuccessPage({
           </div>
         </CardContent>
       </Card>
+
+      {/* Guest-to-account conversion */}
+      {isGuest && email && (
+        <CreateAccountPrompt email={email} />
+      )}
 
       <p className="mt-8 text-center text-xs text-muted-foreground">
         Questions? Contact the management company directly or reply to your
