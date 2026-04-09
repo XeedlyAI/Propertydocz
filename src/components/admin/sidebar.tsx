@@ -23,10 +23,19 @@ interface SidebarProps {
   userName: string;
 }
 
-const NAV_ITEMS = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+}
+
+const OPERATIONS_ITEMS: NavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/requests", label: "Requests", icon: FileText },
   { href: "/admin/associations", label: "Associations", icon: Building2 },
+];
+
+const SYSTEM_ITEMS: NavItem[] = [
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -42,8 +51,28 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
     router.refresh();
   }
 
+  function NavLink({ item }: { item: NavItem }) {
+    const isActive =
+      pathname === item.href || pathname.startsWith(item.href + "/");
+    return (
+      <Link
+        href={item.href}
+        onClick={() => setMobileOpen(false)}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 border-l-[3px]",
+          isActive
+            ? "border-[#38b6ff] bg-[#38b6ff]/10 text-[#38b6ff]"
+            : "border-transparent text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#38b6ff]/5 hover:text-foreground"
+        )}
+      >
+        <item.icon className="size-[18px]" />
+        {item.label}
+      </Link>
+    );
+  }
+
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-white dark:bg-[#1A1D26] border-r border-[#E5E7EB] dark:border-white/8">
+    <div className="flex h-full flex-col bg-white dark:bg-[#0C0F14] border-r border-[#E5E7EB] dark:border-white/8">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2.5 border-b border-[#E5E7EB] dark:border-white/8 px-5">
         <div className="flex size-7 items-center justify-center rounded-lg bg-[#38b6ff]/15">
@@ -64,28 +93,29 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
         </p>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-0.5 px-3 py-3">
-        {NAV_ITEMS.map((item) => {
-          const isActive =
-            pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 border-l-2",
-                isActive
-                  ? "border-[#38b6ff] bg-[#38b6ff]/10 text-[#38b6ff]"
-                  : "border-transparent text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#F4F5F7] dark:hover:bg-white/5 hover:text-foreground"
-              )}
-            >
-              <item.icon className="size-4" />
-              {item.label}
-            </Link>
-          );
-        })}
+      {/* Navigation — Operations */}
+      <nav className="flex-1 flex flex-col px-3 py-3">
+        <div className="space-y-0.5">
+          <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
+            Operations
+          </p>
+          {OPERATIONS_ITEMS.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
+
+        {/* Spacer pushes System to bottom */}
+        <div className="flex-1" />
+
+        {/* Navigation — System */}
+        <div className="space-y-0.5">
+          <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
+            System
+          </p>
+          {SYSTEM_ITEMS.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
       </nav>
 
       {/* User / Sign Out */}
@@ -107,7 +137,7 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
         </div>
         <button
           onClick={handleSignOut}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#6B7280] dark:text-[#94A3B8] transition-colors hover:bg-[#F4F5F7] dark:hover:bg-white/5 hover:text-foreground"
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#6B7280] dark:text-[#94A3B8] transition-colors hover:bg-[#38b6ff]/5 hover:text-foreground"
         >
           <LogOut className="size-4" />
           Sign Out

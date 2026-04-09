@@ -3,30 +3,35 @@ import { getAdminUser } from "@/lib/auth";
 import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
 import type { DocumentType, RequestStatus } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  FileText,
-  Clock,
-  CheckCircle2,
-  DollarSign,
-  AlertCircle,
-} from "lucide-react";
 import Link from "next/link";
 import { AiAdvisory } from "@/components/admin/ai-advisory";
+import { DashboardClient } from "./dashboard-client";
 
-const STATUS_COLORS: Record<RequestStatus, string> = {
-  received: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+const STATUS_DOT_COLOR: Record<RequestStatus, string> = {
+  received: "bg-slate-400",
+  paid: "bg-blue-400",
+  awaiting_data: "bg-[#f59e0b]",
+  ready_for_generation: "bg-[#38b6ff]",
+  pending_review: "bg-[#f59e0b]",
+  approved: "bg-[#14b8a6]",
+  delivered: "bg-[#14b8a6]",
+  cancelled: "bg-[#ef4444]",
+};
+
+const STATUS_BADGE: Record<RequestStatus, string> = {
+  received:
+    "bg-slate-100 text-slate-600 dark:bg-slate-800/50 dark:text-slate-300",
   paid: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
   awaiting_data:
-    "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
+    "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   ready_for_generation:
     "bg-sky-50 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400",
   pending_review:
-    "bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400",
+    "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   approved:
-    "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
+    "bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400",
   delivered:
-    "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+    "bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400",
   cancelled: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
@@ -48,7 +53,7 @@ export default async function DashboardPage() {
   const { data: requests } = await supabase
     .from("document_requests")
     .select(
-      "id, created_at, requester_name, requester_email, property_address, document_types, status, total_price_cents, turnaround, bill_to_closing, payment_status"
+      "id, created_at, updated_at, requester_name, requester_email, property_address, document_types, status, total_price_cents, turnaround, bill_to_closing, payment_status"
     )
     .eq("tenant_id", user.tenantId)
     .order("created_at", { ascending: false });
@@ -61,13 +66,22 @@ export default async function DashboardPage() {
     now.getMonth(),
     1
   ).toISOString();
+  const startOfLastMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1
+  ).toISOString();
 
+  // KPI metrics
   const totalRequests = allRequests.length;
   const awaitingData = allRequests.filter(
     (r) => r.status === "awaiting_data"
   ).length;
   const pendingReview = allRequests.filter(
     (r) => r.status === "pending_review"
+  ).length;
+  const readyForGen = allRequests.filter(
+    (r) => r.status === "ready_for_generation"
   ).length;
   const deliveredThisMonth = allRequests.filter(
     (r) => r.status === "delivered" && r.created_at >= startOfMonth
@@ -78,192 +92,75 @@ export default async function DashboardPage() {
     )
     .reduce((sum, r) => sum + (r.total_price_cents || 0), 0);
 
+  // Pipeline counts
+  const received = allRequests.filter((r) => r.status === "received").length;
+  const delivered = allRequests.filter((r) => r.status === "delivered").length;
+
+  // Revenue last month
+  const revenueLastMonth = allRequests
+    .filter(
+      (r) =>
+        r.payment_status === "paid" &&
+        r.created_at >= startOfLastMonth &&
+        r.created_at < startOfMonth
+    )
+    .reduce((sum, r) => sum + (r.total_price_cents || 0), 0);
+
+  // Average turnaround
+  const deliveredWithTime = allRequests
+    .filter((r) => r.status === "delivered" && r.updated_at)
+    .map((r) => {
+      const created = new Date(r.created_at).getTime();
+      const deliveredAt = new Date(r.updated_at!).getTime();
+      return (deliveredAt - created) / (1000 * 60 * 60 * 24);
+    });
+  const avgTurnaround =
+    deliveredWithTime.length > 0
+      ? deliveredWithTime.reduce((a, b) => a + b, 0) /
+        deliveredWithTime.length
+      : null;
+
   const recentRequests = allRequests.slice(0, 20);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          Overview of your document requests
-        </p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {/* Revenue — Dark Accent Card */}
-        <div className="dark-accent-card rounded-xl p-5 sm:col-span-2 lg:col-span-1">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium uppercase tracking-wider text-white/50">
-              Revenue
-            </p>
-            <DollarSign className="size-4 text-[#38b6ff]" />
-          </div>
-          <p className="mt-2 font-data text-2xl font-bold text-white">
-            {formatCents(revenueThisMonth)}
-          </p>
-          <p className="mt-1 text-xs text-white/40">This month</p>
-        </div>
-
-        {/* Total Requests */}
-        <Card>
-          <CardContent className="pt-5 pb-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Total Requests
-              </p>
-              <FileText className="size-4 text-[#38b6ff]" />
-            </div>
-            <p className="mt-2 font-data text-2xl font-bold">{totalRequests}</p>
-            <p className="mt-1 text-xs text-muted-foreground">All time</p>
-          </CardContent>
-        </Card>
-
-        {/* Awaiting Data */}
-        <Card>
-          <CardContent className="pt-5 pb-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Awaiting Data
-              </p>
-              <AlertCircle className="size-4 text-amber-500" />
-            </div>
-            <p className="mt-2 font-data text-2xl font-bold">{awaitingData}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Need attention
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Pending Review */}
-        <Card>
-          <CardContent className="pt-5 pb-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Pending Review
-              </p>
-              <Clock className="size-4 text-violet-500" />
-            </div>
-            <p className="mt-2 font-data text-2xl font-bold">
-              {pendingReview}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">Ready to review</p>
-          </CardContent>
-        </Card>
-
-        {/* Delivered */}
-        <Card>
-          <CardContent className="pt-5 pb-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Delivered
-              </p>
-              <CheckCircle2 className="size-4 text-green-500" />
-            </div>
-            <p className="mt-2 font-data text-2xl font-bold">
-              {deliveredThisMonth}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">This month</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* AI Advisory */}
-      <AiAdvisory />
-
-      {/* Recent Requests Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Requests</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentRequests.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No document requests yet.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left">
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Date
-                    </th>
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Requester
-                    </th>
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Property
-                    </th>
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Documents
-                    </th>
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Status
-                    </th>
-                    <th className="pb-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentRequests.map((req) => (
-                    <tr
-                      key={req.id}
-                      className="border-b border-border/50 last:border-0 transition-colors hover:bg-muted/50"
-                    >
-                      <td className="py-3 pr-4">
-                        <Link
-                          href={`/admin/requests/${req.id}`}
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {new Date(req.created_at).toLocaleDateString()}
-                        </Link>
-                      </td>
-                      <td className="py-3 pr-4">
-                        <Link
-                          href={`/admin/requests/${req.id}`}
-                          className="font-medium hover:text-[#38b6ff] transition-colors"
-                        >
-                          {req.requester_name}
-                        </Link>
-                      </td>
-                      <td className="py-3 pr-4 max-w-[200px] truncate text-muted-foreground">
-                        {req.property_address}
-                      </td>
-                      <td className="py-3 pr-4">
-                        <div className="flex flex-wrap gap-1">
-                          {(req.document_types as DocumentType[]).map((dt) => (
-                            <span
-                              key={dt}
-                              className="inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
-                            >
-                              {DOCUMENT_LABELS[dt]?.split(" ")[0] || dt}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="py-3 pr-4">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[req.status as RequestStatus] || "bg-muted text-muted-foreground"}`}
-                        >
-                          {STATUS_LABELS[req.status as RequestStatus] ||
-                            req.status}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right font-data font-medium">
-                        {req.bill_to_closing
-                          ? "BTC"
-                          : formatCents(req.total_price_cents)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    <DashboardClient
+      kpiData={{
+        revenueThisMonth,
+        totalRequests,
+        awaitingData,
+        pendingReview,
+        readyForGen,
+        deliveredThisMonth,
+      }}
+      pipelineData={{
+        received,
+        awaitingData,
+        pendingReview,
+        readyForGen,
+        delivered,
+      }}
+      healthData={{
+        revenueThisMonth,
+        revenueLastMonth,
+        avgTurnaroundDays: avgTurnaround,
+        deliveredCount: delivered,
+        totalCount: totalRequests,
+      }}
+      recentRequests={recentRequests.map((req) => ({
+        id: req.id,
+        created_at: req.created_at,
+        requester_name: req.requester_name,
+        property_address: req.property_address,
+        document_types: req.document_types as DocumentType[],
+        status: req.status as RequestStatus,
+        total_price_cents: req.total_price_cents,
+        bill_to_closing: req.bill_to_closing,
+      }))}
+      statusConfig={{
+        dotColors: STATUS_DOT_COLOR,
+        badgeColors: STATUS_BADGE,
+        labels: STATUS_LABELS,
+      }}
+    />
   );
 }

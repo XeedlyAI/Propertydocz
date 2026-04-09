@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -16,7 +16,12 @@ import {
   TrendingUp,
   RefreshCw,
   Loader2,
+  Send,
+  Mic,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+/* ── Insight types ── */
 
 interface AdvisoryInsight {
   type: "urgent" | "warning" | "info" | "positive";
@@ -24,37 +29,46 @@ interface AdvisoryInsight {
   detail: string;
 }
 
-const TYPE_CONFIG = {
-  urgent: {
-    icon: AlertCircle,
-    color: "text-red-500",
-    bg: "bg-red-50 dark:bg-red-950/30",
-    border: "border-red-200 dark:border-red-800",
-  },
-  warning: {
-    icon: AlertTriangle,
-    color: "text-amber-500",
-    bg: "bg-amber-50 dark:bg-amber-950/30",
-    border: "border-amber-200 dark:border-amber-800",
-  },
-  info: {
-    icon: Info,
-    color: "text-blue-500",
-    bg: "bg-blue-50 dark:bg-blue-950/30",
-    border: "border-blue-200 dark:border-blue-800",
-  },
-  positive: {
-    icon: TrendingUp,
-    color: "text-emerald-500",
-    bg: "bg-emerald-50 dark:bg-emerald-950/30",
-    border: "border-emerald-200 dark:border-emerald-800",
-  },
+const BORDER_COLOR: Record<string, string> = {
+  urgent: "border-l-[#ef4444]",
+  warning: "border-l-[#f59e0b]",
+  positive: "border-l-[#14b8a6]",
+  info: "border-l-[#38b6ff]",
 };
+
+const ICON_COLOR: Record<string, string> = {
+  urgent: "text-[#ef4444]",
+  warning: "text-[#f59e0b]",
+  positive: "text-[#14b8a6]",
+  info: "text-[#38b6ff]",
+};
+
+const TYPE_ICON: Record<string, typeof AlertCircle> = {
+  urgent: AlertCircle,
+  warning: AlertTriangle,
+  info: Info,
+  positive: TrendingUp,
+};
+
+/* ── Chat types ── */
+
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+/* ── Component ── */
 
 export function AiAdvisory() {
   const [insights, setInsights] = useState<AdvisoryInsight[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Chat state
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const fetchInsights = useCallback(async (force = false) => {
     try {
@@ -76,22 +90,78 @@ export function AiAdvisory() {
     fetchInsights();
   }, [fetchInsights]);
 
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   function handleRefresh() {
     setRefreshing(true);
     fetchInsights(true);
   }
 
-  return (
-    <Card className="relative overflow-hidden">
-      {/* Gradient accent stripe */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#38b6ff] via-[#7C3AED] to-[#38b6ff]" />
+  async function handleSendMessage(e: React.FormEvent) {
+    e.preventDefault();
+    const text = chatInput.trim();
+    if (!text || chatLoading) return;
 
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+    const userMsg: ChatMessage = { role: "user", content: text };
+    setMessages((prev) => [...prev, userMsg]);
+    setChatInput("");
+    setChatLoading(true);
+
+    try {
+      const res = await fetch("/api/ai-assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          history: messages.slice(-10), // last 10 messages for context
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: data.response },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "Sorry, I couldn't process that. Please try again.",
+          },
+        ]);
+      }
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Connection error. Please try again.",
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
+  // Group insights
+  const needsAttention = insights.filter(
+    (i) => i.type === "urgent" || i.type === "warning"
+  );
+  const onTrack = insights.filter(
+    (i) => i.type === "positive" || i.type === "info"
+  );
+
+  return (
+    <Card className="dash-card overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <div className="flex size-6 items-center justify-center rounded-md bg-gradient-to-br from-[#38b6ff]/20 to-[#7C3AED]/20">
-            <Sparkles className="size-3.5 text-[#38b6ff]" />
+          <div className="flex size-6 items-center justify-center rounded-md bg-brand-50 dark:bg-accent">
+            <Sparkles className="size-3.5 text-brand-400" />
           </div>
-          AI Advisory
+          AI Assistant
         </CardTitle>
         <Button
           variant="ghost"
@@ -99,6 +169,7 @@ export function AiAdvisory() {
           onClick={handleRefresh}
           disabled={refreshing}
           className="size-7"
+          title="Refresh insights"
         >
           {refreshing ? (
             <Loader2 className="size-3.5 animate-spin" />
@@ -108,7 +179,8 @@ export function AiAdvisory() {
         </Button>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="space-y-4">
+        {/* ── Briefing ── */}
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -121,32 +193,122 @@ export function AiAdvisory() {
             No insights available right now.
           </p>
         ) : (
-          <div className="space-y-2.5">
-            {insights.map((insight, i) => {
-              const config = TYPE_CONFIG[insight.type] || TYPE_CONFIG.info;
-              const IconComponent = config.icon;
-              return (
-                <div
-                  key={i}
-                  className={`flex items-start gap-3 rounded-lg border px-3 py-2.5 ${config.bg} ${config.border}`}
-                >
-                  <IconComponent
-                    className={`size-4 mt-0.5 shrink-0 ${config.color}`}
-                  />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium leading-tight">
-                      {insight.title}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
-                      {insight.detail}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="space-y-3">
+            {/* Needs Attention */}
+            {needsAttention.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                  Needs attention
+                </p>
+                {needsAttention.map((insight, i) => (
+                  <InsightRow key={`attn-${i}`} insight={insight} />
+                ))}
+              </div>
+            )}
+
+            {/* On Track */}
+            {onTrack.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                  On track
+                </p>
+                {onTrack.map((insight, i) => (
+                  <InsightRow key={`track-${i}`} insight={insight} />
+                ))}
+              </div>
+            )}
           </div>
         )}
+
+        {/* ── Chat Thread ── */}
+        {messages.length > 0 && (
+          <div className="max-h-64 overflow-y-auto space-y-2 rounded-lg border border-border p-3">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "max-w-[85%] rounded-lg px-3 py-2 text-sm",
+                  msg.role === "user"
+                    ? "ml-auto bg-[#38b6ff] text-white"
+                    : "mr-auto bg-muted text-foreground"
+                )}
+              >
+                {msg.content}
+              </div>
+            ))}
+            {chatLoading && (
+              <div className="mr-auto flex items-center gap-1.5 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+                <Loader2 className="size-3 animate-spin" />
+                Thinking...
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+        )}
+
+        {/* ── Chat Input ── */}
+        <form
+          onSubmit={handleSendMessage}
+          className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2"
+        >
+          <input
+            type="text"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            placeholder="Ask about your requests, associations, revenue..."
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+            disabled={chatLoading}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-7 shrink-0"
+            title="Voice coming soon"
+            disabled
+          >
+            <Mic className="size-3.5 text-muted-foreground" />
+          </Button>
+          <Button
+            type="submit"
+            variant="ghost"
+            size="icon"
+            className="size-7 shrink-0"
+            disabled={chatLoading || !chatInput.trim()}
+          >
+            <Send className="size-3.5 text-brand-400" />
+          </Button>
+        </form>
       </CardContent>
     </Card>
+  );
+}
+
+/* ── Insight Row (left-border accent) ── */
+
+function InsightRow({ insight }: { insight: AdvisoryInsight }) {
+  const IconComponent = TYPE_ICON[insight.type] || Info;
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-3 rounded-lg border-l-[3px] bg-card px-3 py-2.5",
+        BORDER_COLOR[insight.type] || BORDER_COLOR.info
+      )}
+    >
+      <IconComponent
+        className={cn(
+          "size-4 mt-0.5 shrink-0",
+          ICON_COLOR[insight.type] || ICON_COLOR.info
+        )}
+      />
+      <div className="min-w-0">
+        <p className="text-sm font-medium leading-tight text-foreground">
+          {insight.title}
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+          {insight.detail}
+        </p>
+      </div>
+    </div>
   );
 }
