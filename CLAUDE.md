@@ -149,6 +149,51 @@ NEXT_PUBLIC_APP_DOMAIN=propertydocz.com
 - Grounded, data-based analysis — no unsupported superlative claims or motivational rhetoric
 - When in doubt, ask before assuming
 
+## Design System (XeedlyAI Standards)
+
+Full reference: `XEEDLY_STANDARDS.md` (project root)
+
+### Fonts
+- **Inter** — all UI text, headings, body (CSS var: `--font-sans`)
+- **JetBrains Mono** — all numbers, money, dates, data figures (CSS var: `--font-mono`, utility: `.font-data`)
+- Configured in `src/app/layout.tsx` via `next/font/google`
+
+### Primary Color
+- Brand blue: `#38b6ff` — CTAs, active states, sidebar highlights
+- Full ramp: `brand-50` through `brand-900` in globals.css
+
+### Status Colors (Left-Border Accents Only)
+| Status | Color | Class |
+|--------|-------|-------|
+| Urgent | `#ef4444` | `.status-urgent` |
+| Attention | `#f59e0b` | `.status-attention` |
+| Good | `#14b8a6` | `.status-good` |
+| Info | `#38b6ff` | `.status-info` |
+
+**Rule:** Never use full-color background fills for status. Always left-border accent.
+
+### Shared Component Registry
+| Component | Path | Usage |
+|-----------|------|-------|
+| PageHeader | `src/components/shared/PageHeader.tsx` | Consistent page title + subtitle + action |
+| PageKpiTicker | `src/components/shared/PageKpiTicker.tsx` | KPI bar atop every dashboard page |
+| PageTransition | `src/components/shared/PageTransition.tsx` | FadeUp, StaggerContainer, FadeUpChild |
+| EmptyState | `src/components/shared/EmptyState.tsx` | Brand-consistent empty states |
+| useCountUp | `src/hooks/useCountUp.ts` | Animated count-up for KPI numbers |
+
+### Page Information Hierarchy
+Every dashboard page follows this order:
+1. **PageHeader** — title, subtitle, action button
+2. **PageKpiTicker** — summary metrics
+3. **Content** — cards, tables, detail views
+
+### CSS Utilities
+- `.dash-card` — card shadow + hover elevation (use on all dashboard cards)
+- `.topo-bg` — topographical background pattern (landing page)
+- `.table-scroll-mobile` — horizontal scroll for tables on mobile
+- `.font-data` — JetBrains Mono with tabular numbers
+
 ## Reference
 - Full build plan: PROPERTYDOCZ_BUILD_PLAN.md
 - Build roadmap: PROMPT_PLAN.md (create during Phase 0)
+- Design system: XEEDLY_STANDARDS.md
