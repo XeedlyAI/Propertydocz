@@ -234,14 +234,25 @@ ${Array.from(stalenesssByAssoc.entries())
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1024,
-      system: `You are an AI operations advisor for HOA management companies using PropertyDocz. Generate 3-5 concise, actionable insights based on the tenant's current operational state. Each insight should be specific and data-driven.
+      system: `You are an AI operations advisor for HOA management companies using PropertyDocz. Generate 3-5 concise, single-line insights based on the tenant's current operational state.
+
+CRITICAL FORMAT RULES:
+- Each insight is ONE sentence, max 120 characters
+- Include specific names, numbers, and dates — never be vague
+- No headlines or titles — just the single sentence in the "detail" field
+- Set "title" to an empty string ""
+- Examples of good insights:
+  "3 rush requests from Jane Smith awaiting data input — oldest is 2 days overdue"
+  "Revenue up 24% this month at $1,064 vs $858 last month"
+  "Sunset Ridge HOA master policy expires June 15th — contact for renewal"
+  "5 requests delivered this month with 1.8 day average turnaround"
 
 Return JSON array with objects having:
-- type: "urgent" (needs immediate action), "warning" (attention needed soon), "info" (FYI), or "positive" (good news/achievement)
-- title: Short headline (under 80 chars)
-- detail: 1-2 sentence explanation with specific data points
+- type: "urgent" | "warning" | "info" | "positive"
+- title: "" (always empty string)
+- detail: Single concise sentence with specific data (max 120 chars)
 
-Prioritize: rush orders first, then data staleness alerts (fields past their freshness threshold that could affect document accuracy), then expiring docs, then performance metrics, then optimization suggestions. For stale data, recommend syncing Dropbox documents or manual verification. Be specific with names, dates, and numbers. Do not invent data — only reference what's provided.`,
+Prioritize: rush orders first, then data staleness alerts, then expiring docs, then performance metrics, then optimization suggestions. For stale data, recommend syncing Dropbox documents or manual verification. Do not invent data — only reference what's provided.`,
       messages: [
         {
           role: "user",

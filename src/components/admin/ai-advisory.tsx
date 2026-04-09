@@ -179,42 +179,46 @@ export function AiAdvisory() {
         </Button>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {/* ── Briefing ── */}
         {loading ? (
-          <div className="flex items-center justify-center py-8">
+          <div className="flex items-center justify-center py-6">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
               Generating insights...
             </div>
           </div>
         ) : insights.length === 0 ? (
-          <p className="py-4 text-center text-sm text-muted-foreground">
+          <p className="py-3 text-center text-sm text-muted-foreground">
             No insights available right now.
           </p>
         ) : (
-          <div className="space-y-3">
+          <div>
             {/* Needs Attention */}
             {needsAttention.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <div>
+                <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                   Needs attention
                 </p>
-                {needsAttention.map((insight, i) => (
-                  <InsightRow key={`attn-${i}`} insight={insight} />
-                ))}
+                <div className="space-y-1.5">
+                  {needsAttention.map((insight, i) => (
+                    <InsightRow key={`attn-${i}`} insight={insight} />
+                  ))}
+                </div>
               </div>
             )}
 
             {/* On Track */}
             {onTrack.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <div className={needsAttention.length > 0 ? "mt-3" : ""}>
+                <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                   On track
                 </p>
-                {onTrack.map((insight, i) => (
-                  <InsightRow key={`track-${i}`} insight={insight} />
-                ))}
+                <div className="space-y-1.5">
+                  {onTrack.map((insight, i) => (
+                    <InsightRow key={`track-${i}`} insight={insight} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -288,27 +292,24 @@ export function AiAdvisory() {
 
 function InsightRow({ insight }: { insight: AdvisoryInsight }) {
   const IconComponent = TYPE_ICON[insight.type] || Info;
+  // Use detail as the single line; fall back to title if detail is empty
+  const text = insight.detail || insight.title;
   return (
     <div
       className={cn(
-        "flex items-start gap-3 rounded-lg border-l-[3px] bg-card px-3 py-2.5",
+        "flex items-center gap-2.5 rounded-md border-l-[3px] px-3 py-2",
         BORDER_COLOR[insight.type] || BORDER_COLOR.info
       )}
     >
       <IconComponent
         className={cn(
-          "size-4 mt-0.5 shrink-0",
+          "size-3.5 shrink-0",
           ICON_COLOR[insight.type] || ICON_COLOR.info
         )}
       />
-      <div className="min-w-0">
-        <p className="text-sm font-medium leading-tight text-foreground">
-          {insight.title}
-        </p>
-        <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
-          {insight.detail}
-        </p>
-      </div>
+      <p className="text-sm leading-snug text-foreground min-w-0">
+        {text}
+      </p>
     </div>
   );
 }
