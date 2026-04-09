@@ -1,221 +1,245 @@
 export function HeroIllustration({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 640 420"
+      viewBox="0 0 600 450"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"
-      aria-label="Illustration of HOA document ordering process across three properties"
+      aria-label="Illustration of property document ordering process across three properties"
     >
       {/* ═══ GROUND LINE ═══ */}
-      <line x1="0" y1="340" x2="640" y2="340" stroke="#94a3b8" strokeWidth="1.5" />
+      <line x1="0" y1="370" x2="600" y2="370" stroke="#94a3b8" strokeWidth="2" />
 
       {/* ═══ PATHWAY (dashed) ═══ */}
       <path
-        d="M80 340 L200 340 L280 340 L400 340 L480 340 L580 340"
+        d="M30 370 L570 370"
         stroke="#cbd5e1"
-        strokeWidth="1"
-        strokeDasharray="6 4"
+        strokeWidth="1.5"
+        strokeDasharray="8 5"
       />
 
       {/* ═══ LANDSCAPING ═══ */}
-      {/* Shrubs — geometric circles */}
-      <circle cx="45" cy="335" r="8" stroke="#94a3b8" strokeWidth="1" fill="none" />
-      <circle cx="55" cy="332" r="6" stroke="#cbd5e1" strokeWidth="1" fill="none" />
-      <circle cx="255" cy="335" r="7" stroke="#94a3b8" strokeWidth="1" fill="none" />
-      <circle cx="245" cy="332" r="5" stroke="#cbd5e1" strokeWidth="1" fill="none" />
-      <circle cx="475" cy="335" r="8" stroke="#94a3b8" strokeWidth="1" fill="none" />
-      <circle cx="465" cy="332" r="6" stroke="#cbd5e1" strokeWidth="1" fill="none" />
+      {/* Shrubs between houses */}
+      <circle cx="185" cy="362" r="10" stroke="#94a3b8" strokeWidth="1.2" fill="none" />
+      <circle cx="198" cy="358" r="7" stroke="#cbd5e1" strokeWidth="1" fill="none" />
+      <circle cx="395" cy="362" r="10" stroke="#94a3b8" strokeWidth="1.2" fill="none" />
+      <circle cx="408" cy="358" r="7" stroke="#cbd5e1" strokeWidth="1" fill="none" />
 
       {/* Fence sections */}
-      <g stroke="#cbd5e1" strokeWidth="1">
-        <line x1="220" y1="340" x2="220" y2="320" />
-        <line x1="230" y1="340" x2="230" y2="320" />
-        <line x1="240" y1="340" x2="240" y2="320" />
-        <line x1="218" y1="325" x2="242" y2="325" />
-        <line x1="218" y1="332" x2="242" y2="332" />
+      <g stroke="#cbd5e1" strokeWidth="1.2">
+        <line x1="210" y1="370" x2="210" y2="345" />
+        <line x1="222" y1="370" x2="222" y2="345" />
+        <line x1="234" y1="370" x2="234" y2="345" />
+        <line x1="208" y1="352" x2="236" y2="352" />
+        <line x1="208" y1="361" x2="236" y2="361" />
       </g>
-      <g stroke="#cbd5e1" strokeWidth="1">
-        <line x1="440" y1="340" x2="440" y2="320" />
-        <line x1="450" y1="340" x2="450" y2="320" />
-        <line x1="460" y1="340" x2="460" y2="320" />
-        <line x1="438" y1="325" x2="462" y2="325" />
-        <line x1="438" y1="332" x2="462" y2="332" />
+      <g stroke="#cbd5e1" strokeWidth="1.2">
+        <line x1="370" y1="370" x2="370" y2="345" />
+        <line x1="382" y1="370" x2="382" y2="345" />
+        <line x1="394" y1="370" x2="394" y2="345" />
+        <line x1="368" y1="352" x2="396" y2="352" />
+        <line x1="368" y1="361" x2="396" y2="361" />
       </g>
 
-      {/* ═══ HOUSE 1 — TOWNHOME WITH FOR SALE SIGN ═══ */}
+      {/* ═══ HOUSE 1 — FOR SALE ═══ */}
       <g>
         {/* Main structure */}
-        <rect x="60" y="230" width="100" height="110" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <rect x="45" y="240" width="130" height="130" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
         {/* Roof — pitched */}
-        <path d="M55 230 L110 185 L165 230" stroke="#94a3b8" strokeWidth="2" fill="none" />
+        <path d="M38 240 L110 175 L182 240" stroke="#94a3b8" strokeWidth="2.5" fill="none" />
         {/* Roof ridge detail */}
-        <line x1="95" y1="200" x2="125" y2="200" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="90" y1="200" x2="130" y2="200" stroke="#cbd5e1" strokeWidth="1.2" />
         {/* Windows — top floor */}
-        <rect x="72" y="245" width="22" height="22" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
-        <rect x="126" y="245" width="22" height="22" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
+        <rect x="60" y="258" width="30" height="28" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <rect x="130" y="258" width="30" height="28" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
         {/* Window cross panes */}
-        <line x1="83" y1="245" x2="83" y2="267" stroke="#cbd5e1" strokeWidth="0.75" />
-        <line x1="72" y1="256" x2="94" y2="256" stroke="#cbd5e1" strokeWidth="0.75" />
-        <line x1="137" y1="245" x2="137" y2="267" stroke="#cbd5e1" strokeWidth="0.75" />
-        <line x1="126" y1="256" x2="148" y2="256" stroke="#cbd5e1" strokeWidth="0.75" />
+        <line x1="75" y1="258" x2="75" y2="286" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="60" y1="272" x2="90" y2="272" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="145" y1="258" x2="145" y2="286" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="130" y1="272" x2="160" y2="272" stroke="#cbd5e1" strokeWidth="1" />
         {/* Door */}
-        <rect x="98" y="295" width="24" height="45" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
-        <circle cx="117" cy="318" r="1.5" fill="#94a3b8" />
+        <rect x="96" y="325" width="28" height="45" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <circle cx="118" cy="348" r="2" fill="#94a3b8" />
         {/* Steps */}
-        <line x1="95" y1="340" x2="125" y2="340" stroke="#94a3b8" strokeWidth="1.5" />
-        <line x1="93" y1="345" x2="127" y2="345" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="92" y1="370" x2="128" y2="370" stroke="#94a3b8" strokeWidth="2" />
 
-        {/* FOR SALE sign */}
-        <line x1="30" y1="280" x2="30" y2="340" stroke="#94a3b8" strokeWidth="1.5" />
-        <rect x="15" y="280" width="30" height="20" stroke="#38b6ff" strokeWidth="1.5" fill="none" rx="2" />
-        <line x1="21" y1="287" x2="39" y2="287" stroke="#38b6ff" strokeWidth="1" />
-        <line x1="23" y1="293" x2="37" y2="293" stroke="#38b6ff" strokeWidth="0.75" />
+        {/* ── Classic Real Estate "FOR SALE" Sign ── */}
+        <g>
+          {/* Post — single vertical */}
+          <line x1="22" y1="260" x2="22" y2="370" stroke="#94a3b8" strokeWidth="2.5" />
+          {/* Horizontal arm extending right from post top */}
+          <line x1="22" y1="260" x2="60" y2="260" stroke="#94a3b8" strokeWidth="2" />
+          {/* Sign hanging from arm — rectangular */}
+          <rect x="24" y="262" width="38" height="28" rx="3" stroke="#38b6ff" strokeWidth="2" fill="none" />
+          {/* "FOR" text */}
+          <text x="43" y="275" textAnchor="middle" fill="#38b6ff" fontSize="7" fontWeight="700" fontFamily="Inter, sans-serif">FOR</text>
+          {/* "SALE" text */}
+          <text x="43" y="285" textAnchor="middle" fill="#38b6ff" fontSize="8" fontWeight="800" fontFamily="Inter, sans-serif">SALE</text>
+          {/* Hanging chains/lines */}
+          <line x1="30" y1="260" x2="30" y2="262" stroke="#94a3b8" strokeWidth="1.5" />
+          <line x1="56" y1="260" x2="56" y2="262" stroke="#94a3b8" strokeWidth="1.5" />
+        </g>
       </g>
 
       {/* Agent silhouette by sign */}
       <g>
-        <circle cx="48" cy="298" r="5" fill="#64748b" />
-        <path d="M42 306 L48 320 L54 306 Z" fill="#64748b" />
-        {/* Extended arm gesturing */}
-        <line x1="54" y1="309" x2="65" y2="303" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Head */}
+        <circle cx="50" cy="320" r="8" fill="#64748b" />
+        {/* Body */}
+        <path d="M40 332 L50 355 L60 332 Z" fill="#64748b" />
+        {/* Extended arm gesturing toward house */}
+        <line x1="60" y1="336" x2="78" y2="326" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" />
       </g>
 
       {/* Buyer couple approaching */}
       <g>
         {/* Person 1 */}
-        <circle cx="130" cy="310" r="4.5" fill="#64748b" />
-        <path d="M125 317 L130 330 L135 317 Z" fill="#64748b" />
+        <circle cx="145" cy="330" r="7" fill="#64748b" />
+        <path d="M137 340 L145 362 L153 340 Z" fill="#64748b" />
         {/* Person 2 */}
-        <circle cx="142" cy="308" r="5" fill="#64748b" />
-        <path d="M137 315 L142 329 L147 315 Z" fill="#64748b" />
+        <circle cx="162" cy="327" r="8" fill="#64748b" />
+        <path d="M153 338 L162 361 L171 338 Z" fill="#64748b" />
       </g>
 
       {/* ═══ HOUSE 2 — CENTER, TALLER — DOCUMENT PREP ═══ */}
       <g>
         {/* Main structure — taller */}
-        <rect x="270" y="200" width="110" height="140" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <rect x="248" y="210" width="140" height="160" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
         {/* Roof — flat parapet style */}
-        <line x1="265" y1="200" x2="385" y2="200" stroke="#94a3b8" strokeWidth="2" />
-        <line x1="268" y1="195" x2="382" y2="195" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="242" y1="210" x2="394" y2="210" stroke="#94a3b8" strokeWidth="2.5" />
+        <line x1="246" y1="204" x2="390" y2="204" stroke="#cbd5e1" strokeWidth="1.2" />
         {/* Windows — top floor row */}
-        <rect x="282" y="215" width="20" height="20" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
-        <rect x="315" y="215" width="20" height="20" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
-        <rect x="348" y="215" width="20" height="20" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
+        <rect x="262" y="228" width="28" height="26" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <rect x="304" y="228" width="28" height="26" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <rect x="346" y="228" width="28" height="26" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
         {/* Window pane details */}
-        <line x1="292" y1="215" x2="292" y2="235" stroke="#cbd5e1" strokeWidth="0.75" />
-        <line x1="325" y1="215" x2="325" y2="235" stroke="#cbd5e1" strokeWidth="0.75" />
-        <line x1="358" y1="215" x2="358" y2="235" stroke="#cbd5e1" strokeWidth="0.75" />
+        <line x1="276" y1="228" x2="276" y2="254" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="318" y1="228" x2="318" y2="254" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="360" y1="228" x2="360" y2="254" stroke="#cbd5e1" strokeWidth="1" />
         {/* Windows — bottom floor */}
-        <rect x="282" y="260" width="20" height="22" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
-        <rect x="348" y="260" width="20" height="22" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
+        <rect x="262" y="278" width="28" height="28" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <rect x="346" y="278" width="28" height="28" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
         {/* Door — wider entrance */}
-        <rect x="312" y="300" width="26" height="40" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
-        <circle cx="333" cy="320" r="1.5" fill="#94a3b8" />
+        <rect x="304" y="328" width="30" height="42" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <circle cx="328" cy="350" r="2" fill="#94a3b8" />
 
-        {/* Figure at desk/laptop */}
+        {/* Figure at desk/laptop inside */}
         <g>
           {/* Desk */}
-          <rect x="280" y="318" width="24" height="2" stroke="#94a3b8" strokeWidth="1" fill="none" />
-          <line x1="282" y1="320" x2="282" y2="340" stroke="#cbd5e1" strokeWidth="1" />
-          <line x1="302" y1="320" x2="302" y2="340" stroke="#cbd5e1" strokeWidth="1" />
+          <rect x="260" y="344" width="32" height="3" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
+          <line x1="263" y1="347" x2="263" y2="370" stroke="#cbd5e1" strokeWidth="1.2" />
+          <line x1="289" y1="347" x2="289" y2="370" stroke="#cbd5e1" strokeWidth="1.2" />
           {/* Laptop on desk */}
-          <rect x="285" y="312" width="14" height="6" stroke="#94a3b8" strokeWidth="1" fill="none" rx="0.5" />
-          <line x1="285" y1="318" x2="299" y2="318" stroke="#94a3b8" strokeWidth="1" />
+          <rect x="266" y="336" width="20" height="8" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
+          <line x1="266" y1="344" x2="286" y2="344" stroke="#94a3b8" strokeWidth="1.5" />
           {/* Person sitting */}
-          <circle cx="276" cy="302" r="4.5" fill="#64748b" />
-          <path d="M271 309 L276 322 L281 309 Z" fill="#64748b" />
+          <circle cx="254" cy="322" r="7" fill="#64748b" />
+          <path d="M246 332 L254 354 L262 332 Z" fill="#64748b" />
         </g>
 
-        {/* Floating document icons */}
+        {/* Floating document icons above house */}
         {/* Doc 1 */}
         <g>
-          <rect x="345" y="155" width="24" height="30" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="2" />
-          <line x1="350" y1="163" x2="364" y2="163" stroke="#cbd5e1" strokeWidth="1" />
-          <line x1="350" y1="168" x2="362" y2="168" stroke="#cbd5e1" strokeWidth="0.75" />
-          <line x1="350" y1="173" x2="360" y2="173" stroke="#cbd5e1" strokeWidth="0.75" />
+          <rect x="340" y="148" width="32" height="40" stroke="#94a3b8" strokeWidth="2" fill="none" rx="3" />
+          <line x1="347" y1="158" x2="365" y2="158" stroke="#cbd5e1" strokeWidth="1.2" />
+          <line x1="347" y1="165" x2="363" y2="165" stroke="#cbd5e1" strokeWidth="1" />
+          <line x1="347" y1="172" x2="360" y2="172" stroke="#cbd5e1" strokeWidth="1" />
         </g>
         {/* Doc 2 */}
         <g>
-          <rect x="315" y="140" width="24" height="30" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="2" />
-          <line x1="320" y1="148" x2="334" y2="148" stroke="#cbd5e1" strokeWidth="1" />
-          <line x1="320" y1="153" x2="332" y2="153" stroke="#cbd5e1" strokeWidth="0.75" />
-          <line x1="320" y1="158" x2="330" y2="158" stroke="#cbd5e1" strokeWidth="0.75" />
+          <rect x="300" y="128" width="32" height="40" stroke="#94a3b8" strokeWidth="2" fill="none" rx="3" />
+          <line x1="307" y1="138" x2="325" y2="138" stroke="#cbd5e1" strokeWidth="1.2" />
+          <line x1="307" y1="145" x2="323" y2="145" stroke="#cbd5e1" strokeWidth="1" />
+          <line x1="307" y1="152" x2="320" y2="152" stroke="#cbd5e1" strokeWidth="1" />
         </g>
         {/* Doc 3 — with gold checkmark */}
         <g>
-          <rect x="285" y="148" width="24" height="30" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="2" />
-          <line x1="290" y1="156" x2="304" y2="156" stroke="#cbd5e1" strokeWidth="1" />
-          <line x1="290" y1="161" x2="302" y2="161" stroke="#cbd5e1" strokeWidth="0.75" />
+          <rect x="260" y="140" width="32" height="40" stroke="#94a3b8" strokeWidth="2" fill="none" rx="3" />
+          <line x1="267" y1="150" x2="285" y2="150" stroke="#cbd5e1" strokeWidth="1.2" />
+          <line x1="267" y1="157" x2="283" y2="157" stroke="#cbd5e1" strokeWidth="1" />
           {/* Gold checkmark */}
-          <path d="M293 167 L297 171 L305 163" stroke="#F5A623" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M270 165 L276 172 L288 160" stroke="#F5A623" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
         </g>
 
         {/* Connection lines from docs to house */}
-        <line x1="325" y1="195" x2="325" y2="170" stroke="#cbd5e1" strokeWidth="0.75" strokeDasharray="3 3" />
+        <line x1="318" y1="204" x2="318" y2="170" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="4 4" />
       </g>
 
-      {/* ═══ HOUSE 3 — COMPLETED TRANSACTION ═══ */}
+      {/* ═══ HOUSE 3 — COMPLETED TRANSACTION / SOLD ═══ */}
       <g>
         {/* Main structure */}
-        <rect x="500" y="240" width="100" height="100" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <rect x="430" y="248" width="130" height="122" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
         {/* Roof — gabled */}
-        <path d="M495 240 L550 195 L605 240" stroke="#94a3b8" strokeWidth="2" fill="none" />
+        <path d="M424 248 L495 190 L566 248" stroke="#94a3b8" strokeWidth="2.5" fill="none" />
         {/* Chimney */}
-        <rect x="575" y="205" width="12" height="25" stroke="#cbd5e1" strokeWidth="1" fill="none" />
-        {/* Window */}
-        <rect x="512" y="258" width="24" height="22" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
-        <line x1="524" y1="258" x2="524" y2="280" stroke="#cbd5e1" strokeWidth="0.75" />
-        <line x1="512" y1="269" x2="536" y2="269" stroke="#cbd5e1" strokeWidth="0.75" />
-        {/* Window — right */}
-        <rect x="564" y="258" width="24" height="22" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
-        <line x1="576" y1="258" x2="576" y2="280" stroke="#cbd5e1" strokeWidth="0.75" />
-        <line x1="564" y1="269" x2="588" y2="269" stroke="#cbd5e1" strokeWidth="0.75" />
+        <rect x="535" y="210" width="16" height="30" stroke="#cbd5e1" strokeWidth="1.5" fill="none" />
+        {/* Window left */}
+        <rect x="445" y="268" width="30" height="28" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <line x1="460" y1="268" x2="460" y2="296" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="445" y1="282" x2="475" y2="282" stroke="#cbd5e1" strokeWidth="1" />
+        {/* Window right */}
+        <rect x="515" y="268" width="30" height="28" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <line x1="530" y1="268" x2="530" y2="296" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="515" y1="282" x2="545" y2="282" stroke="#cbd5e1" strokeWidth="1" />
         {/* Door */}
-        <rect x="538" y="300" width="24" height="40" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
-        <circle cx="557" cy="320" r="1.5" fill="#94a3b8" />
+        <rect x="480" y="328" width="28" height="42" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+        <circle cx="502" cy="350" r="2" fill="#94a3b8" />
 
-        {/* SOLD banner overlay */}
-        <rect x="510" y="230" width="42" height="14" stroke="#F5A623" strokeWidth="1.5" fill="none" rx="3" />
-        <text x="531" y="240.5" textAnchor="middle" fill="#F5A623" fontSize="8" fontWeight="700" fontFamily="Inter, sans-serif">SOLD</text>
+        {/* ── Classic Real Estate "SOLD" Sign ── */}
+        <g>
+          {/* Post */}
+          <line x1="578" y1="260" x2="578" y2="370" stroke="#94a3b8" strokeWidth="2.5" />
+          {/* Horizontal arm extending left */}
+          <line x1="540" y1="260" x2="578" y2="260" stroke="#94a3b8" strokeWidth="2" />
+          {/* Sign hanging from arm */}
+          <rect x="542" y="262" width="38" height="28" rx="3" stroke="#F5A623" strokeWidth="2" fill="none" />
+          {/* "SOLD" text */}
+          <text x="561" y="281" textAnchor="middle" fill="#F5A623" fontSize="10" fontWeight="800" fontFamily="Inter, sans-serif">SOLD</text>
+          {/* Hanging lines */}
+          <line x1="548" y1="260" x2="548" y2="262" stroke="#94a3b8" strokeWidth="1.5" />
+          <line x1="574" y1="260" x2="574" y2="262" stroke="#94a3b8" strokeWidth="1.5" />
+        </g>
 
         {/* Figure receiving document */}
         <g>
-          <circle cx="500" cy="310" r="5" fill="#64748b" />
-          <path d="M494 317 L500 331 L506 317 Z" fill="#64748b" />
+          {/* Head */}
+          <circle cx="435" cy="330" r="8" fill="#64748b" />
+          {/* Body */}
+          <path d="M426 341 L435 364 L444 341 Z" fill="#64748b" />
           {/* Document in hand */}
-          <rect x="488" y="318" width="10" height="13" stroke="#94a3b8" strokeWidth="1" fill="none" rx="1" />
-          <line x1="490" y1="322" x2="496" y2="322" stroke="#cbd5e1" strokeWidth="0.5" />
-          <line x1="490" y1="325" x2="495" y2="325" stroke="#cbd5e1" strokeWidth="0.5" />
+          <rect x="420" y="346" width="14" height="18" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="2" />
+          <line x1="423" y1="352" x2="431" y2="352" stroke="#cbd5e1" strokeWidth="0.75" />
+          <line x1="423" y1="356" x2="430" y2="356" stroke="#cbd5e1" strokeWidth="0.75" />
         </g>
 
         {/* Email/digital delivery symbol */}
         <g>
-          <rect x="570" y="295" width="20" height="14" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="2" />
-          <path d="M570 295 L580 304 L590 295" stroke="#94a3b8" strokeWidth="1" fill="none" />
+          <rect x="520" y="322" width="26" height="18" stroke="#94a3b8" strokeWidth="2" fill="none" rx="3" />
+          <path d="M520 322 L533 333 L546 322" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
           {/* Send lines */}
-          <line x1="594" y1="298" x2="602" y2="298" stroke="#cbd5e1" strokeWidth="0.75" />
-          <line x1="594" y1="302" x2="600" y2="302" stroke="#cbd5e1" strokeWidth="0.75" />
-          <line x1="594" y1="306" x2="598" y2="306" stroke="#cbd5e1" strokeWidth="0.75" />
+          <line x1="550" y1="326" x2="562" y2="326" stroke="#cbd5e1" strokeWidth="1" />
+          <line x1="550" y1="332" x2="558" y2="332" stroke="#cbd5e1" strokeWidth="1" />
+          <line x1="550" y1="338" x2="555" y2="338" stroke="#cbd5e1" strokeWidth="1" />
         </g>
       </g>
 
       {/* ═══ SKY — SUN ═══ */}
-      <circle cx="580" cy="60" r="18" stroke="#F5A623" strokeWidth="1.5" fill="none" />
+      <circle cx="540" cy="70" r="24" stroke="#F5A623" strokeWidth="2" fill="none" />
       {/* Sun rays */}
-      <line x1="580" y1="36" x2="580" y2="28" stroke="#F5A623" strokeWidth="1" />
-      <line x1="580" y1="84" x2="580" y2="92" stroke="#F5A623" strokeWidth="1" />
-      <line x1="556" y1="60" x2="548" y2="60" stroke="#F5A623" strokeWidth="1" />
-      <line x1="604" y1="60" x2="612" y2="60" stroke="#F5A623" strokeWidth="1" />
-      <line x1="563" y1="43" x2="557" y2="37" stroke="#F5A623" strokeWidth="1" />
-      <line x1="597" y1="77" x2="603" y2="83" stroke="#F5A623" strokeWidth="1" />
-      <line x1="597" y1="43" x2="603" y2="37" stroke="#F5A623" strokeWidth="1" />
-      <line x1="563" y1="77" x2="557" y2="83" stroke="#F5A623" strokeWidth="1" />
+      <line x1="540" y1="38" x2="540" y2="28" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="540" y1="102" x2="540" y2="112" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="508" y1="70" x2="498" y2="70" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="572" y1="70" x2="582" y2="70" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="517" y1="47" x2="510" y2="40" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="563" y1="93" x2="570" y2="100" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="563" y1="47" x2="570" y2="40" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="517" y1="93" x2="510" y2="100" stroke="#F5A623" strokeWidth="1.5" />
 
       {/* ═══ CLOUD WISPS ═══ */}
-      <path d="M80 50 Q100 40, 120 50 Q130 42, 145 50" stroke="#cbd5e1" strokeWidth="0.75" fill="none" />
-      <path d="M200 70 Q215 62, 230 70 Q240 63, 250 70" stroke="#cbd5e1" strokeWidth="0.75" fill="none" />
+      <path d="M60 55 Q90 40, 120 55 Q135 42, 155 55" stroke="#cbd5e1" strokeWidth="1" fill="none" />
+      <path d="M200 80 Q225 65, 250 80 Q265 68, 280 80" stroke="#cbd5e1" strokeWidth="1" fill="none" />
+      <path d="M380 50 Q400 38, 420 50 Q430 40, 445 50" stroke="#cbd5e1" strokeWidth="1" fill="none" />
     </svg>
   );
 }
