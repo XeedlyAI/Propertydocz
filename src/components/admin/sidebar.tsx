@@ -9,6 +9,10 @@ import {
   LayoutDashboard,
   FileText,
   Building2,
+  Users,
+  Landmark,
+  TrendingUp,
+  CreditCard,
   Settings,
   LogOut,
   Menu,
@@ -33,6 +37,16 @@ const OPERATIONS_ITEMS: NavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/requests", label: "Requests", icon: FileText },
   { href: "/admin/associations", label: "Associations", icon: Building2 },
+];
+
+const CLIENTS_ITEMS: NavItem[] = [
+  { href: "/admin/agents", label: "Agents", icon: Users },
+  { href: "/admin/lenders", label: "Lenders", icon: Landmark },
+];
+
+const FINANCE_ITEMS: NavItem[] = [
+  { href: "/admin/revenue", label: "Revenue", icon: TrendingUp },
+  { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
 ];
 
 const SYSTEM_ITEMS: NavItem[] = [
@@ -71,6 +85,19 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
     );
   }
 
+  function NavGroup({ label, items }: { label: string; items: NavItem[] }) {
+    return (
+      <div className="space-y-0.5">
+        <p className="px-3 pb-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/50">
+          {label}
+        </p>
+        {items.map((item) => (
+          <NavLink key={item.href} item={item} />
+        ))}
+      </div>
+    );
+  }
+
   const sidebarContent = (
     <div className="flex h-full flex-col bg-white dark:bg-[#0C0F14] border-r border-[#E5E7EB] dark:border-white/8">
       {/* Logo */}
@@ -93,29 +120,16 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
         </p>
       </div>
 
-      {/* Navigation — Operations */}
-      <nav className="flex-1 flex flex-col px-3 py-3">
-        <div className="space-y-0.5">
-          <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
-            Operations
-          </p>
-          {OPERATIONS_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} />
-          ))}
-        </div>
+      {/* Navigation */}
+      <nav className="flex-1 flex flex-col px-3 py-3 gap-4">
+        <NavGroup label="Operations" items={OPERATIONS_ITEMS} />
+        <NavGroup label="Clients" items={CLIENTS_ITEMS} />
+        <NavGroup label="Finance" items={FINANCE_ITEMS} />
 
         {/* Spacer pushes System to bottom */}
         <div className="flex-1" />
 
-        {/* Navigation — System */}
-        <div className="space-y-0.5">
-          <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
-            System
-          </p>
-          {SYSTEM_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} />
-          ))}
-        </div>
+        <NavGroup label="System" items={SYSTEM_ITEMS} />
       </nav>
 
       {/* User / Sign Out */}

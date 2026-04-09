@@ -17,6 +17,10 @@ import {
   Shield,
   Users,
   Wand2,
+  FileText,
+  Landmark,
+  TrendingUp,
+  CreditCard,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -39,12 +43,28 @@ const PLATFORM_ITEMS: NavItem[] = [
   { href: "/platform/revenue", label: "Revenue", icon: DollarSign },
 ];
 
+const OPERATIONS_ITEMS: NavItem[] = [
+  { href: "/platform/requests", label: "Requests", icon: FileText },
+  { href: "/platform/associations", label: "Associations", icon: Building2 },
+];
+
+const CLIENTS_ITEMS: NavItem[] = [
+  { href: "/platform/client-agents", label: "Agents", icon: Users },
+  { href: "/platform/lenders", label: "Lenders", icon: Landmark },
+];
+
+const FINANCE_ITEMS: NavItem[] = [
+  { href: "/platform/tenant-revenue", label: "Revenue", icon: TrendingUp },
+  { href: "/platform/subscriptions", label: "Subscriptions", icon: CreditCard },
+];
+
 const SYSTEM_ITEMS: NavItem[] = [
   { href: "/platform/settings", label: "Settings", icon: Settings },
 ];
 
-// Platform uses purple accent
-const ACCENT = "#8b5cf6";
+// Purple accent for platform items, blue for everything else
+const PURPLE = "#8b5cf6";
+const BLUE = "#38b6ff";
 
 export function PlatformSidebar({ userName }: PlatformSidebarProps) {
   const pathname = usePathname();
@@ -58,9 +78,10 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
     router.refresh();
   }
 
-  function NavLink({ item }: { item: NavItem }) {
+  function NavLink({ item, accent = BLUE }: { item: NavItem; accent?: string }) {
     const isActive =
       pathname === item.href || pathname.startsWith(item.href + "/");
+    const isPurple = accent === PURPLE;
     return (
       <Link
         href={item.href}
@@ -68,13 +89,47 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
         className={cn(
           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 border-l-[3px]",
           isActive
-            ? `border-[${ACCENT}] bg-[${ACCENT}]/10 text-[${ACCENT}]`
-            : `border-transparent text-[#6B7280] dark:text-[#94A3B8] hover:bg-[${ACCENT}]/5 hover:text-foreground`
+            ? isPurple
+              ? "border-[#8b5cf6] bg-[#8b5cf6]/10 text-[#8b5cf6]"
+              : "border-[#38b6ff] bg-[#38b6ff]/10 text-[#38b6ff]"
+            : isPurple
+              ? "border-transparent text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#8b5cf6]/5 hover:text-foreground"
+              : "border-transparent text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#38b6ff]/5 hover:text-foreground"
         )}
       >
         <item.icon className="size-[18px]" />
         {item.label}
       </Link>
+    );
+  }
+
+  function NavGroup({
+    label,
+    items,
+    accent = BLUE,
+    sublabel,
+  }: {
+    label: string;
+    items: NavItem[];
+    accent?: string;
+    sublabel?: string;
+  }) {
+    return (
+      <div className="space-y-0.5">
+        <div className="px-3 pb-1.5">
+          <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/50">
+            {label}
+          </p>
+          {sublabel && (
+            <p className="text-[9px] text-muted-foreground/40 mt-0.5">
+              {sublabel}
+            </p>
+          )}
+        </div>
+        {items.map((item) => (
+          <NavLink key={item.href} item={item} accent={accent} />
+        ))}
+      </div>
     );
   }
 
@@ -101,29 +156,21 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
         <p className="mt-0.5 text-sm font-medium text-foreground">XeedlyAI</p>
       </div>
 
-      {/* Navigation — Platform */}
-      <nav className="flex-1 flex flex-col px-3 py-3">
-        <div className="space-y-0.5">
-          <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
-            Platform
-          </p>
-          {PLATFORM_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} />
-          ))}
-        </div>
+      {/* Navigation */}
+      <nav className="flex-1 flex flex-col px-3 py-3 gap-4 overflow-y-auto">
+        <NavGroup label="Platform" items={PLATFORM_ITEMS} accent={PURPLE} />
+
+        {/* Separator for tenant-scoped sections */}
+        <div className="border-t border-[#E5E7EB] dark:border-white/8 mx-3" />
+
+        <NavGroup label="Operations" items={OPERATIONS_ITEMS} sublabel="Filtered by org" />
+        <NavGroup label="Clients" items={CLIENTS_ITEMS} sublabel="Filtered by org" />
+        <NavGroup label="Finance" items={FINANCE_ITEMS} sublabel="Filtered by org" />
 
         {/* Spacer pushes System to bottom */}
         <div className="flex-1" />
 
-        {/* Navigation — System */}
-        <div className="space-y-0.5">
-          <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
-            System
-          </p>
-          {SYSTEM_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} />
-          ))}
-        </div>
+        <NavGroup label="System" items={SYSTEM_ITEMS} />
       </nav>
 
       {/* Switch to Tenant Admin */}
