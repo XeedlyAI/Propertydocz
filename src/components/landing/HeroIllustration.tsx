@@ -1,242 +1,338 @@
 export function HeroIllustration({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 680 520"
+      viewBox="0 0 700 560"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"
-      aria-label="Illustration of HOA document ordering process across three properties"
+      aria-label="Architectural illustration of a house for sale with property documents"
     >
-      {/* ═══ GROUND LINE ═══ */}
-      <line x1="0" y1="440" x2="680" y2="440" stroke="#94a3b8" strokeWidth="2.5" />
+      {/* ═══════════════════════════════════════════
+          LEFT HALF — HOUSE WITH FOR-SALE SIGN
+          ═══════════════════════════════════════════ */}
 
-      {/* ═══ PATHWAY (dashed) ═══ */}
-      <path
-        d="M10 440 L670 440"
-        stroke="#cbd5e1"
-        strokeWidth="2"
-        strokeDasharray="10 6"
-      />
+      {/* ── Ground line ── */}
+      <line x1="0" y1="480" x2="360" y2="480" stroke="#94a3b8" strokeWidth="2" />
 
-      {/* ═══ LANDSCAPING ═══ */}
-      {/* Shrubs between houses */}
-      <circle cx="210" cy="428" r="14" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
-      <circle cx="228" cy="422" r="10" stroke="#cbd5e1" strokeWidth="1.2" fill="none" />
-      <circle cx="450" cy="428" r="14" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
-      <circle cx="468" cy="422" r="10" stroke="#cbd5e1" strokeWidth="1.2" fill="none" />
-
-      {/* Fence sections — between house 1 and 2 */}
-      <g stroke="#cbd5e1" strokeWidth="1.5">
-        <line x1="240" y1="440" x2="240" y2="408" />
-        <line x1="256" y1="440" x2="256" y2="408" />
-        <line x1="272" y1="440" x2="272" y2="408" />
-        <line x1="237" y1="418" x2="275" y2="418" />
-        <line x1="237" y1="430" x2="275" y2="430" />
-      </g>
-      {/* Fence sections — between house 2 and 3 */}
-      <g stroke="#cbd5e1" strokeWidth="1.5">
-        <line x1="420" y1="440" x2="420" y2="408" />
-        <line x1="436" y1="440" x2="436" y2="408" />
-        <line x1="452" y1="440" x2="452" y2="408" />
-        <line x1="417" y1="418" x2="455" y2="418" />
-        <line x1="417" y1="430" x2="455" y2="430" />
+      {/* ── Grass texture marks ── */}
+      <g stroke="#cbd5e1" strokeWidth="1" strokeLinecap="round">
+        <line x1="15" y1="480" x2="20" y2="474" />
+        <line x1="22" y1="480" x2="26" y2="475" />
+        <line x1="55" y1="480" x2="60" y2="474" />
+        <line x1="62" y1="480" x2="65" y2="476" />
+        <line x1="240" y1="480" x2="244" y2="474" />
+        <line x1="248" y1="480" x2="253" y2="475" />
+        <line x1="290" y1="480" x2="295" y2="474" />
+        <line x1="300" y1="480" x2="303" y2="476" />
+        <line x1="330" y1="480" x2="335" y2="475" />
+        <line x1="340" y1="480" x2="343" y2="476" />
       </g>
 
-      {/* ═══ HOUSE 1 — FOR SALE ═══ */}
+      {/* ── Walkway to door (dashed) ── */}
+      <path d="M160 480 L160 500 Q160 510 170 510 L210 510 Q220 510 220 500 L220 480" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="6 4" fill="none" />
+
+      {/* ═══ THE HOUSE — Craftsman style ═══ */}
+
+      {/* Foundation */}
+      <rect x="70" y="465" width="240" height="15" stroke="#94a3b8" strokeWidth="2" fill="none" />
+      {/* Foundation texture lines */}
+      <line x1="80" y1="472" x2="300" y2="472" stroke="#cbd5e1" strokeWidth="0.8" />
+
+      {/* Main structure */}
+      <rect x="70" y="260" width="240" height="205" stroke="#94a3b8" strokeWidth="2.5" fill="none" />
+
+      {/* ── Roof — gable with overhang ── */}
+      <path d="M55 260 L190 130 L325 260" stroke="#94a3b8" strokeWidth="3" fill="none" strokeLinejoin="round" />
+      {/* Roof overhang eave line */}
+      <line x1="60" y1="260" x2="320" y2="260" stroke="#94a3b8" strokeWidth="1.5" />
+      {/* Roof ridge cap */}
+      <line x1="175" y1="140" x2="205" y2="140" stroke="#cbd5e1" strokeWidth="1.5" />
+      {/* Roof shingle lines */}
+      <line x1="100" y1="220" x2="280" y2="220" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="85" y1="240" x2="295" y2="240" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="115" y1="200" x2="265" y2="200" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="135" y1="180" x2="245" y2="180" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="155" y1="160" x2="225" y2="160" stroke="#cbd5e1" strokeWidth="0.8" />
+
+      {/* Gable window (attic) */}
+      <circle cx="190" cy="200" r="18" stroke="#94a3b8" strokeWidth="2" fill="none" />
+      <line x1="190" y1="182" x2="190" y2="218" stroke="#cbd5e1" strokeWidth="1" />
+      <line x1="172" y1="200" x2="208" y2="200" stroke="#cbd5e1" strokeWidth="1" />
+
+      {/* ── Second floor windows ── */}
+      {/* Window left */}
+      <rect x="95" y="280" width="50" height="60" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+      <line x1="120" y1="280" x2="120" y2="340" stroke="#94a3b8" strokeWidth="1.5" />
+      <line x1="95" y1="310" x2="145" y2="310" stroke="#94a3b8" strokeWidth="1.5" />
+      {/* Window sill */}
+      <line x1="90" y1="342" x2="150" y2="342" stroke="#94a3b8" strokeWidth="2" />
+      {/* Window header */}
+      <line x1="90" y1="278" x2="150" y2="278" stroke="#94a3b8" strokeWidth="2" />
+
+      {/* Window right */}
+      <rect x="235" y="280" width="50" height="60" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
+      <line x1="260" y1="280" x2="260" y2="340" stroke="#94a3b8" strokeWidth="1.5" />
+      <line x1="235" y1="310" x2="285" y2="310" stroke="#94a3b8" strokeWidth="1.5" />
+      {/* Window sill */}
+      <line x1="230" y1="342" x2="290" y2="342" stroke="#94a3b8" strokeWidth="2" />
+      {/* Window header */}
+      <line x1="230" y1="278" x2="290" y2="278" stroke="#94a3b8" strokeWidth="2" />
+
+      {/* ── Front porch ── */}
+      {/* Porch roof */}
+      <line x1="100" y1="365" x2="280" y2="365" stroke="#94a3b8" strokeWidth="2.5" />
+      {/* Porch columns */}
+      <rect x="108" y="365" width="8" height="100" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
+      <rect x="264" y="365" width="8" height="100" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
+      {/* Porch railing */}
+      <line x1="116" y1="425" x2="160" y2="425" stroke="#94a3b8" strokeWidth="1.5" />
+      <line x1="220" y1="425" x2="264" y2="425" stroke="#94a3b8" strokeWidth="1.5" />
+      {/* Railing balusters left */}
+      <line x1="126" y1="425" x2="126" y2="465" stroke="#cbd5e1" strokeWidth="1" />
+      <line x1="138" y1="425" x2="138" y2="465" stroke="#cbd5e1" strokeWidth="1" />
+      <line x1="150" y1="425" x2="150" y2="465" stroke="#cbd5e1" strokeWidth="1" />
+      {/* Railing balusters right */}
+      <line x1="230" y1="425" x2="230" y2="465" stroke="#cbd5e1" strokeWidth="1" />
+      <line x1="242" y1="425" x2="242" y2="465" stroke="#cbd5e1" strokeWidth="1" />
+      <line x1="254" y1="425" x2="254" y2="465" stroke="#cbd5e1" strokeWidth="1" />
+      {/* Porch floor */}
+      <line x1="100" y1="465" x2="280" y2="465" stroke="#94a3b8" strokeWidth="1.5" />
+      {/* Steps */}
+      <rect x="155" y="465" width="70" height="6" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
+      <rect x="150" y="471" width="80" height="6" stroke="#94a3b8" strokeWidth="1.2" fill="none" />
+      <rect x="145" y="477" width="90" height="4" stroke="#cbd5e1" strokeWidth="1" fill="none" />
+
+      {/* ── Front door ── */}
+      <rect x="165" y="380" width="50" height="85" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
+      {/* Door panels */}
+      <rect x="172" y="387" width="36" height="30" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+      <rect x="172" y="425" width="36" height="30" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+      {/* Door knob */}
+      <circle cx="205" cy="425" r="3.5" fill="#94a3b8" />
+
+      {/* ── Chimney ── */}
+      <rect x="255" y="150" width="22" height="80" stroke="#94a3b8" strokeWidth="2" fill="none" />
+      {/* Chimney cap */}
+      <line x1="250" y1="150" x2="282" y2="150" stroke="#94a3b8" strokeWidth="2.5" />
+      {/* Chimney brick lines */}
+      <line x1="255" y1="165" x2="277" y2="165" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="255" y1="180" x2="277" y2="180" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="255" y1="195" x2="277" y2="195" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="266" y1="150" x2="266" y2="165" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="266" y1="180" x2="266" y2="195" stroke="#cbd5e1" strokeWidth="0.8" />
+
+      {/* ── Landscaping — bushes ── */}
+      {/* Left bush */}
+      <ellipse cx="85" cy="470" rx="20" ry="14" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
+      <ellipse cx="75" cy="472" rx="12" ry="10" stroke="#cbd5e1" strokeWidth="1" fill="none" />
+      {/* Right bush */}
+      <ellipse cx="295" cy="470" rx="20" ry="14" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
+      <ellipse cx="305" cy="472" rx="12" ry="10" stroke="#cbd5e1" strokeWidth="1" fill="none" />
+
+      {/* ═══ FOR SALE SIGN — Large, prominent ═══ */}
       <g>
-        {/* Main structure — 180px wide */}
-        <rect x="30" y="240" width="180" height="200" stroke="#94a3b8" strokeWidth="3" fill="none" rx="2" />
-        {/* Roof — pitched */}
-        <path d="M20 240 L120 155 L220 240" stroke="#94a3b8" strokeWidth="3" fill="none" />
-        {/* Roof ridge detail */}
-        <line x1="85" y1="185" x2="155" y2="185" stroke="#cbd5e1" strokeWidth="1.5" />
-        {/* Windows — top floor */}
-        <rect x="50" y="265" width="42" height="38" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        <rect x="148" y="265" width="42" height="38" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        {/* Window cross panes */}
-        <line x1="71" y1="265" x2="71" y2="303" stroke="#cbd5e1" strokeWidth="1.2" />
-        <line x1="50" y1="284" x2="92" y2="284" stroke="#cbd5e1" strokeWidth="1.2" />
-        <line x1="169" y1="265" x2="169" y2="303" stroke="#cbd5e1" strokeWidth="1.2" />
-        <line x1="148" y1="284" x2="190" y2="284" stroke="#cbd5e1" strokeWidth="1.2" />
-        {/* Door */}
-        <rect x="100" y="380" width="38" height="60" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        <circle cx="130" cy="412" r="3" fill="#94a3b8" />
-        {/* Steps */}
-        <rect x="94" y="438" width="50" height="6" stroke="#94a3b8" strokeWidth="1.5" fill="none" rx="1" />
+        {/* Sign post — vertical */}
+        <line x1="30" y1="290" x2="30" y2="480" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
+        {/* Horizontal arm */}
+        <line x1="26" y1="290" x2="80" y2="290" stroke="#94a3b8" strokeWidth="3.5" strokeLinecap="round" />
+        {/* Decorative finial on post top */}
+        <circle cx="30" cy="286" r="5" stroke="#94a3b8" strokeWidth="2" fill="none" />
+
+        {/* Main sign panel */}
+        <rect x="14" y="296" width="66" height="60" rx="4" stroke="#38b6ff" strokeWidth="3" fill="none" />
+        {/* Inner border */}
+        <rect x="20" y="302" width="54" height="48" rx="2" stroke="#38b6ff" strokeWidth="1" fill="none" />
+
+        {/* "HOUSE" text */}
+        <text x="47" y="322" textAnchor="middle" fill="#38b6ff" fontSize="13" fontWeight="800" fontFamily="Inter, system-ui, sans-serif" letterSpacing="1">HOUSE</text>
+        {/* "FOR SALE" text */}
+        <text x="47" y="340" textAnchor="middle" fill="#38b6ff" fontSize="14" fontWeight="800" fontFamily="Inter, system-ui, sans-serif" letterSpacing="1.5">FOR SALE</text>
+
+        {/* Hanging rider sign below */}
+        <rect x="22" y="362" width="50" height="22" rx="2" stroke="#94a3b8" strokeWidth="1.5" fill="none" />
+        {/* Hanging chains */}
+        <line x1="30" y1="356" x2="30" y2="362" stroke="#94a3b8" strokeWidth="1.5" />
+        <line x1="64" y1="356" x2="64" y2="362" stroke="#94a3b8" strokeWidth="1.5" />
+        {/* Agent text lines */}
+        <line x1="30" y1="370" x2="64" y2="370" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="34" y1="378" x2="60" y2="378" stroke="#cbd5e1" strokeWidth="0.8" />
       </g>
 
-      {/* ── FOR SALE Yard Sign — classic real estate style ── */}
+
+      {/* ═══════════════════════════════════════════
+          RIGHT HALF — SCATTERED DOCUMENTS
+          ═══════════════════════════════════════════ */}
+
+      {/* ── Document 1: Resale Certificate (top-left, slight rotation) ── */}
+      <g transform="translate(385, 40) rotate(-3)">
+        <rect x="0" y="0" width="130" height="170" stroke="#94a3b8" strokeWidth="2.5" fill="white" rx="4" />
+        {/* Header bar */}
+        <rect x="0" y="0" width="130" height="28" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="4" />
+        <rect x="0" y="14" width="130" height="14" stroke="none" fill="none" />
+        <text x="65" y="19" textAnchor="middle" fill="#38b6ff" fontSize="9" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">RESALE CERTIFICATE</text>
+        {/* Content lines */}
+        <line x1="12" y1="42" x2="118" y2="42" stroke="#cbd5e1" strokeWidth="1.2" />
+        <line x1="12" y1="54" x2="100" y2="54" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="66" x2="110" y2="66" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="78" x2="95" y2="78" stroke="#cbd5e1" strokeWidth="1" />
+        {/* Separator */}
+        <line x1="12" y1="92" x2="118" y2="92" stroke="#94a3b8" strokeWidth="0.8" />
+        {/* More content */}
+        <line x1="12" y1="106" x2="105" y2="106" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="118" x2="115" y2="118" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="130" x2="90" y2="130" stroke="#cbd5e1" strokeWidth="1" />
+        {/* Signature area */}
+        <line x1="12" y1="152" x2="60" y2="152" stroke="#94a3b8" strokeWidth="1.2" />
+        <text x="12" y="163" fill="#cbd5e1" fontSize="6" fontFamily="Inter, system-ui, sans-serif">Signature</text>
+        <line x1="75" y1="152" x2="118" y2="152" stroke="#94a3b8" strokeWidth="1.2" />
+        <text x="75" y="163" fill="#cbd5e1" fontSize="6" fontFamily="Inter, system-ui, sans-serif">Date</text>
+      </g>
+
+      {/* ── Document 2: Property Disclosure (top-right, opposite rotation) ── */}
+      <g transform="translate(530, 55) rotate(4)">
+        <rect x="0" y="0" width="130" height="170" stroke="#94a3b8" strokeWidth="2.5" fill="white" rx="4" />
+        {/* Header */}
+        <rect x="0" y="0" width="130" height="28" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="4" />
+        <text x="65" y="12" textAnchor="middle" fill="#94a3b8" fontSize="7" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">PROPERTY DISCLOSURE</text>
+        <text x="65" y="23" textAnchor="middle" fill="#94a3b8" fontSize="7" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">STATEMENT</text>
+        {/* Checkbox section */}
+        <text x="12" y="44" fill="#94a3b8" fontSize="7" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">APPLIANCES</text>
+        <rect x="12" y="50" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        <rect x="28" y="50" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        <rect x="44" y="50" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        <line x1="24" y1="56" x2="26" y2="56" stroke="#cbd5e1" strokeWidth="0.5" />
+        {/* Check marks in boxes */}
+        <path d="M14 54 L16 57 L19 52" stroke="#14b8a6" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+        <path d="M30 54 L32 57 L35 52" stroke="#14b8a6" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+
+        <text x="12" y="76" fill="#94a3b8" fontSize="7" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">ROOF</text>
+        <rect x="12" y="82" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        <rect x="28" y="82" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        <path d="M14 86 L16 89 L19 84" stroke="#14b8a6" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+
+        <text x="12" y="108" fill="#94a3b8" fontSize="7" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">PLUMBING</text>
+        <rect x="12" y="114" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        <rect x="28" y="114" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        <rect x="44" y="114" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        {/* Label lines next to checkboxes */}
+        <line x1="58" y1="56" x2="90" y2="56" stroke="#cbd5e1" strokeWidth="0.8" />
+        <line x1="58" y1="88" x2="85" y2="88" stroke="#cbd5e1" strokeWidth="0.8" />
+        <line x1="58" y1="120" x2="95" y2="120" stroke="#cbd5e1" strokeWidth="0.8" />
+        {/* Right column labels */}
+        <text x="72" y="44" fill="#94a3b8" fontSize="7" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">WINDOWS</text>
+        <rect x="72" y="50" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        <rect x="88" y="50" width="8" height="8" stroke="#cbd5e1" strokeWidth="1" fill="none" rx="1" />
+        {/* Signature */}
+        <line x1="12" y1="152" x2="60" y2="152" stroke="#94a3b8" strokeWidth="1.2" />
+        <line x1="75" y1="152" x2="118" y2="152" stroke="#94a3b8" strokeWidth="1.2" />
+      </g>
+
+      {/* ── Document 3: Payoff Statement (middle, overlapping) ── */}
+      <g transform="translate(400, 230) rotate(-2)">
+        <rect x="0" y="0" width="130" height="170" stroke="#94a3b8" strokeWidth="2.5" fill="white" rx="4" />
+        {/* Header */}
+        <rect x="0" y="0" width="130" height="28" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="4" />
+        <text x="65" y="19" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">PAYOFF STATEMENT</text>
+        {/* Amount section */}
+        <text x="12" y="48" fill="#94a3b8" fontSize="7" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">BALANCE DUE</text>
+        <rect x="12" y="52" width="106" height="20" stroke="#cbd5e1" strokeWidth="1.2" fill="none" rx="2" />
+        <text x="95" y="66" textAnchor="end" fill="#94a3b8" fontSize="11" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">$2,847.50</text>
+        {/* Line items */}
+        <line x1="12" y1="84" x2="80" y2="84" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="90" y1="84" x2="118" y2="84" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="96" x2="80" y2="96" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="90" y1="96" x2="118" y2="96" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="108" x2="80" y2="108" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="90" y1="108" x2="118" y2="108" stroke="#cbd5e1" strokeWidth="1" />
+        {/* Total line */}
+        <line x1="12" y1="122" x2="118" y2="122" stroke="#94a3b8" strokeWidth="1.5" />
+        <line x1="12" y1="136" x2="70" y2="136" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="90" y1="136" x2="118" y2="136" stroke="#94a3b8" strokeWidth="1.5" />
+        {/* Signature */}
+        <line x1="12" y1="155" x2="55" y2="155" stroke="#94a3b8" strokeWidth="1.2" />
+        <line x1="75" y1="155" x2="118" y2="155" stroke="#94a3b8" strokeWidth="1.2" />
+      </g>
+
+      {/* ── Document 4: Lender Questionnaire (middle-right) ── */}
+      <g transform="translate(550, 250) rotate(5)">
+        <rect x="0" y="0" width="130" height="170" stroke="#94a3b8" strokeWidth="2.5" fill="white" rx="4" />
+        {/* Header */}
+        <rect x="0" y="0" width="130" height="28" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="4" />
+        <text x="65" y="12" textAnchor="middle" fill="#94a3b8" fontSize="8" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">LENDER</text>
+        <text x="65" y="23" textAnchor="middle" fill="#94a3b8" fontSize="8" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">QUESTIONNAIRE</text>
+        {/* Q&A lines */}
+        <text x="12" y="45" fill="#94a3b8" fontSize="6" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">Q1.</text>
+        <line x1="26" y1="45" x2="118" y2="45" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="56" x2="118" y2="56" stroke="#cbd5e1" strokeWidth="0.8" />
+        <text x="12" y="72" fill="#94a3b8" fontSize="6" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">Q2.</text>
+        <line x1="26" y1="72" x2="118" y2="72" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="83" x2="118" y2="83" stroke="#cbd5e1" strokeWidth="0.8" />
+        <text x="12" y="99" fill="#94a3b8" fontSize="6" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">Q3.</text>
+        <line x1="26" y1="99" x2="118" y2="99" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="110" x2="118" y2="110" stroke="#cbd5e1" strokeWidth="0.8" />
+        <text x="12" y="126" fill="#94a3b8" fontSize="6" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">Q4.</text>
+        <line x1="26" y1="126" x2="118" y2="126" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="137" x2="100" y2="137" stroke="#cbd5e1" strokeWidth="0.8" />
+        {/* Signature */}
+        <line x1="12" y1="155" x2="55" y2="155" stroke="#94a3b8" strokeWidth="1.2" />
+        <line x1="75" y1="155" x2="118" y2="155" stroke="#94a3b8" strokeWidth="1.2" />
+      </g>
+
+      {/* ── Document 5: Governing Docs (bottom, overlapping) ── */}
+      <g transform="translate(430, 415) rotate(-4)">
+        <rect x="0" y="0" width="130" height="110" stroke="#94a3b8" strokeWidth="2.5" fill="white" rx="4" />
+        {/* Header */}
+        <rect x="0" y="0" width="130" height="28" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="4" />
+        <text x="65" y="12" textAnchor="middle" fill="#94a3b8" fontSize="7" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">GOVERNING</text>
+        <text x="65" y="23" textAnchor="middle" fill="#94a3b8" fontSize="7" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">DOCUMENTS</text>
+        {/* Content lines */}
+        <line x1="12" y1="42" x2="100" y2="42" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="54" x2="110" y2="54" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="66" x2="90" y2="66" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="78" x2="105" y2="78" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="12" y1="90" x2="95" y2="90" stroke="#cbd5e1" strokeWidth="1" />
+      </g>
+
+      {/* ── Gold checkmark overlay on Resale Certificate ── */}
+      <g transform="translate(470, 150)">
+        <circle cx="0" cy="0" r="18" stroke="#F5A623" strokeWidth="2.5" fill="white" />
+        <path d="M-8 0 L-3 6 L9 -6" stroke="#F5A623" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      </g>
+
+      {/* ── "APPROVED" stamp on Payoff Statement ── */}
+      <g transform="translate(480, 360) rotate(-8)">
+        <rect x="-35" y="-12" width="70" height="24" rx="3" stroke="#14b8a6" strokeWidth="2" fill="none" />
+        <text x="0" y="4" textAnchor="middle" fill="#14b8a6" fontSize="11" fontWeight="800" fontFamily="Inter, system-ui, sans-serif" letterSpacing="2">APPROVED</text>
+      </g>
+
+      {/* ── Connecting arrow from house to documents ── */}
       <g>
-        {/* Left post leg */}
-        <line x1="12" y1="270" x2="12" y2="440" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
-        {/* Right post leg */}
-        <line x1="56" y1="270" x2="56" y2="440" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
-        {/* Top crossbar */}
-        <line x1="8" y1="270" x2="60" y2="270" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
-        {/* Sign panel — hanging from crossbar */}
-        <rect x="8" y="275" width="52" height="42" rx="3" stroke="#38b6ff" strokeWidth="2.5" fill="none" />
-        {/* "FOR" text line */}
-        <text x="34" y="293" textAnchor="middle" fill="#38b6ff" fontSize="11" fontWeight="700" fontFamily="Inter, system-ui, sans-serif">FOR</text>
-        {/* "SALE" text line */}
-        <text x="34" y="310" textAnchor="middle" fill="#38b6ff" fontSize="13" fontWeight="800" fontFamily="Inter, system-ui, sans-serif">SALE</text>
+        <path d="M330 300 C360 300, 365 260, 390 180" stroke="#38b6ff" strokeWidth="2" strokeDasharray="8 5" fill="none" />
+        <path d="M385 185 L392 176 L388 190 Z" fill="#38b6ff" />
       </g>
 
-      {/* Agent silhouette by sign */}
-      <g>
-        <circle cx="55" cy="378" r="11" fill="#64748b" />
-        <path d="M41 394 L55 425 L69 394 Z" fill="#64748b" />
-        {/* Extended arm gesturing toward house */}
-        <line x1="69" y1="400" x2="92" y2="386" stroke="#64748b" strokeWidth="3" strokeLinecap="round" />
-      </g>
+      {/* ═══ SKY DETAILS ═══ */}
+      {/* Cloud wisps */}
+      <path d="M90 60 Q120 42, 150 60 Q168 44, 195 60" stroke="#cbd5e1" strokeWidth="1.2" fill="none" />
+      <path d="M200 85 Q225 70, 250 85 Q265 72, 285 85" stroke="#cbd5e1" strokeWidth="1" fill="none" />
 
-      {/* Buyer couple approaching */}
-      <g>
-        {/* Person 1 */}
-        <circle cx="160" cy="388" r="10" fill="#64748b" />
-        <path d="M148 402 L160 432 L172 402 Z" fill="#64748b" />
-        {/* Person 2 */}
-        <circle cx="184" cy="384" r="11" fill="#64748b" />
-        <path d="M171 399 L184 430 L197 399 Z" fill="#64748b" />
-      </g>
+      {/* Sun */}
+      <circle cx="330" cy="55" r="22" stroke="#F5A623" strokeWidth="2" fill="none" />
+      <line x1="330" y1="25" x2="330" y2="16" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="330" y1="85" x2="330" y2="94" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="300" y1="55" x2="291" y2="55" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="360" y1="55" x2="369" y2="55" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="314" y1="39" x2="308" y2="33" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="346" y1="71" x2="352" y2="77" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="346" y1="39" x2="352" y2="33" stroke="#F5A623" strokeWidth="1.5" />
+      <line x1="314" y1="71" x2="308" y2="77" stroke="#F5A623" strokeWidth="1.5" />
 
-      {/* ═══ HOUSE 2 — CENTER, TALLER — DOCUMENT PREP ═══ */}
-      <g>
-        {/* Main structure — 190px wide, taller */}
-        <rect x="280" y="195" width="190" height="245" stroke="#94a3b8" strokeWidth="3" fill="none" rx="2" />
-        {/* Roof — flat parapet style */}
-        <line x1="273" y1="195" x2="477" y2="195" stroke="#94a3b8" strokeWidth="3" />
-        <line x1="278" y1="187" x2="472" y2="187" stroke="#cbd5e1" strokeWidth="1.5" />
-        {/* Windows — top floor row */}
-        <rect x="298" y="218" width="38" height="34" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        <rect x="356" y="218" width="38" height="34" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        <rect x="414" y="218" width="38" height="34" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        {/* Window pane details */}
-        <line x1="317" y1="218" x2="317" y2="252" stroke="#cbd5e1" strokeWidth="1.2" />
-        <line x1="375" y1="218" x2="375" y2="252" stroke="#cbd5e1" strokeWidth="1.2" />
-        <line x1="433" y1="218" x2="433" y2="252" stroke="#cbd5e1" strokeWidth="1.2" />
-        {/* Windows — bottom floor */}
-        <rect x="298" y="280" width="38" height="36" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        <rect x="414" y="280" width="38" height="36" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        {/* Door — wider entrance */}
-        <rect x="358" y="388" width="38" height="52" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        <circle cx="388" cy="416" r="3" fill="#94a3b8" />
-
-        {/* Figure at desk/laptop */}
-        <g>
-          {/* Desk */}
-          <rect x="293" y="410" width="44" height="4" stroke="#94a3b8" strokeWidth="2" fill="none" />
-          <line x1="297" y1="414" x2="297" y2="440" stroke="#cbd5e1" strokeWidth="1.5" />
-          <line x1="333" y1="414" x2="333" y2="440" stroke="#cbd5e1" strokeWidth="1.5" />
-          {/* Laptop on desk */}
-          <rect x="300" y="398" width="28" height="12" stroke="#94a3b8" strokeWidth="2" fill="none" rx="1" />
-          <line x1="300" y1="410" x2="328" y2="410" stroke="#94a3b8" strokeWidth="2" />
-          {/* Person sitting */}
-          <circle cx="285" cy="378" r="10" fill="#64748b" />
-          <path d="M273 392 L285 422 L297 392 Z" fill="#64748b" />
-        </g>
-
-        {/* Floating document icons above house */}
-        {/* Doc 1 */}
-        <g>
-          <rect x="404" y="108" width="44" height="56" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="4" />
-          <line x1="414" y1="122" x2="438" y2="122" stroke="#cbd5e1" strokeWidth="1.5" />
-          <line x1="414" y1="132" x2="436" y2="132" stroke="#cbd5e1" strokeWidth="1.2" />
-          <line x1="414" y1="142" x2="432" y2="142" stroke="#cbd5e1" strokeWidth="1.2" />
-          <line x1="414" y1="152" x2="428" y2="152" stroke="#cbd5e1" strokeWidth="1" />
-        </g>
-        {/* Doc 2 */}
-        <g>
-          <rect x="348" y="82" width="44" height="56" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="4" />
-          <line x1="358" y1="96" x2="382" y2="96" stroke="#cbd5e1" strokeWidth="1.5" />
-          <line x1="358" y1="106" x2="380" y2="106" stroke="#cbd5e1" strokeWidth="1.2" />
-          <line x1="358" y1="116" x2="376" y2="116" stroke="#cbd5e1" strokeWidth="1.2" />
-          <line x1="358" y1="126" x2="372" y2="126" stroke="#cbd5e1" strokeWidth="1" />
-        </g>
-        {/* Doc 3 — with gold checkmark */}
-        <g>
-          <rect x="292" y="95" width="44" height="56" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="4" />
-          <line x1="302" y1="109" x2="326" y2="109" stroke="#cbd5e1" strokeWidth="1.5" />
-          <line x1="302" y1="119" x2="324" y2="119" stroke="#cbd5e1" strokeWidth="1.2" />
-          {/* Gold checkmark */}
-          <path d="M306 131 L314 140 L330 124" stroke="#F5A623" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        </g>
-
-        {/* Connection lines from docs to house */}
-        <line x1="375" y1="187" x2="375" y2="140" stroke="#cbd5e1" strokeWidth="1.2" strokeDasharray="5 5" />
-      </g>
-
-      {/* ═══ HOUSE 3 — COMPLETED TRANSACTION / SOLD ═══ */}
-      <g>
-        {/* Main structure — 180px wide */}
-        <rect x="490" y="255" width="180" height="185" stroke="#94a3b8" strokeWidth="3" fill="none" rx="2" />
-        {/* Roof — gabled */}
-        <path d="M482 255 L580 170 L678 255" stroke="#94a3b8" strokeWidth="3" fill="none" />
-        {/* Chimney */}
-        <rect x="640" y="195" width="20" height="45" stroke="#cbd5e1" strokeWidth="2" fill="none" />
-        {/* Window left */}
-        <rect x="510" y="280" width="42" height="38" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        <line x1="531" y1="280" x2="531" y2="318" stroke="#cbd5e1" strokeWidth="1.2" />
-        <line x1="510" y1="299" x2="552" y2="299" stroke="#cbd5e1" strokeWidth="1.2" />
-        {/* Window right */}
-        <rect x="608" y="280" width="42" height="38" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        <line x1="629" y1="280" x2="629" y2="318" stroke="#cbd5e1" strokeWidth="1.2" />
-        <line x1="608" y1="299" x2="650" y2="299" stroke="#cbd5e1" strokeWidth="1.2" />
-        {/* Door */}
-        <rect x="560" y="388" width="38" height="52" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="2" />
-        <circle cx="590" cy="416" r="3" fill="#94a3b8" />
-      </g>
-
-      {/* ── SOLD Yard Sign — classic real estate style ── */}
-      <g>
-        {/* Left post leg */}
-        <line x1="490" y1="290" x2="490" y2="440" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
-        {/* Right post leg */}
-        <line x1="534" y1="290" x2="534" y2="440" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
-        {/* Top crossbar */}
-        <line x1="486" y1="290" x2="538" y2="290" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
-        {/* Sign panel */}
-        <rect x="486" y="295" width="52" height="42" rx="3" stroke="#F5A623" strokeWidth="2.5" fill="none" />
-        {/* "SOLD" text */}
-        <text x="512" y="322" textAnchor="middle" fill="#F5A623" fontSize="14" fontWeight="800" fontFamily="Inter, system-ui, sans-serif">SOLD</text>
-      </g>
-
-      {/* Figure receiving document */}
-      <g>
-        <circle cx="496" cy="386" r="11" fill="#64748b" />
-        <path d="M483 401 L496 432 L509 401 Z" fill="#64748b" />
-        {/* Document in hand */}
-        <rect x="476" y="408" width="18" height="24" stroke="#94a3b8" strokeWidth="2" fill="none" rx="2" />
-        <line x1="480" y1="416" x2="490" y2="416" stroke="#cbd5e1" strokeWidth="1" />
-        <line x1="480" y1="422" x2="489" y2="422" stroke="#cbd5e1" strokeWidth="1" />
-      </g>
-
-      {/* Email/digital delivery symbol */}
-      <g>
-        <rect x="618" y="376" width="36" height="24" stroke="#94a3b8" strokeWidth="2.5" fill="none" rx="3" />
-        <path d="M618 376 L636 394 L654 376" stroke="#94a3b8" strokeWidth="2" fill="none" />
-        {/* Send lines */}
-        <line x1="660" y1="382" x2="676" y2="382" stroke="#cbd5e1" strokeWidth="1.2" />
-        <line x1="660" y1="390" x2="672" y2="390" stroke="#cbd5e1" strokeWidth="1.2" />
-        <line x1="660" y1="398" x2="668" y2="398" stroke="#cbd5e1" strokeWidth="1.2" />
-      </g>
-
-      {/* ═══ SKY — SUN ═══ */}
-      <circle cx="620" cy="65" r="32" stroke="#F5A623" strokeWidth="2.5" fill="none" />
-      {/* Sun rays */}
-      <line x1="620" y1="22" x2="620" y2="8" stroke="#F5A623" strokeWidth="2" />
-      <line x1="620" y1="108" x2="620" y2="122" stroke="#F5A623" strokeWidth="2" />
-      <line x1="577" y1="65" x2="563" y2="65" stroke="#F5A623" strokeWidth="2" />
-      <line x1="663" y1="65" x2="677" y2="65" stroke="#F5A623" strokeWidth="2" />
-      <line x1="589" y1="34" x2="579" y2="24" stroke="#F5A623" strokeWidth="2" />
-      <line x1="651" y1="96" x2="661" y2="106" stroke="#F5A623" strokeWidth="2" />
-      <line x1="651" y1="34" x2="661" y2="24" stroke="#F5A623" strokeWidth="2" />
-      <line x1="589" y1="96" x2="579" y2="106" stroke="#F5A623" strokeWidth="2" />
-
-      {/* ═══ CLOUD WISPS ═══ */}
-      <path d="M50 55 Q90 35, 130 55 Q148 38, 175 55" stroke="#cbd5e1" strokeWidth="1.2" fill="none" />
-      <path d="M220 75 Q255 55, 290 75 Q310 58, 335 75" stroke="#cbd5e1" strokeWidth="1.2" fill="none" />
-      <path d="M420 45 Q450 28, 480 45 Q495 32, 515 45" stroke="#cbd5e1" strokeWidth="1.2" fill="none" />
+      {/* ── Dimension lines (architectural style) ── */}
+      {/* Vertical dimension left */}
+      <line x1="50" y1="130" x2="50" y2="260" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="46" y1="130" x2="54" y2="130" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="46" y1="260" x2="54" y2="260" stroke="#cbd5e1" strokeWidth="0.8" />
     </svg>
   );
 }
