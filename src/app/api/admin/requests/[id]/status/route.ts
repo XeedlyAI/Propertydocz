@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { sendAdminNotification, sendDocumentReady } from "@/lib/email/send";
+import { createFulfillmentLedgerEntry } from "@/lib/services/fulfillment.service";
 import type { RequestStatus } from "@/lib/types";
 
 // Valid status transitions
@@ -44,7 +45,7 @@ export async function POST(
     // Verify request belongs to tenant
     const { data: docRequest } = await supabase
       .from("document_requests")
-      .select("id, status, tenant_id, requester_name, requester_email, property_address, document_types")
+      .select("id, status, tenant_id, requester_name, requester_email, property_address, document_types, total_price_cents, customer_id, pricing_type")
       .eq("id", id)
       .eq("tenant_id", profile.tenant_id)
       .single();
@@ -167,6 +168,23 @@ export async function POST(
       }
     } catch (emailErr) {
       console.error("Email notification failed (non-blocking):", emailErr);
+    }
+
+    // Create fulfillment ledger entry when delivered
+    if (nextStatus === "delivered") {
+      try {
+        const serviceClient = await createServiceClient();
+        await createFulfillmentLedgerEntry(serviceClient, {
+          id,
+          tenant_id: profile.tenant_id,
+          customer_id: docRequest.customer_id || null,
+          document_types: docRequest.document_types as string[],
+          total_price_cents: docRequest.total_price_cents || 0,
+          pricing_type: docRequest.pricing_type || "standard",
+        });
+      } catch (ledgerErr) {
+        console.error("Fulfillment ledger creation failed (non-blocking):", ledgerErr);
+      }
     }
 
     return NextResponse.json({ success: true, status: nextStatus });
