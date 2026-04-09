@@ -9,10 +9,7 @@ import {
   LayoutDashboard,
   FileText,
   Building2,
-  Users,
-  Landmark,
   TrendingUp,
-  CreditCard,
   Settings,
   LogOut,
   Menu,
@@ -39,14 +36,8 @@ const OPERATIONS_ITEMS: NavItem[] = [
   { href: "/admin/associations", label: "Associations", icon: Building2 },
 ];
 
-const CLIENTS_ITEMS: NavItem[] = [
-  { href: "/admin/agents", label: "Agents", icon: Users },
-  { href: "/admin/lenders", label: "Lenders", icon: Landmark },
-];
-
 const FINANCE_ITEMS: NavItem[] = [
   { href: "/admin/revenue", label: "Revenue", icon: TrendingUp },
-  { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
 ];
 
 const SYSTEM_ITEMS: NavItem[] = [
@@ -123,7 +114,6 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 flex flex-col px-3 py-3 gap-4">
         <NavGroup label="Operations" items={OPERATIONS_ITEMS} />
-        <NavGroup label="Clients" items={CLIENTS_ITEMS} />
         <NavGroup label="Finance" items={FINANCE_ITEMS} />
 
         {/* Spacer pushes System to bottom */}
@@ -195,7 +185,7 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar — full height, sticky on desktop, fixed on mobile */}
+      {/* Sidebar */}
       <aside
         className={cn(
           "fixed top-0 left-0 z-50 h-screen w-64 transition-transform duration-200 ease-out lg:sticky lg:top-0 lg:translate-x-0 lg:shrink-0",

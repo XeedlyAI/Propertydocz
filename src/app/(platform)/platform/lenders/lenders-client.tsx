@@ -70,7 +70,7 @@ export function LendersClient({ lenders, kpis }: LendersClientProps) {
     {
       value: kpis.totalLenders,
       label: "Total Lenders",
-      context: "All time",
+      context: "All tenants",
       contextColor: "muted",
     },
     {
@@ -108,7 +108,7 @@ export function LendersClient({ lenders, kpis }: LendersClientProps) {
       <FadeUpChild>
         <PageHeader
           title="Lenders"
-          subtitle="Lender contacts who order lender questionnaires"
+          subtitle="Lender contacts across all tenants who order lender questionnaires"
         />
       </FadeUpChild>
 
@@ -129,13 +129,13 @@ export function LendersClient({ lenders, kpis }: LendersClientProps) {
                     placeholder="Search lenders..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="h-9 w-full sm:w-52 rounded-lg border border-border bg-background pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#38b6ff]/30"
+                    className="h-9 w-full sm:w-52 rounded-lg border border-border bg-background pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/30"
                   />
                 </div>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                  className="h-9 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#38b6ff]/30"
+                  className="h-9 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/30"
                 >
                   <option value="orders">Sort: Orders</option>
                   <option value="revenue">Sort: Revenue</option>
@@ -165,7 +165,7 @@ export function LendersClient({ lenders, kpis }: LendersClientProps) {
                         Name
                       </th>
                       <th className="hidden sm:table-cell pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Company
+                        Type
                       </th>
                       <th className="pb-3 pr-4 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
                         Orders
@@ -217,7 +217,7 @@ export function LendersClient({ lenders, kpis }: LendersClientProps) {
                           <td className="py-3 pr-4 text-right font-mono font-medium">
                             {lender.totalOrders}
                           </td>
-                          <td className="py-3 pr-4 text-right font-mono font-medium text-[#38b6ff]">
+                          <td className="py-3 pr-4 text-right font-mono font-medium text-[#8b5cf6]">
                             {lender.lenderQuestionnaires}
                           </td>
                           <td className="py-3 pr-4 text-right font-mono font-medium">

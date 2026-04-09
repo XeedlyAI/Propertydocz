@@ -17,9 +17,7 @@ import {
   Shield,
   Users,
   Wand2,
-  FileText,
   Landmark,
-  TrendingUp,
   CreditCard,
 } from "lucide-react";
 import { useState } from "react";
@@ -39,22 +37,12 @@ const PLATFORM_ITEMS: NavItem[] = [
   { href: "/platform/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/platform/tenants", label: "Tenants", icon: Building2 },
   { href: "/platform/onboard", label: "Onboard", icon: Wand2 },
-  { href: "/platform/agents", label: "Agents", icon: Users },
   { href: "/platform/revenue", label: "Revenue", icon: DollarSign },
 ];
 
-const OPERATIONS_ITEMS: NavItem[] = [
-  { href: "/platform/requests", label: "Requests", icon: FileText },
-  { href: "/platform/associations", label: "Associations", icon: Building2 },
-];
-
 const CLIENTS_ITEMS: NavItem[] = [
-  { href: "/platform/client-agents", label: "Agents", icon: Users },
+  { href: "/platform/agents", label: "Agents", icon: Users },
   { href: "/platform/lenders", label: "Lenders", icon: Landmark },
-];
-
-const FINANCE_ITEMS: NavItem[] = [
-  { href: "/platform/tenant-revenue", label: "Revenue", icon: TrendingUp },
   { href: "/platform/subscriptions", label: "Subscriptions", icon: CreditCard },
 ];
 
@@ -62,7 +50,6 @@ const SYSTEM_ITEMS: NavItem[] = [
   { href: "/platform/settings", label: "Settings", icon: Settings },
 ];
 
-// Purple accent for platform items, blue for everything else
 const PURPLE = "#8b5cf6";
 const BLUE = "#38b6ff";
 
@@ -107,25 +94,16 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
     label,
     items,
     accent = BLUE,
-    sublabel,
   }: {
     label: string;
     items: NavItem[];
     accent?: string;
-    sublabel?: string;
   }) {
     return (
       <div className="space-y-0.5">
-        <div className="px-3 pb-1.5">
-          <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/50">
-            {label}
-          </p>
-          {sublabel && (
-            <p className="text-[9px] text-muted-foreground/40 mt-0.5">
-              {sublabel}
-            </p>
-          )}
-        </div>
+        <p className="px-3 pb-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/50">
+          {label}
+        </p>
         {items.map((item) => (
           <NavLink key={item.href} item={item} accent={accent} />
         ))}
@@ -159,13 +137,7 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 flex flex-col px-3 py-3 gap-4 overflow-y-auto">
         <NavGroup label="Platform" items={PLATFORM_ITEMS} accent={PURPLE} />
-
-        {/* Separator for tenant-scoped sections */}
-        <div className="border-t border-[#E5E7EB] dark:border-white/8 mx-3" />
-
-        <NavGroup label="Operations" items={OPERATIONS_ITEMS} sublabel="Filtered by org" />
-        <NavGroup label="Clients" items={CLIENTS_ITEMS} sublabel="Filtered by org" />
-        <NavGroup label="Finance" items={FINANCE_ITEMS} sublabel="Filtered by org" />
+        <NavGroup label="Clients" items={CLIENTS_ITEMS} accent={PURPLE} />
 
         {/* Spacer pushes System to bottom */}
         <div className="flex-1" />

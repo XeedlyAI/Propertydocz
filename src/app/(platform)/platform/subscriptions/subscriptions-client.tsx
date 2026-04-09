@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, AlertTriangle, UserX } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/PageHeader";
 import {
@@ -85,8 +85,8 @@ const STATUS_CONFIG: Record<
     label: "Cancelled",
   },
   trial: {
-    dot: "bg-[#38b6ff]",
-    badge: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+    dot: "bg-[#8b5cf6]",
+    badge: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
     label: "Trial",
   },
 };
@@ -148,7 +148,7 @@ export function SubscriptionsClient({
       <FadeUpChild>
         <PageHeader
           title="Subscriptions"
-          subtitle="Membership tiers, usage, and recurring revenue"
+          subtitle="Cross-tenant membership tiers, usage, and recurring revenue"
         />
       </FadeUpChild>
 
@@ -193,7 +193,7 @@ export function SubscriptionsClient({
                   )}
                   <div className="pt-1.5 mt-1.5 border-t border-border flex justify-between">
                     <span>MRR</span>
-                    <span className="font-mono font-medium text-[#38b6ff]">
+                    <span className="font-mono font-medium text-[#8b5cf6]">
                       ${(tier.mrr / 100).toFixed(2)}
                     </span>
                   </div>
@@ -258,7 +258,7 @@ export function SubscriptionsClient({
                           ? "bg-[#ef4444]"
                           : usagePct > 80
                             ? "bg-[#f59e0b]"
-                            : "bg-[#38b6ff]";
+                            : "bg-[#8b5cf6]";
 
                       return (
                         <tr

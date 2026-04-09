@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import { getAdminUser } from "@/lib/auth";
+import { getPlatformUser } from "@/lib/auth";
+import { createServiceClient } from "@/lib/supabase/server";
 import type { DocumentType } from "@/lib/types";
 import { LendersClient } from "./lenders-client";
 
@@ -13,16 +13,16 @@ interface LenderRow {
   lastOrderDate: string;
 }
 
-export default async function LendersPage() {
-  const user = await getAdminUser();
-  const supabase = await createClient();
+export default async function PlatformLendersPage() {
+  await getPlatformUser();
+  const supabase = await createServiceClient();
 
+  // Cross-tenant: fetch ALL document requests (no tenant_id filter)
   const { data: requests } = await supabase
     .from("document_requests")
     .select(
       "id, created_at, requester_name, requester_email, requester_type, document_types, total_price_cents, payment_status"
     )
-    .eq("tenant_id", user.tenantId)
     .order("created_at", { ascending: false });
 
   const allRequests = requests || [];
@@ -60,7 +60,6 @@ export default async function LendersPage() {
       if (!existing.name && req.requester_name) existing.name = req.requester_name;
       if (!existing.rType && req.requester_type) existing.rType = req.requester_type;
     } else if (hasLQ) {
-      // Only create entry if they've ordered at least one LQ
       lenderMap.set(key, {
         name: req.requester_name || "",
         email: req.requester_email || "",
@@ -71,14 +70,6 @@ export default async function LendersPage() {
         lastOrder: req.created_at,
       });
     }
-  }
-
-  // Also add subsequent non-LQ orders for known lenders
-  for (const req of allRequests) {
-    const key = (req.requester_email || req.requester_name || "unknown").toLowerCase();
-    const existing = lenderMap.get(key);
-    if (!existing) continue;
-    // Already counted in the first pass
   }
 
   const lenders: LenderRow[] = Array.from(lenderMap.values())
@@ -104,10 +95,6 @@ export default async function LendersPage() {
       r.created_at >= startOfMonth &&
       ((r.document_types || []) as DocumentType[]).includes("lender_questionnaire")
   ).length;
-
-  const deliveredWithTime = allRequests
-    .filter((r) => ((r.document_types || []) as DocumentType[]).includes("lender_questionnaire"))
-    .length;
 
   const totalLenderRevenue = lenders.reduce((s, l) => s + l.revenue, 0);
 

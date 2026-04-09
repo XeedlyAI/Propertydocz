@@ -1,4 +1,4 @@
-import { getAdminUser } from "@/lib/auth";
+import { getPlatformUser } from "@/lib/auth";
 import { SubscriptionsClient } from "./subscriptions-client";
 
 // Subscription tiers - these will be wired to Stripe later
@@ -41,15 +41,14 @@ const TIERS = [
   },
 ];
 
-export default async function SubscriptionsPage() {
-  const user = await getAdminUser();
+export default async function PlatformSubscriptionsPage() {
+  await getPlatformUser();
 
-  // TODO: When Stripe subscriptions are wired, fetch real data here:
-  // - Query subscriptions table for this tenant
+  // TODO: When Stripe subscriptions are wired, fetch real cross-tenant data here:
+  // - Query subscriptions table across all tenants using createServiceClient
   // - Group by tier, calculate MRR, usage, status
   // - Identify at-risk (no orders in 30+ days) and churned subscribers
 
-  // For now, pass empty/placeholder data
   const totalMRR = TIERS.reduce((s, t) => s + t.mrr, 0);
   const totalSubscribers = TIERS.reduce((s, t) => s + t.subscribers, 0);
   const paidSubscribers = TIERS.filter((t) => t.priceCents > 0).reduce(
