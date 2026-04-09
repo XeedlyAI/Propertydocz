@@ -19,6 +19,7 @@ import {
   Send,
 } from "lucide-react";
 import { MeshGradient } from "./mesh-gradient";
+import { HeroIllustration } from "@/components/landing/HeroIllustration";
 import {
   FadeUp,
   StaggerContainer,
@@ -28,53 +29,63 @@ import {
 /* ───────── HERO ───────── */
 function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       <MeshGradient />
-      <div className="relative z-10 mx-auto max-w-5xl px-6 py-32 text-center">
-        <FadeUp>
-          <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
-            <Zap className="size-3.5 text-[#38b6ff]" />
-            <span className="text-xs font-medium text-white/70">
-              AI-Powered HOA Document Platform
-            </span>
-          </div>
-        </FadeUp>
-        <FadeUp delay={0.1}>
-          <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-            HOA Documents.
-            <br />
-            <span className="text-[#38b6ff]">Ordered in Seconds.</span>
-            <br />
-            Delivered with Precision.
-          </h1>
-        </FadeUp>
-        <FadeUp delay={0.2}>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/60 sm:text-xl">
-            The modern platform connecting management companies, agents, and
-            lenders. AI-generated resale certificates, payoff statements, and
-            more — compliant with Utah law, delivered digitally.
-          </p>
-        </FadeUp>
-        <FadeUp delay={0.3}>
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/for-management-companies"
-              className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-[#1A1A2E] shadow-2xl transition-all hover:shadow-white/20 hover:scale-[1.02] min-h-[44px]"
-            >
-              <Building2 className="size-4" />
-              I&apos;m a Management Company
-              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-            <Link
-              href="/for-agents"
-              className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-[#38b6ff]/30 bg-[#38b6ff]/10 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-[#38b6ff]/20 hover:border-[#38b6ff]/50 min-h-[44px]"
-            >
-              <FileText className="size-4" />
-              I Need Documents
-              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </div>
-        </FadeUp>
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-14 items-center">
+        {/* Left column — content (~55%) */}
+        <div className="md:col-span-7 text-center md:text-left">
+          <FadeUp>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
+              <Zap className="size-3.5 text-[#38b6ff]" />
+              <span className="text-xs font-medium text-white/70">
+                AI-Powered HOA Document Platform
+              </span>
+            </div>
+          </FadeUp>
+          <FadeUp delay={0.1}>
+            <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl">
+              HOA Documents.
+              <br />
+              <span className="text-[#38b6ff]">Ordered in Seconds.</span>
+              <br />
+              Delivered with Precision.
+            </h1>
+          </FadeUp>
+          <FadeUp delay={0.2}>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/60 sm:text-xl md:mx-0 mx-auto">
+              The modern platform connecting management companies, agents, and
+              lenders. AI-generated resale certificates, payoff statements, and
+              more — compliant with Utah law, delivered digitally.
+            </p>
+          </FadeUp>
+          <FadeUp delay={0.3}>
+            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row md:justify-start sm:justify-center">
+              <Link
+                href="/for-management-companies"
+                className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-[#1A1A2E] shadow-2xl transition-all hover:shadow-white/20 hover:scale-[1.02] min-h-[44px]"
+              >
+                <Building2 className="size-4" />
+                I&apos;m a Management Company
+                <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="/for-agents"
+                className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-[#38b6ff]/30 bg-[#38b6ff]/10 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-[#38b6ff]/20 hover:border-[#38b6ff]/50 min-h-[44px]"
+              >
+                <FileText className="size-4" />
+                I Need Documents
+                <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+          </FadeUp>
+        </div>
+
+        {/* Right column — illustration (~45%) */}
+        <div className="md:col-span-5 flex justify-center md:justify-end">
+          <FadeUp delay={0.4}>
+            <HeroIllustration className="w-full max-w-[520px] h-auto opacity-90 drop-shadow-2xl" />
+          </FadeUp>
+        </div>
       </div>
       {/* Bottom gradient fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FAFBFC] to-transparent" />
