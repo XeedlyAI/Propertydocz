@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { orderFormSchema } from "@/lib/schemas";
 import { calculateOrderTotal, DOCUMENT_LABELS } from "@/lib/pricing";
 import { createCheckoutSession } from "@/lib/stripe";
-import { sendOrderConfirmation, sendAdminNotification } from "@/lib/email/send";
+import { sendOrderConfirmation, sendAdminNotification, sendUsageAlert } from "@/lib/email/send";
 import { runRequestIntelligence } from "@/lib/services/request-intelligence";
 import { findAgentByEmail, recordUsage } from "@/lib/services/usage-tracking";
 import {
@@ -217,6 +217,25 @@ export async function POST(request: NextRequest) {
         was_overage: pricing.pricingType === "overage",
         overage_amount: pricing.pricingType === "overage" ? pricing.finalPrice : 0,
       });
+
+      // Send usage alert if crossing thresholds
+      if (subscription.packages_included > 0) {
+        const usagePct = (pricing.packagesUsed / subscription.packages_included) * 100;
+        if (usagePct >= 100 || (usagePct >= 80 && usagePct < 100)) {
+          try {
+            await sendUsageAlert({
+              to: data.requester_email,
+              customerName: data.requester_name,
+              tier: subscription.tier,
+              packagesUsed: pricing.packagesUsed,
+              packagesIncluded: subscription.packages_included,
+              threshold: usagePct >= 100 ? 100 : 80,
+            });
+          } catch (alertErr) {
+            console.error("Failed to send usage alert:", alertErr);
+          }
+        }
+      }
     }
 
     // ── If order is fully covered by subscription, skip payment ──

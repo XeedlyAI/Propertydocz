@@ -203,6 +203,47 @@ export default async function PlatformCustomersPage() {
       };
     });
 
+  // ── Upgrade opportunities ──
+  // Free customers with 3+ orders are good upgrade candidates
+  const upgradeOpportunities = customerRows
+    .filter((c) => c.tier === "free" && c.orders >= 3)
+    .sort((a, b) => b.orders - a.orders)
+    .slice(0, 5)
+    .map((c) => ({
+      name: c.name,
+      email: c.email,
+      orders: c.orders,
+      revenue: c.revenue,
+      potentialSavings: Math.round(c.revenue * 0.20), // estimate 20% savings
+    }));
+
+  // Subscribers using >80% of packages are candidates for tier upgrade
+  const tierUpgradeCandidates = customerRows
+    .filter((c) => {
+      if (c.tier === "free" || c.tier === "title_partner") return false;
+      if (c.packagesIncluded === 0) return false;
+      return (c.packagesUsed / c.packagesIncluded) >= 0.80;
+    })
+    .slice(0, 5)
+    .map((c) => ({
+      name: c.name,
+      currentTier: c.tier,
+      packagesUsed: c.packagesUsed,
+      packagesIncluded: c.packagesIncluded,
+    }));
+
+  // ── Subscription health metrics ──
+  const totalPackagesUsed = allSubscriptions
+    .filter((s) => s.status === "active")
+    .reduce((sum, s) => sum + (s.packages_used || 0), 0);
+  const totalPackagesIncluded = allSubscriptions
+    .filter((s) => s.status === "active")
+    .reduce((sum, s) => sum + (s.packages_included || 0), 0);
+  const avgUsagePct = totalPackagesIncluded > 0
+    ? Math.round((totalPackagesUsed / totalPackagesIncluded) * 100)
+    : 0;
+  const pastDueCount = allSubscriptions.filter((s) => s.status === "past_due").length;
+
   return (
     <CustomersClient
       customers={customerRows}
@@ -218,6 +259,14 @@ export default async function PlatformCustomersPage() {
       tierSummary={tierSummary}
       recentChurn={recentChurn}
       atRisk={atRisk}
+      upgradeOpportunities={upgradeOpportunities}
+      tierUpgradeCandidates={tierUpgradeCandidates}
+      subscriptionHealth={{
+        avgUsagePct,
+        totalPackagesUsed,
+        totalPackagesIncluded,
+        pastDueCount,
+      }}
     />
   );
 }

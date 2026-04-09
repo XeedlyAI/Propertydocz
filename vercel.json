@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/usage-reset",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/subscription-report",
+      "schedule": "0 8 1 * *"
     }
   ]
 }

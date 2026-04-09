@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe";
-import { sendOrderConfirmation, sendAdminNotification } from "@/lib/email/send";
+import {
+  sendOrderConfirmation,
+  sendAdminNotification,
+  sendWelcomeEmail,
+  sendPaymentFailed,
+  sendCancellationConfirmation,
+  sendRenewalConfirmation,
+  sendUsageAlert,
+} from "@/lib/email/send";
 import { runRequestIntelligence } from "@/lib/services/request-intelligence";
 import { findAgentByEmail, recordUsage } from "@/lib/services/usage-tracking";
 
@@ -77,6 +85,24 @@ export async function POST(request: NextRequest) {
               overage_discount_percent: tierConfig?.overageDiscount || 0,
               monthly_price: tierConfig?.priceCents || 0,
             });
+
+            // Send welcome/subscription confirmation email
+            try {
+              const { data: custAccount } = await serviceClient
+                .from("customer_account")
+                .select("email, full_name")
+                .eq("id", customerAccountId)
+                .single();
+
+              if (custAccount?.email) {
+                await sendWelcomeEmail({
+                  to: custAccount.email,
+                  customerName: custAccount.full_name,
+                });
+              }
+            } catch (emailErr) {
+              console.error("Failed to send welcome email:", emailErr);
+            }
           }
           break;
         }
@@ -281,6 +307,13 @@ export async function POST(request: NextRequest) {
         // Handle customer_subscription deletion
         const csCustomerId = sub.metadata?.customer_account_id;
         if (csCustomerId) {
+          // Get tier before updating
+          const { data: cancelledSub } = await serviceClient
+            .from("customer_subscription")
+            .select("tier, customer_id")
+            .eq("stripe_subscription_id", sub.id)
+            .single();
+
           await serviceClient
             .from("customer_subscription")
             .update({
@@ -289,6 +322,27 @@ export async function POST(request: NextRequest) {
               updated_at: new Date().toISOString(),
             })
             .eq("stripe_subscription_id", sub.id);
+
+          // Send cancellation email
+          if (cancelledSub) {
+            try {
+              const { data: custAccount } = await serviceClient
+                .from("customer_account")
+                .select("email, full_name")
+                .eq("id", cancelledSub.customer_id)
+                .single();
+
+              if (custAccount?.email) {
+                await sendCancellationConfirmation({
+                  to: custAccount.email,
+                  customerName: custAccount.full_name,
+                  tier: cancelledSub.tier,
+                });
+              }
+            } catch (emailErr) {
+              console.error("Failed to send cancellation email:", emailErr);
+            }
+          }
           break;
         }
 
@@ -328,15 +382,47 @@ export async function POST(request: NextRequest) {
           };
 
           if (stripeSub.metadata?.customer_account_id) {
+            const newCycleEnd = new Date(stripeSub.current_period_end * 1000).toISOString().split("T")[0];
+
+            // Get subscription details before reset
+            const { data: renewedSub } = await serviceClient
+              .from("customer_subscription")
+              .select("customer_id, tier, packages_included")
+              .eq("stripe_subscription_id", invoice.subscription)
+              .single();
+
             await serviceClient
               .from("customer_subscription")
               .update({
                 packages_used: 0,
                 billing_cycle_start: new Date(stripeSub.current_period_start * 1000).toISOString().split("T")[0],
-                billing_cycle_end: new Date(stripeSub.current_period_end * 1000).toISOString().split("T")[0],
+                billing_cycle_end: newCycleEnd,
                 updated_at: new Date().toISOString(),
               })
               .eq("stripe_subscription_id", invoice.subscription);
+
+            // Send renewal confirmation email
+            if (renewedSub) {
+              try {
+                const { data: custAccount } = await serviceClient
+                  .from("customer_account")
+                  .select("email, full_name")
+                  .eq("id", renewedSub.customer_id)
+                  .single();
+
+                if (custAccount?.email) {
+                  await sendRenewalConfirmation({
+                    to: custAccount.email,
+                    customerName: custAccount.full_name,
+                    tier: renewedSub.tier,
+                    packagesIncluded: renewedSub.packages_included,
+                    billingCycleEnd: newCycleEnd,
+                  });
+                }
+              } catch (emailErr) {
+                console.error("Failed to send renewal email:", emailErr);
+              }
+            }
           }
         }
         break;
@@ -349,6 +435,13 @@ export async function POST(request: NextRequest) {
         const subId = invoice.subscription || null;
 
         if (subId) {
+          // Get subscription details before updating
+          const { data: failedSub } = await serviceClient
+            .from("customer_subscription")
+            .select("customer_id, tier")
+            .eq("stripe_subscription_id", subId)
+            .single();
+
           // Update customer_subscription
           await serviceClient
             .from("customer_subscription")
@@ -357,6 +450,27 @@ export async function POST(request: NextRequest) {
               updated_at: new Date().toISOString(),
             })
             .eq("stripe_subscription_id", subId);
+
+          // Send payment failed email
+          if (failedSub) {
+            try {
+              const { data: custAccount } = await serviceClient
+                .from("customer_account")
+                .select("email, full_name")
+                .eq("id", failedSub.customer_id)
+                .single();
+
+              if (custAccount?.email) {
+                await sendPaymentFailed({
+                  to: custAccount.email,
+                  customerName: custAccount.full_name,
+                  tier: failedSub.tier,
+                });
+              }
+            } catch (emailErr) {
+              console.error("Failed to send payment failed email:", emailErr);
+            }
+          }
 
           // Legacy: update agent_accounts
           await serviceClient

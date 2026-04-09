@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Search, AlertTriangle, UserX, X } from "lucide-react";
+import { Users, Search, AlertTriangle, UserX, X, TrendingUp, ArrowUpRight, CreditCard, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/PageHeader";
 import {
@@ -64,6 +64,28 @@ interface AtRiskEntry {
   daysSinceOrder: number;
 }
 
+interface UpgradeOpportunity {
+  name: string;
+  email: string;
+  orders: number;
+  revenue: number;
+  potentialSavings: number;
+}
+
+interface TierUpgradeCandidate {
+  name: string;
+  currentTier: SubscriptionTier;
+  packagesUsed: number;
+  packagesIncluded: number;
+}
+
+interface SubscriptionHealth {
+  avgUsagePct: number;
+  totalPackagesUsed: number;
+  totalPackagesIncluded: number;
+  pastDueCount: number;
+}
+
 interface CustomersClientProps {
   customers: CustomerRow[];
   kpis: {
@@ -78,6 +100,9 @@ interface CustomersClientProps {
   tierSummary: TierSummary[];
   recentChurn: ChurnEntry[];
   atRisk: AtRiskEntry[];
+  upgradeOpportunities?: UpgradeOpportunity[];
+  tierUpgradeCandidates?: TierUpgradeCandidate[];
+  subscriptionHealth?: SubscriptionHealth;
 }
 
 // ── Detail Panel ──
@@ -237,6 +262,9 @@ export function CustomersClient({
   tierSummary,
   recentChurn,
   atRisk,
+  upgradeOpportunities = [],
+  tierUpgradeCandidates = [],
+  subscriptionHealth,
 }: CustomersClientProps) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -605,6 +633,175 @@ export function CustomersClient({
             </CardContent>
           </Card>
         </FadeUpChild>
+
+        {/* Subscription Health & Analytics */}
+        {subscriptionHealth && (
+          <FadeUpChild>
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+              <Card className="dash-card">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Activity className="size-4 text-[#8b5cf6]" />
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Platform Usage
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${
+                          subscriptionHealth.avgUsagePct > 90
+                            ? "bg-[#ef4444]"
+                            : subscriptionHealth.avgUsagePct > 70
+                              ? "bg-[#f59e0b]"
+                              : "bg-[#8b5cf6]"
+                        }`}
+                        style={{ width: `${Math.min(subscriptionHealth.avgUsagePct, 100)}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span className="font-mono">{subscriptionHealth.totalPackagesUsed}/{subscriptionHealth.totalPackagesIncluded}</span>
+                      <span className="font-mono font-medium text-foreground">{subscriptionHealth.avgUsagePct}%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dash-card">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CreditCard className="size-4 text-[#ef4444]" />
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Past Due
+                    </p>
+                  </div>
+                  <p className="font-mono text-2xl font-bold text-foreground">
+                    {subscriptionHealth.pastDueCount}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {subscriptionHealth.pastDueCount === 0 ? "All payments current" : "Need payment update"}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="dash-card">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <TrendingUp className="size-4 text-[#14b8a6]" />
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Upgrade Leads
+                    </p>
+                  </div>
+                  <p className="font-mono text-2xl font-bold text-foreground">
+                    {upgradeOpportunities.length}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Free users with 3+ orders
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="dash-card">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ArrowUpRight className="size-4 text-[#f59e0b]" />
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Tier Upgrades
+                    </p>
+                  </div>
+                  <p className="font-mono text-2xl font-bold text-foreground">
+                    {tierUpgradeCandidates.length}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Using &gt;80% of packages
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </FadeUpChild>
+        )}
+
+        {/* Upgrade Opportunities */}
+        {(upgradeOpportunities.length > 0 || tierUpgradeCandidates.length > 0) && (
+          <FadeUpChild>
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Free-to-Paid Opportunities */}
+              {upgradeOpportunities.length > 0 && (
+                <Card className="dash-card">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="size-4 text-[#14b8a6]" />
+                      <CardTitle className="text-base">Upgrade Opportunities</CardTitle>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Free customers who order frequently — prime subscription candidates
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {upgradeOpportunities.map((opp, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between border-l-[3px] border-l-[#14b8a6] rounded-r-lg bg-teal-50/50 dark:bg-teal-900/10 px-3 py-2"
+                        >
+                          <div>
+                            <p className="text-sm font-medium">{opp.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {opp.orders} orders • {formatCents(opp.revenue)} spent
+                            </p>
+                          </div>
+                          <span className="text-xs font-medium text-[#14b8a6]">
+                            ~{formatCents(opp.potentialSavings)} savings
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Tier Upgrade Candidates */}
+              {tierUpgradeCandidates.length > 0 && (
+                <Card className="dash-card">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <ArrowUpRight className="size-4 text-[#f59e0b]" />
+                      <CardTitle className="text-base">Tier Upgrade Candidates</CardTitle>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Subscribers using most of their packages — may benefit from a higher tier
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {tierUpgradeCandidates.map((cand, i) => {
+                        const usagePct = cand.packagesIncluded > 0
+                          ? Math.round((cand.packagesUsed / cand.packagesIncluded) * 100)
+                          : 0;
+                        return (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between border-l-[3px] border-l-[#f59e0b] rounded-r-lg bg-amber-50/50 dark:bg-amber-900/10 px-3 py-2"
+                          >
+                            <div>
+                              <p className="text-sm font-medium">{cand.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {getTierName(cand.currentTier)} • {cand.packagesUsed}/{cand.packagesIncluded} packages
+                              </p>
+                            </div>
+                            <span className="text-xs font-mono font-medium text-[#f59e0b]">
+                              {usagePct}% used
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </FadeUpChild>
+        )}
 
         {/* Churn & Health */}
         <FadeUpChild>

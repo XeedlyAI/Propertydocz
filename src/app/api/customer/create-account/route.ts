@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendWelcomeEmail } from "@/lib/email/send";
 
 /**
  * POST /api/customer/create-account
@@ -73,6 +74,25 @@ export async function POST(request: NextRequest) {
         .from("customer_account")
         .update({ user_id: userId, updated_at: new Date().toISOString() })
         .eq("email", email.toLowerCase().trim());
+    }
+
+    // Send welcome email
+    try {
+      const { data: customer } = await supabase
+        .from("customer_account")
+        .select("full_name")
+        .eq("email", email.toLowerCase().trim())
+        .single();
+
+      if (customer?.full_name) {
+        await sendWelcomeEmail({
+          to: email.toLowerCase().trim(),
+          customerName: customer.full_name,
+        });
+      }
+    } catch (emailErr) {
+      console.error("Failed to send welcome email:", emailErr);
+      // Non-blocking
     }
 
     return NextResponse.json({
