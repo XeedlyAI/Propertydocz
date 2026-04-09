@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import {
   Building2,
   ArrowRight,
@@ -19,6 +18,7 @@ import {
   Phone,
 } from "lucide-react";
 import { MeshGradient } from "./mesh-gradient";
+import { RevenueCalculator } from "./revenue-calculator";
 import {
   FadeUp,
   StaggerContainer,
@@ -139,75 +139,23 @@ function ProblemSolutionSection() {
 }
 
 /* ───────── REVENUE CALCULATOR ───────── */
-function RevenueCalculator() {
-  const [properties, setProperties] = useState(50);
-  // Assume ~15% of properties transact per year, ~1.5 docs per transaction
-  const estimatedOrders = Math.round(properties * 0.15 * 1.5);
-  const avgRevPerDoc = 75; // average revenue share per document
-  const annualRevenue = estimatedOrders * avgRevPerDoc;
-
+function RevenueCalculatorSection() {
   return (
-    <section id="revenue-calculator" className="bg-[#F4F5F7] py-24 sm:py-32">
-      <div className="mx-auto max-w-4xl px-6">
+    <section id="revenue-calculator" className="relative py-24 sm:py-32" style={{ backgroundColor: "#f0f4f8" }}>
+      <div className="mx-auto max-w-7xl px-6">
         <FadeUp>
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-wider text-[#38b6ff]">
               Revenue Calculator
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1A1A2E] sm:text-4xl">
-              Estimate your annual document revenue
+              See your document revenue potential
             </h2>
           </div>
         </FadeUp>
         <FadeUp delay={0.1}>
-          <div className="mt-12 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm sm:p-10">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-[#1A1A2E]">
-                  Properties Managed
-                </label>
-                <span className="font-mono text-2xl font-bold text-[#38b6ff]">
-                  {properties}
-                </span>
-              </div>
-              <input
-                type="range"
-                min={10}
-                max={500}
-                step={5}
-                value={properties}
-                onChange={(e) => setProperties(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#38b6ff]"
-              />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>10</span>
-                <span>500</span>
-              </div>
-            </div>
-            <div className="mt-10 grid gap-6 sm:grid-cols-3">
-              <div className="rounded-xl bg-[#F4F5F7] p-5 text-center">
-                <p className="text-xs font-medium text-gray-500">Est. Annual Orders</p>
-                <p className="mt-1 font-mono text-3xl font-bold text-[#1A1A2E]">
-                  {estimatedOrders}
-                </p>
-              </div>
-              <div className="rounded-xl bg-[#F4F5F7] p-5 text-center">
-                <p className="text-xs font-medium text-gray-500">Avg. Revenue / Doc</p>
-                <p className="mt-1 font-mono text-3xl font-bold text-[#1A1A2E]">
-                  ${avgRevPerDoc}
-                </p>
-              </div>
-              <div className="rounded-xl bg-[#38b6ff]/10 p-5 text-center border border-[#38b6ff]/20">
-                <p className="text-xs font-medium text-[#38b6ff]">Est. Annual Revenue</p>
-                <p className="mt-1 font-mono text-3xl font-bold text-[#1A1A2E]">
-                  ${annualRevenue.toLocaleString()}
-                </p>
-              </div>
-            </div>
-            <p className="mt-6 text-center text-xs text-gray-400">
-              Based on ~15% annual turnover rate and 1.5 documents per transaction.
-              Actual revenue depends on your portfolio and market conditions.
-            </p>
+          <div className="mt-12">
+            <RevenueCalculator />
           </div>
         </FadeUp>
       </div>
@@ -376,7 +324,7 @@ export function ForManagementCompaniesPage() {
     <>
       <HeroSection />
       <ProblemSolutionSection />
-      <RevenueCalculator />
+      <RevenueCalculatorSection />
       <FeaturesSection />
       <OnboardingSection />
       <CTASection />
