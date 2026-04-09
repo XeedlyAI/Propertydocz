@@ -17,8 +17,6 @@ import {
   Shield,
   Users,
   Wand2,
-  Landmark,
-  CreditCard,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -37,13 +35,8 @@ const PLATFORM_ITEMS: NavItem[] = [
   { href: "/platform/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/platform/tenants", label: "Tenants", icon: Building2 },
   { href: "/platform/onboard", label: "Onboard", icon: Wand2 },
+  { href: "/platform/customers", label: "Customers", icon: Users },
   { href: "/platform/revenue", label: "Revenue", icon: DollarSign },
-];
-
-const CLIENTS_ITEMS: NavItem[] = [
-  { href: "/platform/agents", label: "Agents", icon: Users },
-  { href: "/platform/lenders", label: "Lenders", icon: Landmark },
-  { href: "/platform/subscriptions", label: "Subscriptions", icon: CreditCard },
 ];
 
 const SYSTEM_ITEMS: NavItem[] = [
@@ -137,7 +130,6 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 flex flex-col px-3 py-3 gap-4 overflow-y-auto">
         <NavGroup label="Platform" items={PLATFORM_ITEMS} accent={PURPLE} />
-        <NavGroup label="Clients" items={CLIENTS_ITEMS} accent={PURPLE} />
 
         {/* Spacer pushes System to bottom */}
         <div className="flex-1" />
