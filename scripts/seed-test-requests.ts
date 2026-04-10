@@ -3,27 +3,30 @@
  * Run with: npm run seed:test
  */
 
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
 
 // ---------------------------------------------------------------------------
-// 1. Parse .env.local
+// 1. Parse .env.local (or fall back to process.env)
 // ---------------------------------------------------------------------------
-const envPath = resolve(__dirname, "../.env.local");
-const envContent = readFileSync(envPath, "utf-8");
 const env: Record<string, string> = {};
-for (const line of envContent.split("\n")) {
-  const match = line.match(/^([^#=]+)=(.*)$/);
-  if (match) env[match[1].trim()] = match[2].trim();
+const envPath = resolve(__dirname, "../.env.local");
+if (existsSync(envPath)) {
+  const envContent = readFileSync(envPath, "utf-8");
+  for (const line of envContent.split("\n")) {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match) env[match[1].trim()] = match[2].trim();
+  }
 }
 
-const supabaseUrl = env["NEXT_PUBLIC_SUPABASE_URL"];
-const serviceRoleKey = env["SUPABASE_SERVICE_ROLE_KEY"];
+const supabaseUrl = env["NEXT_PUBLIC_SUPABASE_URL"] || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceRoleKey = env["SUPABASE_SERVICE_ROLE_KEY"] || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error(
-    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local"
+    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.\n" +
+    "Set them in .env.local or as environment variables."
   );
   process.exit(1);
 }
