@@ -30,7 +30,7 @@ function HeroSection() {
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       <MeshGradient />
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-start">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center">
         {/* Left column — content */}
         <div className="text-center md:text-left md:pt-10">
           <FadeUp>
@@ -87,9 +87,9 @@ function HeroSection() {
         </div>
 
         {/* Right column — illustration */}
-        <div className="w-full flex items-start justify-center md:justify-end">
-          <FadeUp delay={0.4}>
-            <HeroIllustration className="w-full h-auto opacity-90 drop-shadow-2xl" />
+        <div className="w-full md:pt-6">
+          <FadeUp delay={0.4} className="w-full block">
+            <HeroIllustration className="w-full max-w-none h-auto opacity-90 drop-shadow-2xl" />
           </FadeUp>
         </div>
       </div>
