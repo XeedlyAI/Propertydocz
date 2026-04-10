@@ -127,22 +127,22 @@ export function GenerateDocumentsButton({
           )}
 
           {results && results.length > 0 && (
-            <div className="space-y-2 rounded-lg border border-green-200 bg-green-50 p-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-green-700">
-                <CheckCircle2 className="size-4" />
+            <div className="rounded-lg border border-l-4 border-l-[#38b6ff] bg-white p-3 space-y-1">
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <CheckCircle2 className="size-4 text-[#38b6ff]" />
                 Documents generated successfully
               </div>
               {results.map((r) => (
-                <div key={r.document_type} className="text-xs text-green-600">
+                <div key={r.document_type} className="text-xs text-muted-foreground">
                   <span className="font-medium">
                     {r.document_type.replace(/_/g, " ")}
                   </span>
                   {r.warnings.length > 0 && (
-                    <ul className="mt-1 ml-4 list-disc text-amber-600">
+                    <span className="text-amber-600 ml-1">
                       {r.warnings.map((w, i) => (
-                        <li key={i}>{w}</li>
+                        <span key={i}> &middot; {w}</span>
                       ))}
-                    </ul>
+                    </span>
                   )}
                 </div>
               ))}
@@ -150,7 +150,7 @@ export function GenerateDocumentsButton({
           )}
 
           {generationErrors.length > 0 && (
-            <div className="space-y-1 rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <div className="rounded-lg border border-l-4 border-l-amber-400 bg-white p-3 space-y-1">
               <div className="flex items-center gap-2 text-sm font-medium text-amber-700">
                 <AlertTriangle className="size-4" />
                 Some documents had issues
@@ -164,7 +164,7 @@ export function GenerateDocumentsButton({
           )}
 
           {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+            <div className="rounded-lg border border-l-4 border-l-red-500 bg-white p-3">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}

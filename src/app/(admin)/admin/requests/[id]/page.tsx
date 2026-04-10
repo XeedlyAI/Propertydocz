@@ -3,7 +3,6 @@ import { getAdminUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
 import type { DocumentType, RequestStatus } from "@/lib/types";
-import type { GapAnalysisResult } from "@/lib/types/fields";
 import {
   Card,
   CardContent,
@@ -15,24 +14,20 @@ import {
   User,
   Building2,
   FileText,
-  Clock,
   Zap,
-  CheckCircle2,
   ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
-import { LiveDataForm } from "@/components/admin/live-data-form";
+import { TransactionDataForm } from "@/components/admin/transaction-data-form";
 import { StatusActions } from "@/components/admin/status-actions";
 import { GenerateDocumentsButton } from "@/components/admin/generate-documents-button";
 import { GeneratedDocumentsCard } from "@/components/admin/generated-documents-card";
-import { GapAnalysisDisplay } from "@/components/admin/gap-analysis-display";
-import { getFieldsForDocumentType } from "@/lib/services/field-registry";
 import { getAssociationFieldValues } from "@/lib/services/association-data";
 
 const WORKFLOW_STAGES: { key: RequestStatus; label: string }[] = [
   { key: "received", label: "Received" },
   { key: "paid", label: "Paid" },
-  { key: "awaiting_data", label: "Awaiting Data" },
+  { key: "awaiting_data", label: "Needs Details" },
   { key: "ready_for_generation", label: "Ready" },
   { key: "pending_review", label: "Review" },
   { key: "approved", label: "Approved" },
@@ -42,7 +37,7 @@ const WORKFLOW_STAGES: { key: RequestStatus; label: string }[] = [
 const STATUS_LABELS: Record<RequestStatus, string> = {
   received: "Received",
   paid: "Paid",
-  awaiting_data: "Awaiting Data",
+  awaiting_data: "Needs Details",
   ready_for_generation: "Ready for Generation",
   pending_review: "Pending Review",
   approved: "Approved",
@@ -81,12 +76,8 @@ export default async function RequestDetailPage({
     ? request.associations[0]
     : request.associations;
 
-  // Fetch field definitions and association field values in parallel for the form
-  const docTypes = request.document_types as string[];
-  const primaryDocType = docTypes[0] ?? "resale_certificate";
-
-  const [fieldDefinitions, associationFieldValues, generatedDocsResult] = await Promise.all([
-    getFieldsForDocumentType(primaryDocType),
+  // Fetch association field values and generated docs count in parallel
+  const [associationFieldValues, generatedDocsResult] = await Promise.all([
     request.association_id
       ? getAssociationFieldValues(request.association_id)
       : Promise.resolve([]),
@@ -99,21 +90,6 @@ export default async function RequestDetailPage({
   const hasGeneratedDocuments = (generatedDocsResult.count ?? 0) > 0;
 
   // Serialize for client component (strip any non-serializable data)
-  const serializedFieldDefs = fieldDefinitions.map((fd) => ({
-    id: fd.id,
-    field_key: fd.field_key,
-    label: fd.label,
-    tier: fd.tier,
-    value_type: fd.value_type,
-    section: fd.section,
-    document_types: fd.document_types,
-    validation_rules: fd.validation_rules,
-    staleness_days: fd.staleness_days,
-    extraction_hints: fd.extraction_hints,
-    display_order: fd.display_order,
-    help_text: fd.help_text,
-  }));
-
   const serializedFieldValues = associationFieldValues.map((fv) => ({
     id: fv.id,
     association_id: fv.association_id,
@@ -159,50 +135,59 @@ export default async function RequestDetailPage({
         </span>
       </div>
 
-      {/* Workflow Indicator */}
+      {/* Status Bar */}
       {!isCancelled && (
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center gap-1 overflow-x-auto">
-              {WORKFLOW_STAGES.map((stage, i) => {
-                const isComplete = i < currentStageIndex;
-                const isCurrent = i === currentStageIndex;
-                return (
-                  <div key={stage.key} className="flex items-center gap-1">
-                    {i > 0 && (
-                      <div
-                        className={`h-px w-4 sm:w-8 ${
-                          isComplete ? "bg-primary" : "bg-border"
-                        }`}
-                      />
-                    )}
-                    <div
-                      className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors ${
-                        isCurrent
-                          ? "bg-[#38b6ff] text-white"
-                          : isComplete
-                            ? "bg-[#38b6ff]/10 text-[#38b6ff]"
-                            : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {isComplete ? (
-                        <CheckCircle2 className="size-3" />
-                      ) : isCurrent ? (
-                        <Clock className="size-3" />
-                      ) : null}
-                      {stage.label}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border border-slate-200 p-4">
+          {/* Segmented bar */}
+          <div className="flex gap-1">
+            {WORKFLOW_STAGES.map((stage, i) => {
+              const isComplete = i < currentStageIndex;
+              const isCurrent = i === currentStageIndex;
+              return (
+                <div
+                  key={stage.key}
+                  className={`relative h-2 flex-1 rounded-full transition-colors ${
+                    isComplete
+                      ? "bg-[#38b6ff]"
+                      : isCurrent
+                        ? "bg-[#38b6ff]"
+                        : "bg-slate-100"
+                  }`}
+                >
+                  {isCurrent && (
+                    <span className="absolute right-1 top-1/2 -translate-y-1/2 size-1.5 rounded-full bg-white animate-pulse" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {/* Labels below */}
+          <div className="mt-2 flex gap-1">
+            {WORKFLOW_STAGES.map((stage, i) => {
+              const isComplete = i < currentStageIndex;
+              const isCurrent = i === currentStageIndex;
+              return (
+                <span
+                  key={stage.key}
+                  className={`flex-1 text-center text-[10px] sm:text-xs font-medium ${
+                    isCurrent
+                      ? "text-[#38b6ff]"
+                      : isComplete
+                        ? "text-[#38b6ff]/70"
+                        : "text-muted-foreground"
+                  }`}
+                >
+                  {stage.label}
+                </span>
+              );
+            })}
+          </div>
+        </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         {/* Left Column — Info */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="space-y-6">
           {/* Requester Info */}
           <Card>
             <CardHeader>
@@ -287,75 +272,17 @@ export default async function RequestDetailPage({
             </CardContent>
           </Card>
 
-          {/* Gap Analysis Display */}
-          {(request.status === "awaiting_data" ||
-            request.status === "ready_for_generation" ||
-            request.status === "pending_review") && (
-            <GapAnalysisDisplay
-              requestId={request.id}
-              gapAnalysis={
-                (request.gap_analysis as {
-                  missing_fields: string[];
-                  stale_fields: string[];
-                  suspicious_fields: Array<{
-                    field_key: string;
-                    current_value: string;
-                    concern: string;
-                  }>;
-                  compliance_flags: string[];
-                  completeness_score: number;
-                  recommended_status: string;
-                  summary: string;
-                } | null) ?? null
-              }
-              completenessScore={request.completeness_score as number | null}
-              fieldsTotal={
-                (request.gap_analysis as { missing_fields?: string[] } | null)
-                  ? ((request.missing_fields as string[] | null)?.length ?? 0) +
-                    Object.keys(
-                      (request.live_data as Record<string, string> | null) || {}
-                    ).length
-                  : 0
-              }
-              fieldsFilled={
-                Object.keys(
-                  (request.live_data as Record<string, string> | null) || {}
-                ).filter(
-                  (k) =>
-                    (request.live_data as Record<string, string>)[k]?.trim()
-                ).length
-              }
-            />
-          )}
-
-          {/* Live Data Input (when awaiting_data or ready_for_generation) */}
+          {/* Transaction Data Form (when awaiting_data or ready_for_generation) */}
           {(request.status === "awaiting_data" ||
             request.status === "ready_for_generation") && (
-            <div>
-              <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
-                <FileText className="size-4" />
-                Data Review
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Review and confirm all fields below. Green fields are verified,
-                yellow fields need confirmation, and red fields need data input.
-              </p>
-              <LiveDataForm
-                requestId={request.id}
-                documentTypes={request.document_types as DocumentType[]}
-                existingData={
-                  (request.live_data as Record<string, string> | null) || {}
-                }
-                fieldDefinitions={serializedFieldDefs}
-                associationFieldValues={serializedFieldValues}
-                gapAnalysis={
-                  (request.gap_analysis as GapAnalysisResult | null) ?? null
-                }
-                missingFields={
-                  (request.missing_fields as string[] | null) || []
-                }
-              />
-            </div>
+            <TransactionDataForm
+              requestId={request.id}
+              existingData={
+                (request.live_data as Record<string, string> | null) || {}
+              }
+              associationFieldValues={serializedFieldValues}
+              status={request.status as RequestStatus}
+            />
           )}
 
           {/* Generate Documents — renders in ready_for_generation AND pending_review
@@ -384,7 +311,7 @@ export default async function RequestDetailPage({
         </div>
 
         {/* Right Column — Summary & Actions */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
           {/* Order Summary */}
           <Card>
             <CardHeader>

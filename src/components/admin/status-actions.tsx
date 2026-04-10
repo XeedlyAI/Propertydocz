@@ -8,7 +8,6 @@ import {
   Loader2,
   CheckCircle2,
   XCircle,
-  Mail,
   Send,
   Download,
   Sparkles,
@@ -30,6 +29,7 @@ export function StatusActions({
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [complianceConfirmed, setComplianceConfirmed] = useState(false);
 
   async function handleTransition(nextStatus: RequestStatus) {
     setLoading(nextStatus);
@@ -135,42 +135,42 @@ export function StatusActions({
             size="sm"
             className="w-full justify-start gap-2 bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
             disabled={loading !== null}
-            onClick={() => handlePlaceholderAction("send_data_email")}
-          >
-            {loading === "send_data_email" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Mail className="size-4" />
-            )}
-            Send Data Request Email
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start gap-2"
-            disabled={loading !== null}
             onClick={() => handleTransition("ready_for_generation")}
           >
             {loading === "ready_for_generation" ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
-              <CheckCircle2 className="size-4" />
+              <ArrowRight className="size-4" />
             )}
-            Mark Data Received
+            Enter Transaction Details
           </Button>
         </>
       )}
 
       {/* ───── ready_for_generation ───── */}
       {currentStatus === "ready_for_generation" && (
-        <Button
-          className="w-full gap-2 bg-[#38b6ff] text-white text-base font-bold shadow-lg hover:bg-[#1DA8F0] active:bg-[#0A8FD4] py-6"
-          disabled={loading !== null}
-          onClick={scrollToGenerateButton}
-        >
-          <Sparkles className="size-5" />
-          Generate Documents
-        </Button>
+        <div className="space-y-3">
+          <label className="flex items-start gap-2 cursor-pointer text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={complianceConfirmed}
+              onChange={(e) => setComplianceConfirmed(e.target.checked)}
+              className="mt-0.5 size-4 rounded border-border accent-[#38b6ff]"
+            />
+            <span>
+              I confirm all data has been verified and is accurate for document
+              generation
+            </span>
+          </label>
+          <Button
+            className="w-full gap-2 bg-[#38b6ff] text-white text-base font-bold shadow-lg hover:bg-[#1DA8F0] active:bg-[#0A8FD4] py-6 disabled:opacity-50"
+            disabled={loading !== null || !complianceConfirmed}
+            onClick={scrollToGenerateButton}
+          >
+            <Sparkles className="size-5" />
+            Generate Documents
+          </Button>
+        </div>
       )}
 
       {/* ───── pending_review ───── */}
