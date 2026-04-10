@@ -1,13 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getAdminUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
-import { AssociationForm } from "@/components/admin/association-form";
-import { AssociationDropboxSection } from "@/components/admin/association-dropbox-section";
-import { OnboardingStatus } from "@/components/admin/onboarding-status";
-import { DocumentSyncCard } from "@/components/admin/document-sync-card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { AssociationDetailClient } from "./association-detail-client";
 
 export default async function AssociationDetailPage({
   params,
@@ -29,39 +25,55 @@ export default async function AssociationDetailPage({
     notFound();
   }
 
-  // Check if Dropbox is connected for this tenant
   const serviceClient = await createServiceClient();
-  const { data: tenant } = await serviceClient
-    .from("tenants")
-    .select("dropbox_access_token, dropbox_refresh_token")
-    .eq("id", user.tenantId)
-    .single();
+
+  // Fetch all data in parallel
+  const [
+    { data: tenant },
+    { data: governingDocs },
+    { count: fieldsPopulated },
+    { count: fieldsTotal },
+    { data: properties },
+    { data: requests },
+  ] = await Promise.all([
+    serviceClient
+      .from("tenants")
+      .select("dropbox_access_token, dropbox_refresh_token")
+      .eq("id", user.tenantId)
+      .single(),
+    serviceClient
+      .from("governing_documents")
+      .select(
+        "id, document_name, document_category, file_name, file_path, source, last_synced_at, created_at"
+      )
+      .eq("association_id", id)
+      .order("document_category"),
+    serviceClient
+      .from("association_field_values")
+      .select("id", { count: "exact", head: true })
+      .eq("association_id", id)
+      .not("value", "is", null),
+    serviceClient
+      .from("field_definitions")
+      .select("id", { count: "exact", head: true })
+      .in("tier", ["static", "periodic"]),
+    serviceClient
+      .from("properties")
+      .select("id, address, unit_number, owner_name")
+      .eq("association_id", id)
+      .order("unit_number"),
+    serviceClient
+      .from("document_requests")
+      .select(
+        "id, created_at, requester_name, requester_email, document_types, status, total_price_cents, turnaround, property_address"
+      )
+      .eq("association_id", id)
+      .order("created_at", { ascending: false }),
+  ]);
 
   const isDropboxConnected = !!(
     tenant?.dropbox_access_token && tenant?.dropbox_refresh_token
   );
-
-  // Fetch governing documents for this association
-  const { data: governingDocs } = await serviceClient
-    .from("governing_documents")
-    .select(
-      "id, document_name, document_category, file_name, source, last_synced_at"
-    )
-    .eq("association_id", id)
-    .order("document_category");
-
-  // Count populated field values for onboarding status
-  const { count: fieldsPopulated } = await serviceClient
-    .from("association_field_values")
-    .select("id", { count: "exact", head: true })
-    .eq("association_id", id)
-    .not("value", "is", null);
-
-  // Count total extractable fields (static + periodic)
-  const { count: fieldsTotal } = await serviceClient
-    .from("field_definitions")
-    .select("id", { count: "exact", head: true })
-    .in("tier", ["static", "periodic"]);
 
   return (
     <div className="space-y-6">
@@ -78,46 +90,20 @@ export default async function AssociationDetailPage({
           {association.name}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Edit association details
+          Manage association details, properties, documents, and settings
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        {/* Left column: Association form */}
-        <div>
-          <AssociationForm
-            tenantId={user.tenantId}
-            association={association}
-          />
-        </div>
-
-        {/* Right column: Dropbox + Onboarding */}
-        <div className="space-y-4">
-          {/* Onboarding Status */}
-          <OnboardingStatus
-            associationId={id}
-            onboardingStatus={association.onboarding_status}
-            hasDropboxFolder={!!association.dropbox_folder_path}
-            fieldsPopulated={fieldsPopulated ?? 0}
-            fieldsTotal={fieldsTotal ?? 0}
-          />
-
-          {/* Document Sync */}
-          <DocumentSyncCard
-            associationId={id}
-            isDropboxConnected={isDropboxConnected}
-            hasDropboxFolder={!!association.dropbox_folder_path}
-          />
-
-          <h2 className="text-lg font-semibold">Document Sources</h2>
-          <AssociationDropboxSection
-            associationId={id}
-            dropboxFolderPath={association.dropbox_folder_path}
-            isDropboxConnected={isDropboxConnected}
-            governingDocuments={governingDocs || []}
-          />
-        </div>
-      </div>
+      <AssociationDetailClient
+        association={association}
+        tenantId={user.tenantId}
+        governingDocs={governingDocs || []}
+        properties={properties || []}
+        requests={requests || []}
+        isDropboxConnected={isDropboxConnected}
+        fieldsPopulated={fieldsPopulated ?? 0}
+        fieldsTotal={fieldsTotal ?? 0}
+      />
     </div>
   );
 }

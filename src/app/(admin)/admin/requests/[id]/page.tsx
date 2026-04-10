@@ -85,12 +85,18 @@ export default async function RequestDetailPage({
   const docTypes = request.document_types as string[];
   const primaryDocType = docTypes[0] ?? "resale_certificate";
 
-  const [fieldDefinitions, associationFieldValues] = await Promise.all([
+  const [fieldDefinitions, associationFieldValues, generatedDocsResult] = await Promise.all([
     getFieldsForDocumentType(primaryDocType),
     request.association_id
       ? getAssociationFieldValues(request.association_id)
       : Promise.resolve([]),
+    supabase
+      .from("generated_documents")
+      .select("id", { count: "exact", head: true })
+      .eq("document_request_id", id),
   ]);
+
+  const hasGeneratedDocuments = (generatedDocsResult.count ?? 0) > 0;
 
   // Serialize for client component (strip any non-serializable data)
   const serializedFieldDefs = fieldDefinitions.map((fd) => ({
@@ -357,19 +363,23 @@ export default async function RequestDetailPage({
               triggers a router.refresh() that changes status to pending_review */}
           {(request.status === "ready_for_generation" ||
             request.status === "pending_review") && (
-            <GenerateDocumentsButton
-              requestId={request.id}
-              status={request.status}
-            />
+            <div data-generate-documents>
+              <GenerateDocumentsButton
+                requestId={request.id}
+                status={request.status}
+              />
+            </div>
           )}
 
           {/* Document Preview (when pending_review or later) */}
           {(request.status === "pending_review" ||
             request.status === "approved" ||
             request.status === "delivered") && (
-            <GeneratedDocumentsCard
-              requestId={request.id}
-            />
+            <div data-generated-documents>
+              <GeneratedDocumentsCard
+                requestId={request.id}
+              />
+            </div>
           )}
         </div>
 
@@ -394,13 +404,24 @@ export default async function RequestDetailPage({
                   )}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Payment</span>
-                <span className="font-medium capitalize">
-                  {request.bill_to_closing
-                    ? "Bill to Closing"
-                    : (request.payment_status as string).replace("_", " ")}
-                </span>
+              <div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Payment</span>
+                  <span className="font-medium capitalize">
+                    {request.bill_to_closing
+                      ? "Bill to Closing"
+                      : (request.payment_status as string).replace("_", " ")}
+                  </span>
+                </div>
+                {!request.bill_to_closing &&
+                  (request.payment_status as string) === "pending" && (
+                    <button
+                      type="button"
+                      className="mt-1 text-sm text-[#38b6ff] hover:underline"
+                    >
+                      Send Payment Link
+                    </button>
+                  )}
               </div>
               <Separator />
               <div className="flex justify-between">
@@ -432,6 +453,7 @@ export default async function RequestDetailPage({
               <StatusActions
                 requestId={request.id}
                 currentStatus={request.status as RequestStatus}
+                hasGeneratedDocuments={hasGeneratedDocuments}
               />
             </CardContent>
           </Card>
@@ -448,7 +470,19 @@ export default async function RequestDetailPage({
                   <div>
                     <p className="font-medium">Request Created</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(request.created_at).toLocaleString()}
+                      {new Date(request.created_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}{" "}
+                      at{" "}
+                      {new Date(request.created_at).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                      {" "}
+                      <span className="text-muted-foreground/70">&middot; {request.requester_name ?? "System"}</span>
                     </p>
                   </div>
                 </div>
@@ -460,7 +494,19 @@ export default async function RequestDetailPage({
                         Status: {STATUS_LABELS[request.status as RequestStatus]}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(request.updated_at).toLocaleString()}
+                        {new Date(request.updated_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}{" "}
+                        at{" "}
+                        {new Date(request.updated_at).toLocaleTimeString("en-US", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                        {" "}
+                        <span className="text-muted-foreground/70">&middot; System</span>
                       </p>
                     </div>
                   </div>

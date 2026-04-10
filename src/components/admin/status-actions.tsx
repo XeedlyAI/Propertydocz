@@ -1,74 +1,35 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import type { RequestStatus } from "@/lib/types";
 import {
   Loader2,
-  ArrowRight,
   CheckCircle2,
   XCircle,
+  Mail,
   Send,
+  Download,
+  Sparkles,
+  RotateCcw,
+  ArrowRight,
 } from "lucide-react";
-
-// Valid status transitions
-const NEXT_STATUS: Partial<Record<RequestStatus, { status: RequestStatus; label: string; icon: typeof ArrowRight; variant?: "default" | "destructive" }[]>> = {
-  received: [
-    { status: "paid", label: "Mark as Paid", icon: ArrowRight },
-    { status: "cancelled", label: "Cancel", icon: XCircle, variant: "destructive" },
-  ],
-  paid: [
-    { status: "awaiting_data", label: "Move to Awaiting Data", icon: ArrowRight },
-    { status: "cancelled", label: "Cancel", icon: XCircle, variant: "destructive" },
-  ],
-  awaiting_data: [
-    // Live data form handles advancing to ready_for_generation
-    { status: "cancelled", label: "Cancel", icon: XCircle, variant: "destructive" },
-  ],
-  ready_for_generation: [
-    // Generation button handles advancing to pending_review
-    { status: "cancelled", label: "Cancel", icon: XCircle, variant: "destructive" },
-  ],
-  pending_review: [
-    { status: "approved", label: "Approve", icon: CheckCircle2 },
-    { status: "awaiting_data", label: "Request Changes", icon: ArrowRight },
-    { status: "cancelled", label: "Cancel", icon: XCircle, variant: "destructive" },
-  ],
-  approved: [
-    { status: "delivered", label: "Mark as Delivered", icon: Send },
-  ],
-};
 
 interface StatusActionsProps {
   requestId: string;
   currentStatus: RequestStatus;
+  hasGeneratedDocuments?: boolean;
 }
 
-export function StatusActions({ requestId, currentStatus }: StatusActionsProps) {
+export function StatusActions({
+  requestId,
+  currentStatus,
+  hasGeneratedDocuments = false,
+}: StatusActionsProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
-
-  const actions = NEXT_STATUS[currentStatus];
-
-  if (!actions || actions.length === 0) {
-    if (currentStatus === "delivered") {
-      return (
-        <div className="flex items-center gap-2 text-sm text-green-600">
-          <CheckCircle2 className="size-4" />
-          This request has been delivered.
-        </div>
-      );
-    }
-    if (currentStatus === "cancelled") {
-      return (
-        <div className="flex items-center gap-2 text-sm text-destructive">
-          <XCircle className="size-4" />
-          This request has been cancelled.
-        </div>
-      );
-    }
-    return null;
-  }
 
   async function handleTransition(nextStatus: RequestStatus) {
     setLoading(nextStatus);
@@ -98,29 +59,245 @@ export function StatusActions({ requestId, currentStatus }: StatusActionsProps) 
     }
   }
 
-  return (
-    <div className="space-y-2">
-      {actions.map((action) => (
-        <Button
-          key={action.status}
-          variant={action.variant || "default"}
-          size="sm"
-          className="w-full justify-start gap-2"
-          disabled={loading !== null}
-          onClick={() => handleTransition(action.status)}
-        >
-          {loading === action.status ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <action.icon className="size-4" />
-          )}
-          {action.label}
-        </Button>
-      ))}
+  async function handlePlaceholderAction(actionKey: string) {
+    setLoading(actionKey);
+    setError("");
 
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
+    // Placeholder — simulate a brief delay then show success
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    setLoading(null);
+
+    // For now, just refresh to show any server-side changes
+    router.refresh();
+  }
+
+  function scrollToGenerateButton() {
+    const el = document.querySelector("[data-generate-documents]");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  // Terminal states
+  if (currentStatus === "cancelled") {
+    return (
+      <div className="flex items-center gap-2 text-sm text-destructive">
+        <XCircle className="size-4" />
+        This request has been cancelled.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* ───── received ───── */}
+      {currentStatus === "received" && (
+        <>
+          <Button
+            size="sm"
+            className="w-full justify-start gap-2 bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
+            disabled={loading !== null}
+            onClick={() => handleTransition("paid")}
+          >
+            {loading === "paid" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ArrowRight className="size-4" />
+            )}
+            Mark as Paid
+          </Button>
+        </>
       )}
+
+      {/* ───── paid ───── */}
+      {currentStatus === "paid" && (
+        <>
+          <Button
+            size="sm"
+            className="w-full justify-start gap-2 bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
+            disabled={loading !== null}
+            onClick={() => handleTransition("awaiting_data")}
+          >
+            {loading === "awaiting_data" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ArrowRight className="size-4" />
+            )}
+            Move to Awaiting Data
+          </Button>
+        </>
+      )}
+
+      {/* ───── awaiting_data ───── */}
+      {currentStatus === "awaiting_data" && (
+        <>
+          <Button
+            size="sm"
+            className="w-full justify-start gap-2 bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
+            disabled={loading !== null}
+            onClick={() => handlePlaceholderAction("send_data_email")}
+          >
+            {loading === "send_data_email" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Mail className="size-4" />
+            )}
+            Send Data Request Email
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2"
+            disabled={loading !== null}
+            onClick={() => handleTransition("ready_for_generation")}
+          >
+            {loading === "ready_for_generation" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="size-4" />
+            )}
+            Mark Data Received
+          </Button>
+        </>
+      )}
+
+      {/* ───── ready_for_generation ───── */}
+      {currentStatus === "ready_for_generation" && (
+        <Button
+          className="w-full gap-2 bg-[#38b6ff] text-white text-base font-bold shadow-lg hover:bg-[#1DA8F0] active:bg-[#0A8FD4] py-6"
+          disabled={loading !== null}
+          onClick={scrollToGenerateButton}
+        >
+          <Sparkles className="size-5" />
+          Generate Documents
+        </Button>
+      )}
+
+      {/* ───── pending_review ───── */}
+      {currentStatus === "pending_review" && (
+        <>
+          <Button
+            size="sm"
+            className="w-full justify-start gap-2 bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
+            disabled={loading !== null}
+            onClick={() => handleTransition("approved")}
+          >
+            {loading === "approved" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="size-4" />
+            )}
+            {"Approve \u2192 Ready for Delivery"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2"
+            disabled={loading !== null}
+            onClick={() => handleTransition("awaiting_data")}
+          >
+            {loading === "awaiting_data" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <RotateCcw className="size-4" />
+            )}
+            Request Changes
+          </Button>
+        </>
+      )}
+
+      {/* ───── approved ───── */}
+      {currentStatus === "approved" && (
+        <>
+          <Button
+            size="sm"
+            className="w-full justify-start gap-2 bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
+            disabled={loading !== null}
+            onClick={() => handleTransition("delivered")}
+          >
+            {loading === "delivered" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4" />
+            )}
+            Deliver to Requester
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2"
+            disabled={!hasGeneratedDocuments}
+            onClick={() => {
+              const el = document.querySelector("[data-generated-documents]");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+          >
+            <Download className="size-4" />
+            Download PDF
+          </Button>
+        </>
+      )}
+
+      {/* ───── delivered ───── */}
+      {currentStatus === "delivered" && (
+        <>
+          <div className="flex items-center gap-2 text-sm text-green-600 mb-2">
+            <CheckCircle2 className="size-4" />
+            This request has been delivered.
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2"
+            disabled={loading !== null}
+            onClick={() => handlePlaceholderAction("resend_delivery")}
+          >
+            {loading === "resend_delivery" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4" />
+            )}
+            Resend Delivery
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2"
+            disabled={!hasGeneratedDocuments}
+            onClick={() => {
+              const el = document.querySelector("[data-generated-documents]");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+          >
+            <Download className="size-4" />
+            Download PDF
+          </Button>
+        </>
+      )}
+
+      {/* ───── Cancel (all non-terminal statuses except delivered) ───── */}
+      {currentStatus !== "delivered" && (
+        <>
+          <div className="pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start gap-2 border-red-500 text-red-500 hover:bg-red-50"
+              disabled={loading !== null}
+              onClick={() => handleTransition("cancelled")}
+            >
+              {loading === "cancelled" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <XCircle className="size-4" />
+              )}
+              Cancel Request
+            </Button>
+          </div>
+        </>
+      )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }
