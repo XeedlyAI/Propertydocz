@@ -23,6 +23,8 @@ import { TransactionDataForm } from "@/components/admin/transaction-data-form";
 import { StatusActions } from "@/components/admin/status-actions";
 import { GenerateDocumentsButton } from "@/components/admin/generate-documents-button";
 import { GeneratedDocumentsCard } from "@/components/admin/generated-documents-card";
+import { DocumentAccordion } from "@/components/admin/document-accordion";
+import { ReadinessChecklist } from "@/components/admin/readiness-checklist";
 import { getAssociationFieldValues } from "@/lib/services/association-data";
 
 const WORKFLOW_STAGES: { key: RequestStatus; label: string }[] = [
@@ -66,18 +68,20 @@ export default async function RequestDetailPage({
     ? request.associations[0]
     : request.associations;
 
-  // Fetch association field values and generated docs count in parallel
+  // Fetch association field values and generated docs in parallel
   const [associationFieldValues, generatedDocsResult] = await Promise.all([
     request.association_id
       ? getAssociationFieldValues(request.association_id)
       : Promise.resolve([]),
     supabase
       .from("generated_documents")
-      .select("id", { count: "exact", head: true })
-      .eq("document_request_id", id),
+      .select("id, document_request_id, document_type, file_url, file_name, file_type, generation_method, generated_at, created_at")
+      .eq("document_request_id", id)
+      .order("created_at", { ascending: false }),
   ]);
 
-  const hasGeneratedDocuments = (generatedDocsResult.count ?? 0) > 0;
+  const generatedDocuments = generatedDocsResult.data ?? [];
+  const hasGeneratedDocuments = generatedDocuments.length > 0;
 
   // Serialize for client component (strip any non-serializable data)
   const serializedFieldValues = associationFieldValues.map((fv) => ({
@@ -178,6 +182,14 @@ export default async function RequestDetailPage({
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         {/* Left Column — Info */}
         <div className="space-y-6">
+          {/* Readiness Checklist */}
+          <ReadinessChecklist
+            liveData={(request.live_data as Record<string, string> | null) || {}}
+            associationFieldValues={serializedFieldValues}
+            documentTypes={request.document_types as string[]}
+            requestStatus={request.status as string}
+          />
+
           {/* Requester Info */}
           <Card>
             <CardHeader>
@@ -238,7 +250,7 @@ export default async function RequestDetailPage({
             </CardContent>
           </Card>
 
-          {/* Documents */}
+          {/* Documents Accordion */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
@@ -247,18 +259,12 @@ export default async function RequestDetailPage({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {(request.document_types as DocumentType[]).map((dt) => (
-                  <div
-                    key={dt}
-                    className="flex items-center justify-between rounded-lg border p-3"
-                  >
-                    <span className="text-sm font-medium">
-                      {DOCUMENT_LABELS[dt]}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <DocumentAccordion
+                documentTypes={request.document_types as string[]}
+                requestId={request.id}
+                requestStatus={request.status as string}
+                generatedDocuments={generatedDocuments}
+              />
             </CardContent>
           </Card>
 
