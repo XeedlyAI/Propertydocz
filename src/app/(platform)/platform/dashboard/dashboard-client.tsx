@@ -138,6 +138,12 @@ export function PlatformDashboardClient({
           title="Platform Dashboard"
           subtitle="Cross-tenant overview for XeedlyAI"
         />
+        {process.env.NEXT_PUBLIC_REQUIRE_STRIPE_FOR_FULFILLMENT === "false" && (
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+            <span className="size-1.5 rounded-full bg-amber-400" />
+            Dev mode: Stripe payment gate disabled
+          </div>
+        )}
       </FadeUpChild>
 
       {/* KPI Ticker */}

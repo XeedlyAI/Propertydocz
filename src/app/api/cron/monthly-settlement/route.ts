@@ -153,7 +153,8 @@ export async function GET(request: NextRequest) {
       settlementsCreated++;
 
       // Process Stripe transfer if tenant has Connect account and positive earnings
-      if (tenant.stripe_account_id && totalTenantEarnings > 0) {
+      const stripeRequired = process.env.NEXT_PUBLIC_REQUIRE_STRIPE_FOR_FULFILLMENT !== 'false';
+      if (stripeRequired && tenant.stripe_account_id && totalTenantEarnings > 0) {
         try {
           const stripe = getStripe();
           const transferAmountCents = Math.round(totalTenantEarnings * 100);

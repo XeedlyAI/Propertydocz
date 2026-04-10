@@ -310,7 +310,8 @@ export async function POST(request: NextRequest) {
     }
 
     // If Stripe Connect is configured, create a checkout session
-    if (tenant.stripe_account_id && process.env.STRIPE_SECRET_KEY) {
+    const stripeRequired = process.env.NEXT_PUBLIC_REQUIRE_STRIPE_FOR_FULFILLMENT !== 'false';
+    if (stripeRequired && tenant.stripe_account_id && process.env.STRIPE_SECRET_KEY) {
       try {
         const proto = request.headers.get("x-forwarded-proto") || "https";
         const host = request.headers.get("host") || "localhost:3000";
