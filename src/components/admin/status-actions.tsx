@@ -130,21 +130,9 @@ export function StatusActions({
 
       {/* ───── awaiting_data ───── */}
       {currentStatus === "awaiting_data" && (
-        <>
-          <Button
-            size="sm"
-            className="w-full justify-start gap-2 bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
-            disabled={loading !== null}
-            onClick={() => handleTransition("ready_for_generation")}
-          >
-            {loading === "ready_for_generation" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <ArrowRight className="size-4" />
-            )}
-            Enter Transaction Details
-          </Button>
-        </>
+        <p className="text-xs text-slate-400">
+          Complete the highlighted fields above to unlock generation
+        </p>
       )}
 
       {/* ───── ready_for_generation ───── */}

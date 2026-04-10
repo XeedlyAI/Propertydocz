@@ -28,6 +28,17 @@ const OWNER_ALTERNATES: Record<string, string> = {
   owner_names: "owner_name",
 };
 
+/** Keys already captured in the top-level Transaction Details form — skip in per-document view */
+const TOP_LEVEL_TRANSACTION_KEYS = new Set([
+  "owner_name",
+  "owner_names",
+  "unit_lot_number",
+  "closing_date",
+  "balance_due",
+  "special_notes",
+  "property_address",
+]);
+
 function getTransactionValue(
   liveData: Record<string, string>,
   fieldKey: string
@@ -51,6 +62,40 @@ function getAssociationValue(
   const val = record[col];
   if (val === null || val === undefined) return "";
   return String(val).trim();
+}
+
+/** Format a raw value for display based on the field's dataType */
+function formatDisplayValue(raw: string, dataType: DocumentField["dataType"]): string {
+  if (!raw) return "";
+  switch (dataType) {
+    case "currency": {
+      const num = Number(raw);
+      if (isNaN(num)) return raw;
+      return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(num / 100);
+    }
+    case "boolean": {
+      const lower = raw.toLowerCase();
+      if (lower === "true" || lower === "yes" || lower === "1") return "Yes";
+      if (lower === "false" || lower === "no" || lower === "0") return "No";
+      return raw;
+    }
+    case "percentage": {
+      const n = Number(raw);
+      if (isNaN(n)) return raw.includes("%") ? raw : `${raw}%`;
+      return `${n}%`;
+    }
+    case "date": {
+      try {
+        const d = new Date(raw.includes("T") ? raw : raw + "T00:00:00");
+        if (isNaN(d.getTime())) return raw;
+        return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+      } catch {
+        return raw;
+      }
+    }
+    default:
+      return raw;
+  }
 }
 
 function inputTypeForField(field: DocumentField): string {
@@ -83,10 +128,12 @@ function FieldCell({
   label,
   value,
   missing,
+  dataType,
 }: {
   label: string;
   value: string;
   missing: boolean;
+  dataType: DocumentField["dataType"];
 }) {
   const accent = missing
     ? "border-l-2 border-amber-400 pl-2"
@@ -98,7 +145,9 @@ function FieldCell({
       {missing ? (
         <p className="text-sm text-slate-400 italic">&mdash;</p>
       ) : (
-        <p className="text-sm font-medium text-slate-900">{value}</p>
+        <p className="text-sm font-medium text-slate-900">
+          {formatDisplayValue(value, dataType)}
+        </p>
       )}
     </div>
   );
@@ -147,7 +196,9 @@ function EditableFieldCell({
     return (
       <div className={accent}>
         <p className="text-xs text-slate-500">{field.label}</p>
-        <p className="text-sm font-medium text-slate-900">{currentValue}</p>
+        <p className="text-sm font-medium text-slate-900">
+          {formatDisplayValue(currentValue, field.dataType)}
+        </p>
       </div>
     );
   }
@@ -345,6 +396,7 @@ function DocumentSection({
                     label={field.label}
                     value={value}
                     missing={!value}
+                    dataType={field.dataType}
                   />
                 );
               })}
@@ -353,25 +405,17 @@ function DocumentSection({
         </div>
       )}
 
-      {/* Transaction Data sub-section */}
-      {transactionFields.length > 0 && (
+      {/* Transaction Data sub-section — only fields NOT in the top-level form */}
+      {transactionFields.filter((f) => !TOP_LEVEL_TRANSACTION_KEYS.has(f.key)).length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium text-slate-600">Transaction Data</p>
           <div className="grid gap-3 sm:grid-cols-2">
             {transactionFields.map((field) => {
-              // Deduplication
+              // Skip fields already in the top-level Transaction Details form
+              if (TOP_LEVEL_TRANSACTION_KEYS.has(field.key)) return null;
+              // Deduplication across document types
               if (renderedTransactionKeys.current.has(field.key)) {
-                return (
-                  <div
-                    key={field.key}
-                    className="border-l-2 border-slate-200 pl-2"
-                  >
-                    <p className="text-xs text-slate-500">{field.label}</p>
-                    <p className="text-xs text-slate-400 italic">
-                      (see above)
-                    </p>
-                  </div>
-                );
+                return null;
               }
               renderedTransactionKeys.current.add(field.key);
 
