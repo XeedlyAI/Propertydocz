@@ -210,6 +210,7 @@ export function AssociationDetailClient({
         <OverviewTab
           association={association}
           governingDocs={governingDocs}
+          requests={requests}
           onNavigateToSettings={() => setActiveTab("settings")}
         />
       )}
@@ -239,12 +240,17 @@ export function AssociationDetailClient({
 function OverviewTab({
   association,
   governingDocs,
+  requests,
   onNavigateToSettings,
 }: {
   association: AssociationData;
   governingDocs: GoverningDoc[];
+  requests: DocumentRequest[];
   onNavigateToSettings: () => void;
 }) {
+  const activeRequests = requests.filter(
+    (r) => r.status !== "delivered" && r.status !== "cancelled"
+  );
   const fullAddress = [
     association.address,
     association.city,
@@ -298,7 +304,99 @@ function OverviewTab({
   );
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="space-y-6">
+      {/* Active Requests Mini-Table */}
+      {activeRequests.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Active Requests</CardTitle>
+              <Link
+                href={`/admin/requests?association_id=${association.id}`}
+                className="text-xs text-[#38b6ff] hover:underline"
+              >
+                View all requests &rarr;
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left">
+                    <th className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Date
+                    </th>
+                    <th className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Requester
+                    </th>
+                    <th className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Status
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Total
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground w-16">
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeRequests.slice(0, 5).map((req) => (
+                    <tr
+                      key={req.id}
+                      className="border-b border-border/50 last:border-0 hover:bg-muted/50 transition-colors"
+                    >
+                      <td className="px-4 py-2 text-muted-foreground">
+                        {new Date(req.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-2 font-medium truncate max-w-[160px]">
+                        {req.requester_name}
+                      </td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                            STATUS_COLORS[req.status] ||
+                              "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {STATUS_LABELS[req.status] || req.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-right font-mono text-sm">
+                        {!req.total_price_cents
+                          ? "\u2014"
+                          : formatCents(req.total_price_cents)}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <Link
+                          href={`/admin/requests/${req.id}`}
+                          className="text-xs text-[#38b6ff] hover:underline"
+                        >
+                          View &rarr;
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-muted-foreground text-center">
+              No active requests
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-2">
       {/* Association Details Card */}
       <Card>
         <CardHeader>
@@ -437,6 +535,7 @@ function OverviewTab({
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

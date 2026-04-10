@@ -17,17 +17,49 @@ function formatAge(days: number): string {
   return `${Math.floor(days / 30)}mo`;
 }
 
-export default async function RequestsPage() {
+export default async function RequestsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ association_id?: string; status?: string }>;
+}) {
   const user = await getAdminUser();
   const supabase = await createClient();
+  const params = await searchParams;
 
-  const { data: requests } = await supabase
-    .from("document_requests")
-    .select(
-      "id, created_at, requester_name, requester_email, property_address, document_types, status, total_price_cents, turnaround, bill_to_closing, payment_status, requester_type"
-    )
-    .eq("tenant_id", user.tenantId)
-    .order("created_at", { ascending: false });
+  const [{ data: requests }, { data: assocRows }] = await Promise.all([
+    supabase
+      .from("document_requests")
+      .select(
+        "id, created_at, requester_name, requester_email, property_address, document_types, status, total_price_cents, turnaround, bill_to_closing, payment_status, requester_type, association_id"
+      )
+      .eq("tenant_id", user.tenantId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("document_requests")
+      .select("association_id")
+      .eq("tenant_id", user.tenantId)
+      .not("association_id", "is", null),
+  ]);
+
+  // Deduplicate association IDs
+  const uniqueAssocIds = [
+    ...new Set(
+      (assocRows || [])
+        .map((r) => r.association_id as string)
+        .filter(Boolean)
+    ),
+  ];
+
+  // Fetch association names for the filter dropdown
+  let associations: { id: string; name: string }[] = [];
+  if (uniqueAssocIds.length > 0) {
+    const { data: assocData } = await supabase
+      .from("associations")
+      .select("id, name")
+      .in("id", uniqueAssocIds)
+      .order("name");
+    associations = assocData || [];
+  }
 
   const allRequests = requests || [];
   const now = new Date();
@@ -98,7 +130,13 @@ export default async function RequestsPage() {
         <PageKpiTickerResponsive cells={kpis} />
       </FadeUpChild>
       <FadeUpChild>
-        <RequestsTable requests={allRequests} triageCounts={triageCounts} />
+        <RequestsTable
+          requests={allRequests}
+          triageCounts={triageCounts}
+          associations={associations}
+          initialAssociationId={params.association_id}
+          initialStatus={params.status}
+        />
       </FadeUpChild>
     </StaggerContainer>
   );

@@ -22,6 +22,7 @@ interface Request {
   bill_to_closing: boolean;
   payment_status: string;
   requester_type: string;
+  association_id: string | null;
 }
 
 interface TriageCounts {
@@ -158,17 +159,52 @@ function formatTotal(req: Request): string {
 export function RequestsTable({
   requests,
   triageCounts,
+  associations = [],
+  initialAssociationId,
+  initialStatus,
 }: {
   requests: Request[];
   triageCounts: TriageCounts;
+  associations?: { id: string; name: string }[];
+  initialAssociationId?: string;
+  initialStatus?: string;
 }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [docTypeFilter, setDocTypeFilter] = useState("");
-  const [triageFilter, setTriageFilter] = useState<TriageFilter>("all");
+  const [associationFilter, setAssociationFilter] = useState(initialAssociationId || "");
+
+  // Derive initial triage filter from initialStatus
+  const deriveInitialTriage = (): TriageFilter => {
+    if (!initialStatus) return "all";
+    if (["awaiting_data", "pending_review", "ready_for_generation", "rush"].includes(initialStatus)) {
+      return initialStatus as TriageFilter;
+    }
+    return "all";
+  };
+  const [triageFilter, setTriageFilter] = useState<TriageFilter>(deriveInitialTriage);
+
+  // Requests filtered by association only (for dynamic triage counts)
+  const assocFiltered = useMemo(() => {
+    if (!associationFilter) return requests;
+    return requests.filter((r) => r.association_id === associationFilter);
+  }, [requests, associationFilter]);
+
+  // Dynamic triage counts that respect association filter
+  const dynamicTriageCounts = useMemo(() => {
+    const src = assocFiltered;
+    return {
+      awaiting_data: src.filter((r) => r.status === "awaiting_data").length,
+      pending_review: src.filter((r) => r.status === "pending_review").length,
+      ready_for_generation: src.filter((r) => r.status === "ready_for_generation").length,
+      rush: src.filter(
+        (r) => r.turnaround === "rush" && r.status !== "delivered" && r.status !== "cancelled"
+      ).length,
+    };
+  }, [assocFiltered]);
 
   const filtered = useMemo(() => {
-    return requests.filter((r) => {
+    return assocFiltered.filter((r) => {
       if (triageFilter !== "all") {
         if (triageFilter === "rush") {
           if (
@@ -200,26 +236,27 @@ export function RequestsTable({
       }
       return true;
     });
-  }, [requests, search, statusFilter, docTypeFilter, triageFilter]);
+  }, [assocFiltered, search, statusFilter, docTypeFilter, triageFilter]);
 
+  const activeCounts = associationFilter ? dynamicTriageCounts : triageCounts;
   const triagePills: { key: TriageFilter; label: string; count: number }[] = [
-    { key: "all", label: "All", count: requests.length },
+    { key: "all", label: "All", count: assocFiltered.length },
     {
       key: "awaiting_data",
       label: "Awaiting Data",
-      count: triageCounts.awaiting_data,
+      count: activeCounts.awaiting_data,
     },
     {
       key: "pending_review",
       label: "Pending Review",
-      count: triageCounts.pending_review,
+      count: activeCounts.pending_review,
     },
     {
       key: "ready_for_generation",
       label: "Ready",
-      count: triageCounts.ready_for_generation,
+      count: activeCounts.ready_for_generation,
     },
-    { key: "rush", label: "Rush", count: triageCounts.rush },
+    { key: "rush", label: "Rush", count: activeCounts.rush },
   ];
 
   return (
@@ -291,6 +328,20 @@ export function RequestsTable({
                 </option>
               ))}
             </select>
+            {associations.length > 0 && (
+              <select
+                value={associationFilter}
+                onChange={(e) => setAssociationFilter(e.target.value)}
+                className="h-8 rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors focus-visible:border-[#38b6ff] focus-visible:ring-2 focus-visible:ring-[#38b6ff]/20 dark:bg-input/30"
+              >
+                <option value="">All Associations</option>
+                {associations.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
         </CardHeader>
         <CardContent>

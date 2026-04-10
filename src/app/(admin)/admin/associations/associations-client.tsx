@@ -241,7 +241,17 @@ export function AssociationsClient({
                         )}
                       </td>
                       <td className="px-4 py-3 text-right font-mono text-foreground">
-                        {assoc.activeRequests}
+                        {assoc.activeRequests > 0 ? (
+                          <Link
+                            href={`/admin/requests?association_id=${assoc.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[#38b6ff] font-semibold underline-offset-2 hover:underline"
+                          >
+                            {assoc.activeRequests}
+                          </Link>
+                        ) : (
+                          assoc.activeRequests
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right font-mono text-foreground">
                         {assoc.pendingRevenue > 0

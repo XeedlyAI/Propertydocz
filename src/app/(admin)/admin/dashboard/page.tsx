@@ -53,7 +53,7 @@ export default async function DashboardPage() {
   const { data: requests } = await supabase
     .from("document_requests")
     .select(
-      "id, created_at, updated_at, requester_name, requester_email, property_address, document_types, status, total_price_cents, turnaround, bill_to_closing, payment_status"
+      "id, created_at, updated_at, requester_name, requester_email, property_address, document_types, status, total_price_cents, turnaround, bill_to_closing, payment_status, association_id"
     )
     .eq("tenant_id", user.tenantId)
     .order("created_at", { ascending: false });
@@ -122,6 +122,65 @@ export default async function DashboardPage() {
 
   const recentRequests = allRequests.slice(0, 20);
 
+  // --- Association Health Data ---
+  const { data: associations } = await supabase
+    .from("associations")
+    .select(
+      "id, name, manager_name, mailing_address, monthly_assessment_amount"
+    )
+    .eq("tenant_id", user.tenantId)
+    .order("name");
+
+  const assocIds = (associations || []).map((a) => a.id);
+
+  let govDocCounts: Record<string, number> = {};
+  let assocRequestCounts: Record<string, number> = {};
+
+  if (assocIds.length > 0) {
+    const { data: govDocs } = await supabase
+      .from("governing_documents")
+      .select("association_id")
+      .in("association_id", assocIds);
+
+    if (govDocs) {
+      govDocCounts = govDocs.reduce(
+        (acc, d) => {
+          acc[d.association_id] = (acc[d.association_id] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
+    }
+
+    // Active request counts per association
+    const activeReqs = allRequests.filter(
+      (r) => r.status !== "delivered" && r.status !== "cancelled" && r.association_id
+    );
+    for (const req of activeReqs) {
+      if (req.association_id) {
+        assocRequestCounts[req.association_id] =
+          (assocRequestCounts[req.association_id] || 0) + 1;
+      }
+    }
+  }
+
+  const enrichedAssociations = (associations || []).map((a) => {
+    const govDocCount = govDocCounts[a.id] || 0;
+    let filled = 0;
+    if (a.manager_name && a.manager_name.trim()) filled++;
+    if (a.mailing_address && a.mailing_address.trim()) filled++;
+    if (a.monthly_assessment_amount && a.monthly_assessment_amount > 0) filled++;
+    if (govDocCount > 0) filled++;
+    const health = Math.round((filled / 4) * 100);
+
+    return {
+      id: a.id,
+      name: a.name,
+      health,
+      activeRequests: assocRequestCounts[a.id] || 0,
+    };
+  });
+
   return (
     <DashboardClient
       kpiData={{
@@ -155,7 +214,9 @@ export default async function DashboardPage() {
         status: req.status as RequestStatus,
         total_price_cents: req.total_price_cents,
         bill_to_closing: req.bill_to_closing,
+        turnaround: req.turnaround as string,
       }))}
+      associationHealth={enrichedAssociations}
       statusConfig={{
         dotColors: STATUS_DOT_COLOR,
         badgeColors: STATUS_BADGE,
