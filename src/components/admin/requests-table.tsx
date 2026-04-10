@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
 import type { DocumentType, RequestStatus } from "@/lib/types";
-import { Search } from "lucide-react";
+import { Search, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Request {
@@ -51,8 +51,8 @@ const STATUS_LABELS: Record<RequestStatus, string> = {
   received: "Received",
   paid: "Paid",
   awaiting_data: "Awaiting Data",
-  ready_for_generation: "Ready for Gen",
-  pending_review: "Pending Review",
+  ready_for_generation: "Ready",
+  pending_review: "Review",
   approved: "Approved",
   delivered: "Delivered",
   cancelled: "Cancelled",
@@ -76,7 +76,12 @@ const ALL_DOC_TYPES: DocumentType[] = [
   "lender_questionnaire",
 ];
 
-type TriageFilter = "all" | "awaiting_data" | "pending_review" | "ready_for_generation" | "rush";
+type TriageFilter =
+  | "all"
+  | "awaiting_data"
+  | "pending_review"
+  | "ready_for_generation"
+  | "rush";
 
 const ROW_BORDER_COLORS: Record<string, string> = {
   awaiting_data: "border-l-amber-400",
@@ -87,41 +92,45 @@ const ROW_BORDER_COLORS: Record<string, string> = {
 };
 
 function getRowBorderClass(req: Request): string {
-  // Rush overrides other colors
-  if (req.turnaround === "rush" && req.status !== "delivered" && req.status !== "cancelled") {
+  if (
+    req.turnaround === "rush" &&
+    req.status !== "delivered" &&
+    req.status !== "cancelled"
+  ) {
     return "border-l-red-500";
   }
   return ROW_BORDER_COLORS[req.status] || "border-l-transparent";
 }
 
 function getActionButton(req: Request) {
-  const base = "inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium transition-colors";
   switch (req.status) {
     case "awaiting_data":
       return {
         label: "Send Reminder",
-        className: cn(base, "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400"),
+        shortLabel: null,
+        className:
+          "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400",
       };
     case "pending_review":
       return {
-        label: "Review \u2192",
-        className: cn(base, "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"),
+        label: "Review",
+        shortLabel: null,
+        className:
+          "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400",
       };
     case "ready_for_generation":
       return {
-        label: "Generate \u2192",
-        className: cn(base, "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400"),
-      };
-    case "delivered":
-    case "cancelled":
-      return {
-        label: "View",
-        className: cn(base, "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"),
+        label: "Generate",
+        shortLabel: null,
+        className:
+          "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400",
       };
     default:
       return {
         label: "View",
-        className: cn(base, "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"),
+        shortLabel: null,
+        className:
+          "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300",
       };
   }
 }
@@ -140,6 +149,12 @@ function formatAge(createdAt: string): string {
   return "<1h";
 }
 
+function formatTotal(req: Request): string {
+  if (req.bill_to_closing) return "BTC";
+  if (!req.total_price_cents) return "\u2014";
+  return formatCents(req.total_price_cents);
+}
+
 export function RequestsTable({
   requests,
   triageCounts,
@@ -154,16 +169,20 @@ export function RequestsTable({
 
   const filtered = useMemo(() => {
     return requests.filter((r) => {
-      // Triage filter
       if (triageFilter !== "all") {
         if (triageFilter === "rush") {
-          if (!(r.turnaround === "rush" && r.status !== "delivered" && r.status !== "cancelled"))
+          if (
+            !(
+              r.turnaround === "rush" &&
+              r.status !== "delivered" &&
+              r.status !== "cancelled"
+            )
+          )
             return false;
         } else if (r.status !== triageFilter) {
           return false;
         }
       }
-
       if (statusFilter && r.status !== statusFilter) return false;
       if (
         docTypeFilter &&
@@ -185,9 +204,21 @@ export function RequestsTable({
 
   const triagePills: { key: TriageFilter; label: string; count: number }[] = [
     { key: "all", label: "All", count: requests.length },
-    { key: "awaiting_data", label: "Awaiting Data", count: triageCounts.awaiting_data },
-    { key: "pending_review", label: "Pending Review", count: triageCounts.pending_review },
-    { key: "ready_for_generation", label: "Ready to Generate", count: triageCounts.ready_for_generation },
+    {
+      key: "awaiting_data",
+      label: "Awaiting Data",
+      count: triageCounts.awaiting_data,
+    },
+    {
+      key: "pending_review",
+      label: "Pending Review",
+      count: triageCounts.pending_review,
+    },
+    {
+      key: "ready_for_generation",
+      label: "Ready",
+      count: triageCounts.ready_for_generation,
+    },
     { key: "rush", label: "Rush", count: triageCounts.rush },
   ];
 
@@ -224,7 +255,6 @@ export function RequestsTable({
       <Card>
         <CardHeader>
           <CardTitle className="text-base">All Requests</CardTitle>
-          {/* Filters */}
           <div className="flex flex-wrap gap-3 pt-2">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -271,115 +301,195 @@ export function RequestsTable({
                 : "No requests match your filters."}
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left">
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Date
-                    </th>
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Age
-                    </th>
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Requester
-                    </th>
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Property
-                    </th>
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Documents
-                    </th>
-                    <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Status
-                    </th>
-                    <th className="pb-3 pr-4 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Total
-                    </th>
-                    <th className="pb-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((req) => {
-                    const action = getActionButton(req);
-                    return (
-                      <tr
-                        key={req.id}
-                        className={cn(
-                          "border-b border-border/50 last:border-0 transition-colors hover:bg-muted/50 border-l-4",
-                          getRowBorderClass(req)
-                        )}
-                      >
-                        <td className="py-3 pr-4">
-                          <Link
-                            href={`/admin/requests/${req.id}`}
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            {new Date(req.created_at).toLocaleDateString()}
-                          </Link>
-                        </td>
-                        <td className="py-3 pr-4">
-                          <span className="font-mono text-sm text-slate-400">
-                            {formatAge(req.created_at)}
-                          </span>
-                        </td>
-                        <td className="py-3 pr-4">
-                          <Link
-                            href={`/admin/requests/${req.id}`}
-                            className="font-medium hover:text-[#38b6ff] transition-colors"
-                          >
-                            {req.requester_name}
-                          </Link>
-                          <div className="text-xs text-muted-foreground">
-                            {req.requester_email}
-                          </div>
-                        </td>
-                        <td className="py-3 pr-4 max-w-[200px] truncate text-muted-foreground">
-                          {req.property_address}
-                        </td>
-                        <td className="py-3 pr-4">
-                          <div className="flex flex-wrap gap-1">
-                            {(req.document_types as DocumentType[]).map((dt) => (
-                              <span
-                                key={dt}
-                                className="inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
-                              >
-                                {DOCUMENT_LABELS[dt]?.split(" ")[0] || dt}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="py-3 pr-4">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[req.status as RequestStatus] || "bg-muted text-muted-foreground"}`}
-                          >
-                            {STATUS_LABELS[req.status as RequestStatus] ||
-                              req.status}
-                          </span>
-                        </td>
-                        <td className="py-3 pr-4 text-right font-data font-medium">
-                          {req.bill_to_closing
-                            ? "BTC"
-                            : !req.total_price_cents
-                              ? "\u2014"
-                              : formatCents(req.total_price_cents)}
-                        </td>
-                        <td className="py-3 text-right">
-                          <Link
-                            href={`/admin/requests/${req.id}`}
-                            className={action.className}
-                          >
-                            {action.label}
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <>
+              {/* ───── Mobile: Card layout (below md) ───── */}
+              <div className="md:hidden space-y-3">
+                {filtered.map((req) => {
+                  const action = getActionButton(req);
+                  return (
+                    <Link
+                      key={req.id}
+                      href={`/admin/requests/${req.id}`}
+                      className={cn(
+                        "block rounded-xl border border-border/50 p-3 transition-colors hover:bg-muted/50 border-l-[3px]",
+                        getRowBorderClass(req)
+                      )}
+                    >
+                      {/* Line 1: Name + Status + Total */}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium text-sm truncate flex-1">
+                          {req.requester_name}
+                        </span>
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium shrink-0",
+                            STATUS_COLORS[
+                              req.status as RequestStatus
+                            ] || "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {STATUS_LABELS[req.status as RequestStatus] ||
+                            req.status}
+                        </span>
+                        <span className="font-mono text-sm font-medium shrink-0 w-16 text-right">
+                          {formatTotal(req)}
+                        </span>
+                      </div>
+                      {/* Line 2: Property + Age */}
+                      <div className="flex items-center justify-between gap-2 mt-1.5">
+                        <span className="text-xs text-muted-foreground truncate flex-1">
+                          {req.property_address || "No address"}
+                        </span>
+                        <span className="font-mono text-xs text-slate-400 shrink-0">
+                          {formatAge(req.created_at)}
+                        </span>
+                      </div>
+                      {/* Action button */}
+                      <div className="mt-2">
+                        <span
+                          className={cn(
+                            "inline-flex w-full items-center justify-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                            action.className
+                          )}
+                        >
+                          {action.label}
+                          <ChevronRight className="size-3" />
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* ───── Desktop: Table layout (md and up) ───── */}
+              <div className="hidden md:block overflow-hidden rounded-xl">
+                <table className="w-full text-sm table-fixed">
+                  <thead>
+                    <tr className="border-b text-left">
+                      <th className="pb-3 pr-3 text-xs font-medium uppercase tracking-wider text-muted-foreground w-24">
+                        Date
+                      </th>
+                      <th className="pb-3 pr-3 text-xs font-medium uppercase tracking-wider text-muted-foreground w-[180px]">
+                        Requester
+                      </th>
+                      <th className="pb-3 pr-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        Property
+                      </th>
+                      <th className="pb-3 pr-3 text-xs font-medium uppercase tracking-wider text-muted-foreground w-[140px] hidden lg:table-cell">
+                        Documents
+                      </th>
+                      <th className="pb-3 pr-3 text-xs font-medium uppercase tracking-wider text-muted-foreground w-24">
+                        Status
+                      </th>
+                      <th className="pb-3 pr-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground w-20">
+                        Total
+                      </th>
+                      <th className="pb-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground w-28">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((req) => {
+                      const action = getActionButton(req);
+                      return (
+                        <tr
+                          key={req.id}
+                          className={cn(
+                            "border-b border-border/50 last:border-0 transition-colors hover:bg-muted/50 border-l-[3px]",
+                            getRowBorderClass(req)
+                          )}
+                        >
+                          {/* Date + Age merged */}
+                          <td className="py-3 pr-3 w-24">
+                            <Link
+                              href={`/admin/requests/${req.id}`}
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <div className="text-sm">
+                                {new Date(
+                                  req.created_at
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </div>
+                              <div className="font-mono text-xs text-slate-400">
+                                {formatAge(req.created_at)}
+                              </div>
+                            </Link>
+                          </td>
+                          {/* Requester: name + email */}
+                          <td className="py-3 pr-3 w-[180px]">
+                            <Link
+                              href={`/admin/requests/${req.id}`}
+                              className="font-medium hover:text-[#38b6ff] transition-colors block truncate"
+                            >
+                              {req.requester_name}
+                            </Link>
+                            <div className="text-xs text-muted-foreground truncate max-w-[160px]">
+                              {req.requester_email}
+                            </div>
+                          </td>
+                          {/* Property */}
+                          <td className="py-3 pr-3">
+                            <span className="text-muted-foreground truncate block max-w-[180px]">
+                              {req.property_address || "\u2014"}
+                            </span>
+                          </td>
+                          {/* Documents — hidden below lg */}
+                          <td className="py-3 pr-3 w-[140px] hidden lg:table-cell">
+                            <div className="flex flex-wrap gap-1">
+                              {(req.document_types as DocumentType[]).map(
+                                (dt) => (
+                                  <span
+                                    key={dt}
+                                    className="inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                  >
+                                    {DOCUMENT_LABELS[dt]?.split(" ")[0] || dt}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          </td>
+                          {/* Status */}
+                          <td className="py-3 pr-3 w-24">
+                            <span
+                              className={cn(
+                                "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                                STATUS_COLORS[
+                                  req.status as RequestStatus
+                                ] || "bg-muted text-muted-foreground"
+                              )}
+                            >
+                              {STATUS_LABELS[req.status as RequestStatus] ||
+                                req.status}
+                            </span>
+                          </td>
+                          {/* Total */}
+                          <td className="py-3 pr-3 text-right font-mono text-sm w-20">
+                            {formatTotal(req)}
+                          </td>
+                          {/* Action */}
+                          <td className="py-3 text-right w-28">
+                            <Link
+                              href={`/admin/requests/${req.id}`}
+                              className={cn(
+                                "inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                                action.className
+                              )}
+                            >
+                              {action.label}
+                              <ChevronRight className="size-3" />
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

@@ -13,13 +13,17 @@ export default async function AssociationsPage() {
   const supabase = await createClient();
 
   // Fetch associations with health-relevant fields
-  const { data: associations } = await supabase
+  const { data: associations, error: assocError } = await supabase
     .from("associations")
     .select(
-      "id, name, legal_name, address, city, state, zip, total_units, project_type, manager_name, mailing_address, monthly_assessment"
+      "id, name, legal_name, address, city, state, zip, total_units, project_type, manager_name, mailing_address, monthly_assessment_amount"
     )
     .eq("tenant_id", user.tenantId)
     .order("name");
+
+  if (assocError) {
+    console.error("Failed to fetch associations:", assocError);
+  }
 
   const assocIds = (associations || []).map((a) => a.id);
 
@@ -153,6 +157,25 @@ export default async function AssociationsPage() {
     },
   ];
 
+  if (assocError) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Associations"
+          subtitle={`Manage HOA communities for ${user.tenantName}`}
+        />
+        <Card className="dash-card">
+          <CardContent className="py-8">
+            <div className="text-center space-y-2">
+              <p className="text-sm font-medium text-red-600">Failed to load associations</p>
+              <p className="text-xs text-muted-foreground">Please refresh the page or contact support if this persists.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (!associations || associations.length === 0) {
     return (
       <div className="space-y-6">
@@ -198,14 +221,14 @@ function computeHealth(
   assoc: {
     manager_name: string | null;
     mailing_address: string | null;
-    monthly_assessment: number | null;
+    monthly_assessment_amount: number | null;
   },
   govDocCount: number
 ): number {
   let filled = 0;
   if (assoc.manager_name && assoc.manager_name.trim()) filled++;
   if (assoc.mailing_address && assoc.mailing_address.trim()) filled++;
-  if (assoc.monthly_assessment && assoc.monthly_assessment > 0) filled++;
+  if (assoc.monthly_assessment_amount && assoc.monthly_assessment_amount > 0) filled++;
   if (govDocCount > 0) filled++;
   return Math.round((filled / 4) * 100);
 }
@@ -214,7 +237,7 @@ function getMissingFields(
   assoc: {
     manager_name: string | null;
     mailing_address: string | null;
-    monthly_assessment: number | null;
+    monthly_assessment_amount: number | null;
   },
   govDocCount: number
 ): string[] {
@@ -223,7 +246,7 @@ function getMissingFields(
     missing.push("management contact");
   if (!assoc.mailing_address || !assoc.mailing_address.trim())
     missing.push("mailing address");
-  if (!assoc.monthly_assessment || assoc.monthly_assessment <= 0)
+  if (!assoc.monthly_assessment_amount || assoc.monthly_assessment_amount <= 0)
     missing.push("assessment");
   if (govDocCount === 0) missing.push("CC&Rs");
   return missing;
