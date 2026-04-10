@@ -30,9 +30,9 @@ function HeroSection() {
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       <MeshGradient />
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-14 items-center">
-        {/* Left column — content (~55%) */}
-        <div className="md:col-span-7 text-center md:text-left">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-start">
+        {/* Left column — content */}
+        <div className="text-center md:text-left md:pt-10">
           <FadeUp>
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl">
               HOA Documents.
@@ -67,11 +67,28 @@ function HeroSection() {
               </Link>
             </div>
           </FadeUp>
+
+          {/* Trust row — 2x2 grid */}
+          <FadeUp delay={0.3}>
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 md:justify-start justify-center">
+              {[
+                "Compliant with Utah HOA Law",
+                "AI-Generated in Minutes",
+                "Instant Digital Delivery",
+                "Trusted by Management Companies",
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-2 text-sm text-white/70 md:justify-start justify-center">
+                  <CheckCircle2 className="size-4 shrink-0 text-[#14b8a6]" />
+                  {item}
+                </div>
+              ))}
+            </div>
+          </FadeUp>
         </div>
 
-        {/* Right column — illustration (~45%) */}
-        <div className="md:col-span-5 flex items-center justify-center w-full h-full">
-          <FadeUp delay={0.3}>
+        {/* Right column — illustration */}
+        <div className="w-full flex items-start justify-center md:justify-end">
+          <FadeUp delay={0.4}>
             <HeroIllustration className="w-full h-auto opacity-90 drop-shadow-2xl" />
           </FadeUp>
         </div>
