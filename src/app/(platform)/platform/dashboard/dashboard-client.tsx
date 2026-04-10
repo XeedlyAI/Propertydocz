@@ -150,37 +150,37 @@ export function PlatformDashboardClient({
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/platform/tenants"
-            className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-900/50 transition-colors"
           >
             Awaiting Data
-            <span className="inline-flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
+            <span className="inline-flex items-center justify-center rounded-full bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
               {triageCounts.awaiting_data}
             </span>
           </Link>
           <Link
             href="/platform/tenants"
-            className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-purple-300 bg-purple-50 px-3 py-1.5 text-sm font-medium text-purple-700 hover:bg-purple-100 dark:border-purple-700 dark:bg-purple-900/30 dark:text-purple-400 dark:hover:bg-purple-900/50 transition-colors"
           >
             Pending Review
-            <span className="inline-flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
+            <span className="inline-flex items-center justify-center rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-300 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
               {triageCounts.pending_review}
             </span>
           </Link>
           <Link
             href="/platform/tenants"
-            className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
           >
             Ready to Generate
-            <span className="inline-flex items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-400 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
+            <span className="inline-flex items-center justify-center rounded-full bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-300 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
               {triageCounts.ready_for_generation}
             </span>
           </Link>
           <Link
             href="/platform/tenants"
-            className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-red-300 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-100 dark:border-red-700 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 transition-colors"
           >
             Rush
-            <span className="inline-flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
+            <span className="inline-flex items-center justify-center rounded-full bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-300 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
               {triageCounts.rush}
             </span>
           </Link>
@@ -284,8 +284,9 @@ export function PlatformDashboardClient({
                         return (
                           <tr
                             key={req.id}
+                            onClick={() => window.location.href = `/platform/tenants/${req.tenant_id}`}
                             className={cn(
-                              "border-b border-border/50 last:border-0 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02] border-l-[3px]",
+                              "border-b border-border/50 last:border-0 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02] border-l-[3px] cursor-pointer",
                               borderClass
                             )}
                           >
@@ -353,9 +354,13 @@ export function PlatformDashboardClient({
                               {formatCents(req.total_price_cents)}
                             </td>
                             <td className="py-3">
-                              <span className="text-xs text-[#38b6ff] cursor-default">
+                              <Link
+                                href={`/platform/tenants/${req.tenant_id}`}
+                                className="text-xs text-[#38b6ff] hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 View →
-                              </span>
+                              </Link>
                             </td>
                           </tr>
                         );

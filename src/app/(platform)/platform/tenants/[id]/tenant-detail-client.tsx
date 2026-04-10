@@ -41,6 +41,7 @@ interface TenantData {
   primary_color: string | null;
   stripe_account_id: string | null;
   dropbox_access_token: string | null;
+  created_at: string;
   [key: string]: unknown;
 }
 
@@ -285,19 +286,22 @@ export function TenantDetailClient({
         </div>
       </div>
 
-      {/* Continue Onboarding banner */}
-      {(!hasStripe ||
-        !hasDropbox ||
-        associations.length === 0 ||
-        admins.length === 0) && (
-        <Link
-          href={`/platform/onboard?tenant_id=${tenant.id}`}
-          className="flex items-center gap-2 rounded-lg border border-[#38b6ff]/30 bg-[#38b6ff]/5 px-4 py-3 text-sm font-medium text-[#38b6ff] hover:bg-[#38b6ff]/10 transition-colors"
-        >
-          <Wand2 className="size-4" />
-          Continue Onboarding Wizard
-        </Link>
-      )}
+      {/* Continue Onboarding banner — only show if <4/5 steps done AND tenant >24h old, only on overview/settings tabs */}
+      {(() => {
+        const onboardingSteps = [hasStripe, hasDropbox, associations.length > 0, admins.length > 0, true /* tenant exists */];
+        const completedCount = onboardingSteps.filter(Boolean).length;
+        const tenantAgeHours = (Date.now() - new Date(tenant.created_at).getTime()) / (1000 * 60 * 60);
+        const showBanner = completedCount < 4 && tenantAgeHours > 24 && (activeTab === "overview" || activeTab === "settings");
+        return showBanner ? (
+          <Link
+            href={`/platform/onboard?tenant_id=${tenant.id}`}
+            className="flex items-center gap-2 rounded-lg border border-[#38b6ff]/30 bg-[#38b6ff]/5 px-4 py-3 text-sm font-medium text-[#38b6ff] hover:bg-[#38b6ff]/10 transition-colors"
+          >
+            <Wand2 className="size-4" />
+            Continue Onboarding Wizard ({completedCount}/5 complete)
+          </Link>
+        ) : null;
+      })()}
 
       {/* ---- TABS ---- */}
       <div className="border-b border-border">
@@ -586,7 +590,7 @@ function OverviewTab({
                         <span className="text-xs text-muted-foreground">
                           {new Date(req.created_at).toLocaleDateString()}
                         </span>
-                        <span className="text-xs text-muted-foreground/60">
+                        <span className="font-mono text-xs text-slate-400">
                           {formatAge(req.created_at)}
                         </span>
                       </div>
@@ -599,8 +603,11 @@ function OverviewTab({
                     >
                       {STATUS_LABELS[req.status as RequestStatus] || req.status}
                     </span>
-                    <span className="shrink-0 font-data text-sm font-medium">
+                    <span className="shrink-0 font-mono text-sm font-medium">
                       {formatCents(req.total_price_cents)}
+                    </span>
+                    <span className="shrink-0 text-xs text-[#38b6ff]">
+                      View →
                     </span>
                   </div>
                 ))}
@@ -746,29 +753,31 @@ function RequestHistoryTab({
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm table-fixed">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-3 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground w-28">
                       Date
                     </th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-3 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground w-36">
                       Association
                     </th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-3 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground w-40">
                       Requester
                     </th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground max-w-[160px]">
+                    <th className="px-3 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Property
                     </th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground hidden lg:table-cell">
+                    <th className="px-3 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground hidden lg:table-cell w-28">
                       Documents
                     </th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-3 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground w-28">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground w-24">
                       Total
+                    </th>
+                    <th className="px-3 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground w-16">
                     </th>
                   </tr>
                 </thead>
@@ -778,31 +787,33 @@ function RequestHistoryTab({
                       key={req.id}
                       className={`border-b border-border/50 last:border-0 transition-colors hover:bg-muted/50 border-l-[3px] ${getRowBorderColor(req)}`}
                     >
-                      <td className="px-4 py-3">
-                        <div className="text-muted-foreground">
-                          {new Date(req.created_at).toLocaleDateString()}
+                      <td className="px-3 py-3 w-28">
+                        <div className="text-muted-foreground text-sm">
+                          {new Date(req.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                         </div>
-                        <div className="text-xs text-muted-foreground/60">
+                        <div className="font-mono text-xs text-slate-400">
                           {formatAge(req.created_at)}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="px-3 py-3 w-36 truncate text-muted-foreground">
                         {req.association_id && assocMap[req.association_id]
                           ? assocMap[req.association_id].name
                           : "—"}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium">{req.requester_name}</div>
+                      <td className="px-3 py-3 w-40">
+                        <div className="font-medium truncate">{req.requester_name}</div>
                         {req.requester_email && (
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-muted-foreground truncate max-w-[150px]">
                             {req.requester_email}
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3 max-w-[160px] truncate text-muted-foreground">
-                        {req.property_address}
+                      <td className="px-3 py-3">
+                        <span className="block max-w-[160px] truncate text-muted-foreground">
+                          {req.property_address}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 hidden lg:table-cell">
+                      <td className="px-3 py-3 hidden lg:table-cell w-28">
                         <div className="flex flex-wrap gap-1">
                           {(req.document_types as DocumentType[]).map((dt) => (
                             <span
@@ -814,7 +825,7 @@ function RequestHistoryTab({
                           ))}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-3 w-28">
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[req.status as RequestStatus] || "bg-muted text-muted-foreground"}`}
                         >
@@ -822,8 +833,11 @@ function RequestHistoryTab({
                             req.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-data font-medium">
-                        {formatCents(req.total_price_cents)}
+                      <td className="px-3 py-3 text-right font-mono text-sm font-medium w-24">
+                        {req.total_price_cents ? formatCents(req.total_price_cents) : "—"}
+                      </td>
+                      <td className="px-3 py-3 w-16">
+                        <span className="text-xs text-[#38b6ff]">View →</span>
                       </td>
                     </tr>
                   ))}

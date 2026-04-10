@@ -44,7 +44,9 @@ function getOnboardingStatus(tenant: {
   return { checks, completed, total, isComplete };
 }
 
-/** Calculate tenant health score (0-100) */
+/** Calculate tenant health score (0-100)
+ * Weights: onboarding 40%, associations 20%, delivery >20% = 20%, Stripe 20%
+ * Stripe not connected surfaces as warning badge, not score-killer */
 function getTenantHealthScore(tenant: {
   onboardingComplete: boolean;
   hasStripe: boolean;
@@ -52,10 +54,10 @@ function getTenantHealthScore(tenant: {
   deliveryRate: number; // 0-1
 }): number {
   let score = 0;
-  if (tenant.onboardingComplete) score += 30;
-  if (tenant.hasStripe) score += 30;
+  if (tenant.onboardingComplete) score += 40;
   if (tenant.hasAssociations) score += 20;
-  if (tenant.deliveryRate > 0.5) score += 20;
+  if (tenant.deliveryRate > 0.2) score += 20;
+  if (tenant.hasStripe) score += 20;
   return score;
 }
 
