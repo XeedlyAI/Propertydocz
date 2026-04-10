@@ -287,6 +287,7 @@ export default async function RequestDetailPage({
                   (request.live_data as Record<string, string> | null) || {}
                 }
                 associationRecord={association as Record<string, unknown> | null}
+                associationId={request.association_id as string | null}
                 requestId={request.id}
                 requestStatus={request.status as string}
               />
