@@ -16,7 +16,7 @@ if (existsSync(envPath)) {
   const envContent = readFileSync(envPath, "utf-8");
   for (const line of envContent.split("\n")) {
     const match = line.match(/^([^#=]+)=(.*)$/);
-    if (match) env[match[1].trim()] = match[2].trim();
+    if (match) env[match[1].trim()] = match[2].trim().replace(/^["']|["']$/g, "");
   }
 }
 
