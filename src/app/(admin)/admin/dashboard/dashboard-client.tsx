@@ -448,10 +448,13 @@ export function DashboardClient({
                           <td className="py-3 pr-4">
                             <Link
                               href={`/admin/requests/${req.id}`}
-                              className="font-medium hover:text-[#38b6ff] transition-colors"
+                              className="font-semibold hover:text-[#38b6ff] transition-colors"
                             >
                               {req.requester_name}
                             </Link>
+                            <div className="font-mono text-xs text-slate-400">
+                              #{req.id.slice(0, 8)}
+                            </div>
                           </td>
                           <td
                             className="py-3 pr-4 max-w-[200px] truncate text-muted-foreground"

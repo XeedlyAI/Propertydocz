@@ -227,12 +227,19 @@ export function RequestsTable({
         return false;
       if (search) {
         const q = search.toLowerCase();
-        const matchesName = r.requester_name.toLowerCase().includes(q);
-        const matchesAddress = (r.property_address || "")
-          .toLowerCase()
-          .includes(q);
-        const matchesEmail = r.requester_email.toLowerCase().includes(q);
-        if (!matchesName && !matchesAddress && !matchesEmail) return false;
+        // Reference ID search: strip leading # if present
+        const refQuery = q.startsWith("#") ? q.slice(1) : null;
+        if (refQuery) {
+          if (!r.id.toLowerCase().startsWith(refQuery)) return false;
+        } else {
+          const matchesName = r.requester_name.toLowerCase().includes(q);
+          const matchesAddress = (r.property_address || "")
+            .toLowerCase()
+            .includes(q);
+          const matchesEmail = r.requester_email.toLowerCase().includes(q);
+          const matchesRef = r.id.toLowerCase().startsWith(q);
+          if (!matchesName && !matchesAddress && !matchesEmail && !matchesRef) return false;
+        }
       }
       return true;
     });
@@ -296,7 +303,7 @@ export function RequestsTable({
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by name, email, or address..."
+                placeholder="Search by name, email, address, or #reference..."
                 value={search}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSearch(e.target.value)
@@ -368,9 +375,14 @@ export function RequestsTable({
                     >
                       {/* Line 1: Name + Status + Total */}
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-medium text-sm truncate flex-1">
-                          {req.requester_name}
-                        </span>
+                        <div className="flex-1 min-w-0">
+                          <span className="font-semibold text-sm truncate block">
+                            {req.requester_name}
+                          </span>
+                          <span className="font-mono text-xs text-slate-400">
+                            #{req.id.slice(0, 8)}
+                          </span>
+                        </div>
                         <span
                           className={cn(
                             "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium shrink-0",
@@ -470,16 +482,19 @@ export function RequestsTable({
                               </div>
                             </Link>
                           </td>
-                          {/* Requester: name + email */}
+                          {/* Requester: name + email + ref */}
                           <td className="py-3 pr-3 w-[180px]">
                             <Link
                               href={`/admin/requests/${req.id}`}
-                              className="font-medium hover:text-[#38b6ff] transition-colors block truncate"
+                              className="font-semibold hover:text-[#38b6ff] transition-colors block truncate"
                             >
                               {req.requester_name}
                             </Link>
-                            <div className="text-xs text-muted-foreground truncate max-w-[160px]">
+                            <div className="text-xs text-slate-500 truncate max-w-[160px]">
                               {req.requester_email}
+                            </div>
+                            <div className="font-mono text-xs text-slate-400">
+                              #{req.id.slice(0, 8)}
                             </div>
                           </td>
                           {/* Property */}

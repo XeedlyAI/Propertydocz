@@ -317,8 +317,13 @@ export function PlatformDashboardClient({
                                 ? associationMap[req.association_id]
                                 : "\u2014"}
                             </td>
-                            <td className="py-3 pr-4 font-medium">
-                              {req.requester_name}
+                            <td className="py-3 pr-4">
+                              <div className="font-semibold">
+                                {req.requester_name}
+                              </div>
+                              <div className="font-mono text-xs text-slate-400">
+                                #{req.id.slice(0, 8)}
+                              </div>
                             </td>
                             <td
                               className="hidden md:table-cell py-3 pr-4 max-w-[180px] truncate text-muted-foreground"
