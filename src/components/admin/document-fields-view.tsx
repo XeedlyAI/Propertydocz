@@ -13,13 +13,7 @@ import { ChevronDown, ChevronRight, Upload } from "lucide-react";
 interface DocumentFieldsViewProps {
   documentTypes: string[];
   liveData: Record<string, string>;
-  associationFieldValues: Array<{
-    field_key: string;
-    value: string | null;
-    confidence: string | null;
-    source: string | null;
-    last_verified_at: string | null;
-  }>;
+  associationRecord: Record<string, unknown> | null; // direct association row
   requestId: string;
   requestStatus: string;
 }
@@ -49,11 +43,14 @@ function getTransactionValue(
 }
 
 function getAssociationValue(
-  fieldValues: DocumentFieldsViewProps["associationFieldValues"],
-  fieldKey: string
+  record: Record<string, unknown> | null,
+  field: DocumentField
 ): string {
-  const match = fieldValues.find((fv) => fv.field_key === fieldKey);
-  return match?.value?.trim() ? match.value : "";
+  if (!record) return "";
+  const col = field.columnName || field.key;
+  const val = record[col];
+  if (val === null || val === undefined) return "";
+  return String(val).trim();
 }
 
 function inputTypeForField(field: DocumentField): string {
@@ -177,7 +174,7 @@ function EditableFieldCell({
 export function DocumentFieldsView({
   documentTypes,
   liveData,
-  associationFieldValues,
+  associationRecord,
   requestId,
   requestStatus,
 }: DocumentFieldsViewProps) {
@@ -229,7 +226,7 @@ export function DocumentFieldsView({
     // Check if all association fields have values (to auto-collapse)
     const allAssocPopulated = associationFields.every((f) => {
       if (renderedAssociationKeys.current.has(f.key)) return true;
-      return getAssociationValue(associationFieldValues, f.key).length > 0;
+      return getAssociationValue(associationRecord, f).length > 0;
     });
 
     sections.push(
@@ -240,7 +237,7 @@ export function DocumentFieldsView({
         transactionFields={transactionFields}
         allAssocPopulated={allAssocPopulated}
         liveData={liveData}
-        associationFieldValues={associationFieldValues}
+        associationRecord={associationRecord}
         requestId={requestId}
         renderedAssociationKeys={renderedAssociationKeys}
         renderedTransactionKeys={renderedTransactionKeys}
@@ -278,7 +275,7 @@ function DocumentSection({
   transactionFields,
   allAssocPopulated,
   liveData,
-  associationFieldValues,
+  associationRecord,
   requestId,
   renderedAssociationKeys,
   renderedTransactionKeys,
@@ -289,7 +286,7 @@ function DocumentSection({
   transactionFields: DocumentField[];
   allAssocPopulated: boolean;
   liveData: Record<string, string>;
-  associationFieldValues: DocumentFieldsViewProps["associationFieldValues"];
+  associationRecord: Record<string, unknown> | null;
   requestId: string;
   renderedAssociationKeys: React.MutableRefObject<Set<string>>;
   renderedTransactionKeys: React.MutableRefObject<Set<string>>;
@@ -339,8 +336,8 @@ function DocumentSection({
                 renderedAssociationKeys.current.add(field.key);
 
                 const value = getAssociationValue(
-                  associationFieldValues,
-                  field.key
+                  associationRecord,
+                  field
                 );
                 return (
                   <FieldCell

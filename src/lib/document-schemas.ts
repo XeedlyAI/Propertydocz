@@ -6,6 +6,7 @@ export interface DocumentField {
   source: "association" | "per_transaction";
   required: boolean;
   dataType: "text" | "currency" | "date" | "boolean" | "percentage";
+  columnName?: string; // actual column on the associations table
 }
 
 export interface DocumentSchema {
@@ -20,30 +21,30 @@ export interface DocumentSchema {
 // ---------------------------------------------------------------------------
 
 const ASSOCIATION_CORE_FIELDS: DocumentField[] = [
-  { key: "association_name", label: "Association Name", source: "association", required: false, dataType: "text" },
-  { key: "association_address", label: "Association Address", source: "association", required: false, dataType: "text" },
-  { key: "monthly_assessment", label: "Monthly Assessment", source: "association", required: false, dataType: "currency" },
-  { key: "assessment_frequency", label: "Assessment Frequency", source: "association", required: false, dataType: "text" },
-  { key: "special_assessments_planned", label: "Special Assessments Planned", source: "association", required: false, dataType: "boolean" },
-  { key: "special_assessment_details", label: "Special Assessment Details", source: "association", required: false, dataType: "text" },
-  { key: "transfer_fee", label: "Transfer Fee", source: "association", required: false, dataType: "currency" },
-  { key: "capital_contribution", label: "Capital Contribution", source: "association", required: false, dataType: "currency" },
-  { key: "in_litigation", label: "In Litigation", source: "association", required: false, dataType: "boolean" },
-  { key: "litigation_details", label: "Litigation Details", source: "association", required: false, dataType: "text" },
-  { key: "master_policy_carrier", label: "Master Policy Carrier", source: "association", required: false, dataType: "text" },
-  { key: "master_policy_expiration", label: "Master Policy Expiration", source: "association", required: false, dataType: "date" },
-  { key: "general_liability", label: "General Liability", source: "association", required: false, dataType: "currency" },
-  { key: "fidelity_bond", label: "Fidelity Bond", source: "association", required: false, dataType: "currency" },
-  { key: "reserve_balance", label: "Reserve Balance", source: "association", required: false, dataType: "currency" },
-  { key: "percent_funded", label: "Percent Funded", source: "association", required: false, dataType: "percentage" },
-  { key: "reserve_study_date", label: "Reserve Study Date", source: "association", required: false, dataType: "date" },
-  { key: "right_of_first_refusal", label: "Right of First Refusal", source: "association", required: false, dataType: "text" },
-  { key: "rental_policy", label: "Rental Policy", source: "association", required: false, dataType: "text" },
-  { key: "pet_policy", label: "Pet Policy", source: "association", required: false, dataType: "text" },
-  { key: "parking_policy", label: "Parking Policy", source: "association", required: false, dataType: "text" },
-  { key: "age_restrictions", label: "Age Restrictions", source: "association", required: false, dataType: "text" },
-  { key: "total_units", label: "Total Units", source: "association", required: false, dataType: "text" },
-  { key: "percent_owner_occupied", label: "Percent Owner Occupied", source: "association", required: false, dataType: "percentage" },
+  { key: "association_name", label: "Association Name", source: "association", required: false, dataType: "text", columnName: "name" },
+  { key: "association_address", label: "Association Address", source: "association", required: false, dataType: "text", columnName: "address" },
+  { key: "monthly_assessment", label: "Monthly Assessment", source: "association", required: false, dataType: "currency", columnName: "monthly_assessment_amount" },
+  { key: "assessment_frequency", label: "Assessment Frequency", source: "association", required: false, dataType: "text", columnName: "assessment_frequency" },
+  { key: "special_assessments_planned", label: "Special Assessments Planned", source: "association", required: false, dataType: "boolean", columnName: "planned_special_assessment" },
+  { key: "special_assessment_details", label: "Special Assessment Details", source: "association", required: false, dataType: "text", columnName: "planned_sa_purpose" },
+  { key: "transfer_fee", label: "Transfer Fee", source: "association", required: false, dataType: "currency", columnName: "transfer_fee" },
+  { key: "capital_contribution", label: "Capital Contribution", source: "association", required: false, dataType: "currency", columnName: "capital_contribution_fee" },
+  { key: "in_litigation", label: "In Litigation", source: "association", required: false, dataType: "boolean", columnName: "in_litigation" },
+  { key: "litigation_details", label: "Litigation Details", source: "association", required: false, dataType: "text", columnName: "litigation_details" },
+  { key: "master_policy_carrier", label: "Master Policy Carrier", source: "association", required: false, dataType: "text", columnName: "master_policy_carrier" },
+  { key: "master_policy_expiration", label: "Master Policy Expiration", source: "association", required: false, dataType: "date", columnName: "master_policy_expiration" },
+  { key: "general_liability", label: "General Liability", source: "association", required: false, dataType: "currency", columnName: "general_liability_amount" },
+  { key: "fidelity_bond", label: "Fidelity Bond", source: "association", required: false, dataType: "currency", columnName: "fidelity_amount" },
+  { key: "reserve_balance", label: "Reserve Balance", source: "association", required: false, dataType: "currency", columnName: "reserve_balance" },
+  { key: "percent_funded", label: "Percent Funded", source: "association", required: false, dataType: "percentage", columnName: "percent_funded" },
+  { key: "reserve_study_date", label: "Reserve Study Date", source: "association", required: false, dataType: "date", columnName: "reserve_study_date" },
+  { key: "right_of_first_refusal", label: "Right of First Refusal", source: "association", required: false, dataType: "text", columnName: "right_of_first_refusal" },
+  { key: "rental_policy", label: "Rental Policy", source: "association", required: false, dataType: "text", columnName: "rental_policy" },
+  { key: "pet_policy", label: "Pet Policy", source: "association", required: false, dataType: "text", columnName: "pet_policy" },
+  { key: "parking_policy", label: "Parking Policy", source: "association", required: false, dataType: "text", columnName: "parking_policy" },
+  { key: "age_restrictions", label: "Age Restrictions", source: "association", required: false, dataType: "text", columnName: "age_restrictions" },
+  { key: "total_units", label: "Total Units", source: "association", required: false, dataType: "text", columnName: "total_units" },
+  { key: "percent_owner_occupied", label: "Percent Owner Occupied", source: "association", required: false, dataType: "percentage", columnName: "owner_occupied_pct" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -76,9 +77,9 @@ export const DOCUMENT_SCHEMAS: Record<string, DocumentSchema> = {
     label: "Payoff Statement",
     fields: [
       // Association fields (subset)
-      { key: "association_name", label: "Association Name", source: "association", required: false, dataType: "text" },
-      { key: "transfer_fee", label: "Transfer Fee", source: "association", required: false, dataType: "currency" },
-      { key: "payment_mail_address", label: "Payment Mail Address", source: "association", required: false, dataType: "text" },
+      { key: "association_name", label: "Association Name", source: "association", required: false, dataType: "text", columnName: "name" },
+      { key: "transfer_fee", label: "Transfer Fee", source: "association", required: false, dataType: "currency", columnName: "transfer_fee" },
+      { key: "payment_mail_address", label: "Payment Mail Address", source: "association", required: false, dataType: "text", columnName: "payable_to" },
       // Per-transaction fields
       { key: "owner_names", label: "Owner Name(s)", source: "per_transaction", required: true, dataType: "text" },
       { key: "property_address", label: "Property Address", source: "per_transaction", required: true, dataType: "text" },
@@ -125,11 +126,11 @@ export const DOCUMENT_SCHEMAS: Record<string, DocumentSchema> = {
     label: "Status Letter",
     fields: [
       // Association fields (subset)
-      { key: "association_name", label: "Association Name", source: "association", required: false, dataType: "text" },
-      { key: "monthly_assessment", label: "Monthly Assessment", source: "association", required: false, dataType: "currency" },
-      { key: "transfer_fee", label: "Transfer Fee", source: "association", required: false, dataType: "currency" },
-      { key: "capital_contribution", label: "Capital Contribution", source: "association", required: false, dataType: "currency" },
-      { key: "special_assessments_planned", label: "Special Assessments Planned", source: "association", required: false, dataType: "boolean" },
+      { key: "association_name", label: "Association Name", source: "association", required: false, dataType: "text", columnName: "name" },
+      { key: "monthly_assessment", label: "Monthly Assessment", source: "association", required: false, dataType: "currency", columnName: "monthly_assessment_amount" },
+      { key: "transfer_fee", label: "Transfer Fee", source: "association", required: false, dataType: "currency", columnName: "transfer_fee" },
+      { key: "capital_contribution", label: "Capital Contribution", source: "association", required: false, dataType: "currency", columnName: "capital_contribution_fee" },
+      { key: "special_assessments_planned", label: "Special Assessments Planned", source: "association", required: false, dataType: "boolean", columnName: "planned_special_assessment" },
       // Per-transaction fields
       { key: "owner_names", label: "Owner Name(s)", source: "per_transaction", required: true, dataType: "text" },
       { key: "property_address", label: "Property Address", source: "per_transaction", required: true, dataType: "text" },

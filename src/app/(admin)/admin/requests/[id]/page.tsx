@@ -50,7 +50,7 @@ export default async function RequestDetailPage({
   const { data: request, error } = await supabase
     .from("document_requests")
     .select(
-      `*, associations(name, legal_name, address, city, state, zip)`
+      `*, associations(*)`
     )
     .eq("id", id)
     .eq("tenant_id", user.tenantId)
@@ -286,7 +286,7 @@ export default async function RequestDetailPage({
                 liveData={
                   (request.live_data as Record<string, string> | null) || {}
                 }
-                associationFieldValues={serializedFieldValues}
+                associationRecord={association as Record<string, unknown> | null}
                 requestId={request.id}
                 requestStatus={request.status as string}
               />

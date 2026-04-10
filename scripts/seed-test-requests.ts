@@ -111,33 +111,16 @@ async function main() {
   const tenantId: string = tenant.id;
   console.log(`Tenant "corehoa": ${tenantId}`);
 
-  // 2. Look up associations
-  const { data: associations, error: assocErr } = await supabase
-    .from("associations")
-    .select("id, name")
-    .eq("tenant_id", tenantId);
+  // 2. Hardcoded association UUIDs
+  const ASSOCIATION_IDS = {
+    mountainViewCondos: 'd816b7e9-0892-41f4-8016-f62aae1d173e',
+    sunsetRidgeHOA_1234: '494f3146-748e-443f-8054-42ff98a356b5',
+    sunsetRidgeHOA_1200: '8eddf4c1-79c2-473d-83aa-11d0aa24602e',
+  };
 
-  if (assocErr || !associations?.length) {
-    console.error(`Could not find associations for tenant: ${assocErr?.message}`);
-    process.exit(1);
-  }
-
-  const mountainView = associations.find((a) =>
-    a.name.toLowerCase().includes("mountain view")
-  );
-  const sunsetRidge = associations.find((a) =>
-    a.name.toLowerCase().includes("sunset")
-  );
-
-  if (!mountainView || !sunsetRidge) {
-    console.error(
-      `Could not find required associations. Found: ${associations.map((a) => a.name).join(", ")}`
-    );
-    process.exit(1);
-  }
-
-  console.log(`Mountain View Condos: ${mountainView.id}`);
-  console.log(`Sunset Ridge HOA: ${sunsetRidge.id}\n`);
+  console.log(`Mountain View Condos: ${ASSOCIATION_IDS.mountainViewCondos}`);
+  console.log(`Sunset Ridge HOA (1234): ${ASSOCIATION_IDS.sunsetRidgeHOA_1234}`);
+  console.log(`Sunset Ridge HOA (1200): ${ASSOCIATION_IDS.sunsetRidgeHOA_1200}\n`);
 
   // 3. Define the 4 test requests
   const requests = [
@@ -147,7 +130,7 @@ async function main() {
       requester_email: "sarah@utahrealty.com",
       requester_type: "agent" as const,
       property_address: "1622 Heatherwood Circle, Unit 209",
-      association_id: mountainView.id,
+      association_id: ASSOCIATION_IDS.mountainViewCondos,
       status: "received" as const,
       payment_status: "pending" as const,
       document_types: ["resale_certificate"],
@@ -164,7 +147,7 @@ async function main() {
       requester_email: "m.torres@firstam.com",
       requester_type: "title_company" as const,
       property_address: "4500 Mountain View Dr, Unit B22",
-      association_id: mountainView.id,
+      association_id: ASSOCIATION_IDS.mountainViewCondos,
       status: "awaiting_data" as const,
       payment_status: "paid" as const,
       document_types: ["payoff_statement", "resale_certificate"],
@@ -178,7 +161,7 @@ async function main() {
       requester_email: "j.walsh@wellsfargo.com",
       requester_type: "lender" as const,
       property_address: "1200 Sunset Ridge Blvd, Unit 310",
-      association_id: sunsetRidge.id,
+      association_id: ASSOCIATION_IDS.sunsetRidgeHOA_1200,
       status: "ready_for_generation" as const,
       payment_status: "paid" as const,
       document_types: ["lender_questionnaire"],
@@ -196,7 +179,7 @@ async function main() {
       requester_email: "david@kw.com",
       requester_type: "agent" as const,
       property_address: "1234 Mountain View Dr, Unit 5",
-      association_id: sunsetRidge.id,
+      association_id: ASSOCIATION_IDS.sunsetRidgeHOA_1234,
       status: "delivered" as const,
       payment_status: "paid" as const,
       document_types: ["governing_documents"],
