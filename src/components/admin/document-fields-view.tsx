@@ -209,15 +209,15 @@ export function DocumentFieldsView({
   documentTypes, liveData, associationRecord, associationId, requestId, requestStatus,
 }: DocumentFieldsViewProps) {
   const router = useRouter();
-
-  const renderedTransactionKeys = useRef(new Set<string>());
-  const renderedAssociationKeys = useRef(new Set<string>());
-  renderedTransactionKeys.current = new Set<string>();
-  renderedAssociationKeys.current = new Set<string>();
-
   const handleFieldSaved = useCallback(() => { router.refresh(); }, [router]);
 
   if (!documentTypes || documentTypes.length === 0) return null;
+
+  // ── Pre-compute deduplication at the parent level ──
+  // This runs during the parent's render and produces stable filtered arrays
+  // that are passed as props. No refs mutated during child renders.
+  const seenAssociationKeys = new Set<string>();
+  const seenTransactionKeys = new Set<string>();
 
   const sections: React.ReactNode[] = [];
 
@@ -238,28 +238,37 @@ export function DocumentFieldsView({
       continue;
     }
 
-    const associationFields = schema.fields.filter((f) => f.source === "association");
-    const transactionFields = schema.fields.filter((f) => f.source === "per_transaction");
+    const allAssocFields = schema.fields.filter((f) => f.source === "association");
+    const allTransFields = schema.fields.filter((f) => f.source === "per_transaction");
 
-    const allAssocPopulated = associationFields.every((f) => {
-      if (renderedAssociationKeys.current.has(f.key)) return true;
-      return getAssociationValue(associationRecord, f).length > 0;
+    // Filter out already-seen keys for this section
+    const uniqueAssocFields = allAssocFields.filter((f) => {
+      if (seenAssociationKeys.has(f.key)) return false;
+      seenAssociationKeys.add(f.key);
+      return true;
     });
+    const uniqueTransFields = allTransFields.filter((f) => {
+      if (seenTransactionKeys.has(f.key)) return false;
+      seenTransactionKeys.add(f.key);
+      return true;
+    });
+
+    const allAssocPopulated = uniqueAssocFields.every((f) =>
+      getAssociationValue(associationRecord, f).length > 0
+    );
 
     sections.push(
       <DocumentSection
         key={docType}
         docType={docType}
         schema={schema}
-        associationFields={associationFields}
-        transactionFields={transactionFields}
+        associationFields={uniqueAssocFields}
+        transactionFields={uniqueTransFields}
         allAssocPopulated={allAssocPopulated}
         liveData={liveData}
         associationRecord={associationRecord}
         associationId={associationId}
         requestId={requestId}
-        renderedAssociationKeys={renderedAssociationKeys}
-        renderedTransactionKeys={renderedTransactionKeys}
         onFieldSaved={handleFieldSaved}
       />
     );
@@ -288,8 +297,7 @@ export function DocumentFieldsView({
 
 function DocumentSection({
   docType, schema, associationFields, transactionFields, allAssocPopulated,
-  liveData, associationRecord, associationId, requestId,
-  renderedAssociationKeys, renderedTransactionKeys, onFieldSaved,
+  liveData, associationRecord, associationId, requestId, onFieldSaved,
 }: {
   docType: string;
   schema: ReturnType<typeof getDocumentSchema> & {};
@@ -300,8 +308,6 @@ function DocumentSection({
   associationRecord: Record<string, unknown> | null;
   associationId: string | null;
   requestId: string;
-  renderedAssociationKeys: React.MutableRefObject<Set<string>>;
-  renderedTransactionKeys: React.MutableRefObject<Set<string>>;
   onFieldSaved: () => void;
 }) {
   const [assocOpen, setAssocOpen] = useState(!allAssocPopulated);
@@ -337,7 +343,7 @@ function DocumentSection({
   // Track if user has manually edited total_due_at_closing
   const [totalManuallyOverridden, setTotalManuallyOverridden] = useState(false);
 
-  // ── Fix 3: Auto-populate preparation_date + derived date fields on mount ──
+  // ── Auto-populate preparation_date + derived date fields on mount ──
   const autoPopulatedRef = useRef(false);
   useEffect(() => {
     if (autoPopulatedRef.current) return;
@@ -397,7 +403,7 @@ function DocumentSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Fix 1: Auto-calculate total_due_at_closing for payoff_statement ──
+  // ── Auto-calculate total_due_at_closing for payoff_statement ──
   const isPayoff = docType === "payoff_statement";
   useEffect(() => {
     if (!isPayoff || totalManuallyOverridden) return;
@@ -431,10 +437,8 @@ function DocumentSection({
 
     setFieldValues((prev) => {
       const updates: Record<string, string> = {};
-      // Only auto-update if the field exists and hasn't been manually set to something different
       if (visibleFields.some((f) => f.key === "valid_through_date")) {
         const current = prev.valid_through_date || "";
-        // Auto-update if empty or if it was previously an auto-calculated value
         if (!current || current === addDays(prev.preparation_date || todayISO(), 30)) {
           updates.valid_through_date = newDate;
         }
@@ -511,8 +515,6 @@ function DocumentSection({
           {assocOpen && (
             <div className="grid gap-3 sm:grid-cols-2">
               {associationFields.map((field) => {
-                if (renderedAssociationKeys.current.has(field.key)) return null;
-                renderedAssociationKeys.current.add(field.key);
                 const value = getAssociationValue(associationRecord, field);
                 return (
                   <FieldCell key={field.key} label={field.label} value={value} missing={!value} dataType={field.dataType} />
@@ -529,9 +531,6 @@ function DocumentSection({
           <p className="text-xs font-medium text-slate-600">Transaction Data</p>
           <div className="grid gap-3 sm:grid-cols-2">
             {visibleFields.map((field) => {
-              if (renderedTransactionKeys.current.has(field.key)) return null;
-              renderedTransactionKeys.current.add(field.key);
-
               const val = fieldValues[field.key] ?? "";
               const autoLabel =
                 field.key === "total_due_at_closing" && !totalManuallyOverridden
