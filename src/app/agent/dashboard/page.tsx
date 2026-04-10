@@ -83,7 +83,8 @@ export default async function AgentDashboardPage() {
   const includedPackages = tier?.included_packages || 0;
   const remaining = Math.max(0, includedPackages - usageCount);
 
-  const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  /** Agent-facing status display — intentionally simplified labels */
+  const STATUS_DISPLAY: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
     received: { label: "Received", variant: "secondary" },
     awaiting_data: { label: "Processing", variant: "secondary" },
     ready_for_generation: { label: "Processing", variant: "secondary" },
@@ -257,7 +258,7 @@ export default async function AgentDashboardPage() {
             ) : (
               <div className="space-y-3">
                 {orders.map((order) => {
-                  const statusInfo = STATUS_LABELS[order.status] || {
+                  const statusInfo = STATUS_DISPLAY[order.status] || {
                     label: order.status,
                     variant: "secondary" as const,
                   };

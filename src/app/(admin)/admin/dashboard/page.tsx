@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminUser } from "@/lib/auth";
 import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
+import { getStatusLabel } from "@/lib/status-labels";
 import type { DocumentType, RequestStatus } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -35,16 +36,6 @@ const STATUS_BADGE: Record<RequestStatus, string> = {
   cancelled: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-const STATUS_LABELS: Record<RequestStatus, string> = {
-  received: "Received",
-  paid: "Paid",
-  awaiting_data: "Awaiting Data",
-  ready_for_generation: "Ready for Gen",
-  pending_review: "Pending Review",
-  approved: "Approved",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-};
 
 export default async function DashboardPage() {
   const user = await getAdminUser();
@@ -220,7 +211,11 @@ export default async function DashboardPage() {
       statusConfig={{
         dotColors: STATUS_DOT_COLOR,
         badgeColors: STATUS_BADGE,
-        labels: STATUS_LABELS,
+        labels: Object.fromEntries(
+          (["received", "paid", "awaiting_data", "ready_for_generation", "pending_review", "approved", "delivered", "cancelled"] as const).map(
+            (s) => [s, getStatusLabel(s)]
+          )
+        ) as Record<RequestStatus, string>,
       }}
     />
   );

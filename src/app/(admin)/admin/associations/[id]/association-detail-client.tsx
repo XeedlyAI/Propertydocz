@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/pricing";
+import { getStatusLabel } from "@/lib/status-labels";
 import type { RequestStatus } from "@/lib/types";
 import {
   CheckCircle2,
@@ -143,16 +144,6 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  received: "Received",
-  paid: "Paid",
-  awaiting_data: "Awaiting Data",
-  ready_for_generation: "Ready for Gen",
-  pending_review: "Pending Review",
-  approved: "Approved",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-};
 
 const DOC_SLOTS = [
   { category: "ccrs", label: "CC&Rs", icon: ShieldCheck },
@@ -363,7 +354,7 @@ function OverviewTab({
                               "bg-muted text-muted-foreground"
                           )}
                         >
-                          {STATUS_LABELS[req.status] || req.status}
+                          {getStatusLabel(req.status)}
                         </span>
                       </td>
                       <td className="px-4 py-2 text-right font-mono text-sm">
@@ -828,7 +819,7 @@ function RequestHistoryTab({ requests }: { requests: DocumentRequest[] }) {
                             "bg-muted text-muted-foreground"
                         )}
                       >
-                        {STATUS_LABELS[req.status] || req.status}
+                        {getStatusLabel(req.status)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right font-medium">

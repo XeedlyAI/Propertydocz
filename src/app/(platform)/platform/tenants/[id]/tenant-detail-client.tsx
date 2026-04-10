@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { TenantForm } from "@/components/platform/tenant-form";
 import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
+import { getStatusLabel } from "@/lib/status-labels";
 import {
   Card,
   CardContent,
@@ -115,16 +116,6 @@ const STATUS_COLORS: Record<RequestStatus, string> = {
     "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-const STATUS_LABELS: Record<RequestStatus, string> = {
-  received: "Received",
-  paid: "Paid",
-  awaiting_data: "Awaiting Data",
-  ready_for_generation: "Ready for Gen",
-  pending_review: "Pending Review",
-  approved: "Approved",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-};
 
 const BORDER_COLORS: Record<string, string> = {
   awaiting_data: "border-l-amber-400",
@@ -601,7 +592,7 @@ function OverviewTab({
                     <span
                       className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[req.status as RequestStatus] || "bg-muted text-muted-foreground"}`}
                     >
-                      {STATUS_LABELS[req.status as RequestStatus] || req.status}
+                      {getStatusLabel(req.status)}
                     </span>
                     <span className="shrink-0 font-mono text-sm font-medium">
                       {formatCents(req.total_price_cents)}
@@ -721,9 +712,9 @@ function RequestHistoryTab({
           className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm"
         >
           <option value="all">All Statuses</option>
-          {Object.entries(STATUS_LABELS).map(([key, label]) => (
-            <option key={key} value={key}>
-              {label}
+          {(["received", "paid", "awaiting_data", "ready_for_generation", "pending_review", "approved", "delivered", "cancelled"] as const).map((s) => (
+            <option key={s} value={s}>
+              {getStatusLabel(s)}
             </option>
           ))}
         </select>
@@ -829,8 +820,7 @@ function RequestHistoryTab({
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[req.status as RequestStatus] || "bg-muted text-muted-foreground"}`}
                         >
-                          {STATUS_LABELS[req.status as RequestStatus] ||
-                            req.status}
+                          {getStatusLabel(req.status)}
                         </span>
                       </td>
                       <td className="px-3 py-3 text-right font-mono text-sm font-medium w-24">

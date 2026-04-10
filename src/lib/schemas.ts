@@ -14,6 +14,8 @@ export const orderFormSchema = z.object({
     .min(1, "Select at least one document type"),
   property_address: z.string().min(1, "Property address is required"),
   unit_number: z.string().optional(),
+  owner_names: z.string().optional(),
+  closing_date: z.string().optional(),
   requester_name: z.string().min(1, "Name is required"),
   requester_email: z.string().email("Valid email is required"),
   requester_phone: z.string().optional(),

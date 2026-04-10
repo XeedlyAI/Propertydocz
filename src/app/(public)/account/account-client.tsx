@@ -58,7 +58,8 @@ interface AccountClientProps {
   }[];
 }
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+/** Customer-facing status display — intentionally simplified labels */
+const STATUS_DISPLAY: Record<string, { label: string; color: string }> = {
   received: { label: "Received", color: "text-muted-foreground" },
   paid: { label: "Paid", color: "text-[#38b6ff]" },
   awaiting_data: { label: "Processing", color: "text-[#f59e0b]" },
@@ -260,7 +261,7 @@ export function AccountClient({
             ) : (
               <div className="space-y-1">
                 {recentOrders.map((order) => {
-                  const status = STATUS_LABELS[order.status] || STATUS_LABELS.received;
+                  const status = STATUS_DISPLAY[order.status] || STATUS_DISPLAY.received;
                   const docs = (order.documentTypes as DocumentType[])
                     .map((dt) => DOCUMENT_LABELS[dt] || dt)
                     .join(", ");

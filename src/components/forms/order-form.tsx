@@ -348,6 +348,8 @@ export function OrderForm({
   const [selectedDocs, setSelectedDocs] = useState<DocumentType[]>([]);
   const [propertyAddress, setPropertyAddress] = useState("");
   const [unitNumber, setUnitNumber] = useState("");
+  const [ownerNames, setOwnerNames] = useState("");
+  const [closingDate, setClosingDate] = useState("");
   const [turnaround, setTurnaround] = useState<Turnaround>("standard");
   const [rushNotes, setRushNotes] = useState("");
   const [billToClosing, setBillToClosing] = useState(false);
@@ -478,6 +480,8 @@ export function OrderForm({
           document_types: selectedDocs,
           property_address: propertyAddress,
           unit_number: unitNumber || undefined,
+          owner_names: ownerNames || undefined,
+          closing_date: closingDate || undefined,
           requester_name: requesterName,
           requester_email: requesterEmail,
           requester_phone: requesterPhone || undefined,
@@ -860,6 +864,31 @@ export function OrderForm({
               value={unitNumber}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUnitNumber(e.target.value)}
             />
+          </div>
+          <Separator />
+          <div className="space-y-2">
+            <Label htmlFor="ownerNames">Owner Name(s)</Label>
+            <Input
+              id="ownerNames"
+              placeholder="Current owner(s) of record"
+              value={ownerNames}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOwnerNames(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Providing this now speeds up fulfillment.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="closingDate">Estimated Closing Date</Label>
+            <Input
+              id="closingDate"
+              type="date"
+              value={closingDate}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setClosingDate(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Providing this now speeds up fulfillment.
+            </p>
           </div>
         </CardContent>
       </Card>

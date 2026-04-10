@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
+import { getStatusLabel } from "@/lib/status-labels";
 import type { DocumentType, RequestStatus } from "@/lib/types";
 import { Search, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -48,16 +49,6 @@ const STATUS_COLORS: Record<RequestStatus, string> = {
   cancelled: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-const STATUS_LABELS: Record<RequestStatus, string> = {
-  received: "Received",
-  paid: "Paid",
-  awaiting_data: "Awaiting Data",
-  ready_for_generation: "Ready",
-  pending_review: "Review",
-  approved: "Approved",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-};
 
 const ALL_STATUSES: RequestStatus[] = [
   "received",
@@ -250,12 +241,12 @@ export function RequestsTable({
     { key: "all", label: "All", count: assocFiltered.length },
     {
       key: "awaiting_data",
-      label: "Awaiting Data",
+      label: getStatusLabel("awaiting_data"),
       count: activeCounts.awaiting_data,
     },
     {
       key: "pending_review",
-      label: "Pending Review",
+      label: getStatusLabel("pending_review"),
       count: activeCounts.pending_review,
     },
     {
@@ -319,7 +310,7 @@ export function RequestsTable({
               <option value="">All Statuses</option>
               {ALL_STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {STATUS_LABELS[s]}
+                  {getStatusLabel(s)}
                 </option>
               ))}
             </select>
@@ -391,8 +382,7 @@ export function RequestsTable({
                             ] || "bg-muted text-muted-foreground"
                           )}
                         >
-                          {STATUS_LABELS[req.status as RequestStatus] ||
-                            req.status}
+                          {getStatusLabel(req.status)}
                         </span>
                         <span className="font-mono text-sm font-medium shrink-0 w-16 text-right">
                           {formatTotal(req)}
@@ -528,8 +518,7 @@ export function RequestsTable({
                                 ] || "bg-muted text-muted-foreground"
                               )}
                             >
-                              {STATUS_LABELS[req.status as RequestStatus] ||
-                                req.status}
+                              {getStatusLabel(req.status)}
                             </span>
                           </td>
                           {/* Total */}

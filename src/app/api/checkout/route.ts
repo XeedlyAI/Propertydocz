@@ -153,6 +153,11 @@ export async function POST(request: NextRequest) {
       ? `${data.property_address}, ${data.unit_number}`
       : data.property_address;
 
+    // Build initial live_data from order form fields
+    const initialLiveData: Record<string, string> = {};
+    if (data.owner_names) initialLiveData.owner_name = data.owner_names;
+    if (data.closing_date) initialLiveData.closing_date = data.closing_date;
+
     // Insert document request
     const { data: docRequest, error: insertError } = await supabase
       .from("document_requests")
@@ -182,6 +187,8 @@ export async function POST(request: NextRequest) {
         subscription_id: subscriptionId || null,
         pricing_type: pricing.pricingType,
         discount_applied: pricing.discountAmount,
+        // Pre-populate live_data from order form
+        ...(Object.keys(initialLiveData).length > 0 ? { live_data: initialLiveData } : {}),
       })
       .select("id")
       .single();

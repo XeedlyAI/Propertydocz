@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
+import { getStatusLabel } from "@/lib/status-labels";
 import type { DocumentType, RequestStatus } from "@/lib/types";
 import {
   Card,
@@ -25,25 +26,14 @@ import { GeneratedDocumentsCard } from "@/components/admin/generated-documents-c
 import { getAssociationFieldValues } from "@/lib/services/association-data";
 
 const WORKFLOW_STAGES: { key: RequestStatus; label: string }[] = [
-  { key: "received", label: "Received" },
-  { key: "paid", label: "Paid" },
-  { key: "awaiting_data", label: "Needs Details" },
+  { key: "received", label: getStatusLabel("received") },
+  { key: "paid", label: getStatusLabel("paid") },
+  { key: "awaiting_data", label: getStatusLabel("awaiting_data") },
   { key: "ready_for_generation", label: "Ready" },
   { key: "pending_review", label: "Review" },
-  { key: "approved", label: "Approved" },
-  { key: "delivered", label: "Delivered" },
+  { key: "approved", label: getStatusLabel("approved") },
+  { key: "delivered", label: getStatusLabel("delivered") },
 ];
-
-const STATUS_LABELS: Record<RequestStatus, string> = {
-  received: "Received",
-  paid: "Paid",
-  awaiting_data: "Needs Details",
-  ready_for_generation: "Ready for Generation",
-  pending_review: "Pending Review",
-  approved: "Approved",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-};
 
 export default async function RequestDetailPage({
   params,
@@ -131,7 +121,7 @@ export default async function RequestDetailPage({
               : "bg-[#38b6ff]/10 text-[#38b6ff]"
           }`}
         >
-          {STATUS_LABELS[request.status as RequestStatus] || request.status}
+          {getStatusLabel(request.status)}
         </span>
       </div>
 
@@ -418,7 +408,7 @@ export default async function RequestDetailPage({
                     <div className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
                     <div>
                       <p className="font-medium">
-                        Status: {STATUS_LABELS[request.status as RequestStatus]}
+                        Status: {getStatusLabel(request.status)}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(request.updated_at).toLocaleDateString("en-US", {
