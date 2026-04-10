@@ -1,7 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { getPlatformUser } from "@/lib/auth";
 import { formatCents } from "@/lib/pricing";
-import type { DocumentType, RequestStatus } from "@/lib/types";
+import type { DocumentType, RequestStatus, Turnaround } from "@/lib/types";
 import type { KpiCell } from "@/components/shared/PageKpiTicker";
 import { PlatformDashboardClient } from "./dashboard-client";
 
@@ -61,24 +61,36 @@ export default async function PlatformDashboardPage() {
     tenantFeeMap.set(t.id, t.platform_fee_percent || 15);
   }
 
-  // All requests (cross-tenant)
+  // All requests (cross-tenant) — include association_id and turnaround
   const { data: requests } = await serviceClient
     .from("document_requests")
     .select(
-      "id, created_at, updated_at, tenant_id, requester_name, requester_email, property_address, document_types, status, total_price_cents, payment_status"
+      "id, created_at, updated_at, tenant_id, association_id, turnaround, requester_name, requester_email, property_address, document_types, status, total_price_cents, payment_status"
     )
     .order("created_at", { ascending: false });
 
-  // Cron runs (last 20)
-  const { data: cronRuns } = await serviceClient
-    .from("cron_runs")
-    .select(
-      "id, job_name, started_at, finished_at, status, records_processed, error_message, metadata"
-    )
-    .order("started_at", { ascending: false })
-    .limit(20);
+  // Fetch association names for all tenants
+  const { data: associationsData } = await serviceClient
+    .from("associations")
+    .select("id, name, tenant_id");
+
+  const associationMap: Record<string, string> = {};
+  for (const a of associationsData || []) {
+    associationMap[a.id] = a.name;
+  }
 
   const allRequests = requests || [];
+
+  // Compute triage counts across all tenants
+  const activeStatuses = new Set<RequestStatus>(["delivered", "cancelled"]);
+  const triageCounts = {
+    awaiting_data: allRequests.filter((r) => r.status === "awaiting_data").length,
+    pending_review: allRequests.filter((r) => r.status === "pending_review").length,
+    ready_for_generation: allRequests.filter((r) => r.status === "ready_for_generation").length,
+    rush: allRequests.filter(
+      (r) => (r.turnaround as Turnaround) === "rush" && !activeStatuses.has(r.status as RequestStatus)
+    ).length,
+  };
   const now = new Date();
   const startOfMonth = new Date(
     now.getFullYear(),
@@ -267,24 +279,12 @@ export default async function PlatformDashboardPage() {
     });
   }
 
-  // Cron errors
-  const recentErrors = (cronRuns || []).filter(
-    (r) => r.status === "error"
-  );
-  if (recentErrors.length > 0) {
-    platformAlerts.push({
-      type: "urgent",
-      title: `${recentErrors.length} failed background job${recentErrors.length > 1 ? "s" : ""}`,
-      detail: `Most recent: ${recentErrors[0].job_name} — ${recentErrors[0].error_message?.slice(0, 80) || "Unknown error"}`,
-    });
-  }
-
   // If no alerts, add an all-clear
   if (platformAlerts.length === 0) {
     platformAlerts.push({
       type: "positive",
       title: "All systems healthy",
-      detail: "No issues detected across tenants and background jobs.",
+      detail: "No issues detected across tenants.",
     });
   }
 
@@ -376,6 +376,8 @@ export default async function PlatformDashboardPage() {
         id: req.id,
         created_at: req.created_at,
         tenant_id: req.tenant_id,
+        association_id: req.association_id,
+        turnaround: (req.turnaround as Turnaround) || "standard",
         requester_name: req.requester_name,
         property_address: req.property_address,
         document_types: req.document_types as DocumentType[],
@@ -383,18 +385,10 @@ export default async function PlatformDashboardPage() {
         total_price_cents: req.total_price_cents || 0,
       }))}
       tenantNameMap={tenantNameMap}
+      associationMap={associationMap}
+      triageCounts={triageCounts}
       tenantHealthItems={tenantHealthItems}
       platformAlerts={platformAlerts}
-      cronRuns={(cronRuns || []).map((r) => ({
-        id: r.id,
-        job_name: r.job_name,
-        started_at: r.started_at,
-        finished_at: r.finished_at,
-        status: r.status,
-        records_processed: r.records_processed,
-        error_message: r.error_message,
-        metadata: (r.metadata as Record<string, unknown>) || null,
-      }))}
       statusConfig={{
         dotColors: STATUS_DOT_COLOR,
         badgeColors: STATUS_BADGE,

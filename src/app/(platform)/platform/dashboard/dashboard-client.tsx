@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
-import type { DocumentType, RequestStatus } from "@/lib/types";
+import type { DocumentType, RequestStatus, Turnaround } from "@/lib/types";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { PageKpiTickerResponsive, type KpiCell } from "@/components/shared/PageKpiTicker";
 import {
@@ -13,15 +13,38 @@ import {
 } from "@/components/shared/PageTransition";
 import { TenantHealth } from "@/components/platform/tenant-health";
 import { PlatformAlerts } from "@/components/platform/platform-alerts";
-import {
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  Clock,
-} from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+
+/* ── Helpers ── */
+
+function formatAge(dateStr: string): string {
+  const now = new Date();
+  const then = new Date(dateStr);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHrs = Math.floor(diffMins / 60);
+  if (diffHrs < 24) return `${diffHrs}h ago`;
+  const diffDays = Math.floor(diffHrs / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `${diffMonths}mo ago`;
+}
+
+/* ── Row border-left accent by status ── */
+
+const STATUS_BORDER_COLOR: Record<RequestStatus, string> = {
+  received: "border-l-slate-400",
+  paid: "border-l-blue-400",
+  awaiting_data: "border-l-amber-400",
+  pending_review: "border-l-purple-400",
+  ready_for_generation: "border-l-[#38b6ff]",
+  approved: "border-l-teal-400",
+  delivered: "border-l-green-500",
+  cancelled: "border-l-slate-200",
+};
 
 /* ── Types ── */
 
@@ -40,6 +63,8 @@ interface RecentRequest {
   id: string;
   created_at: string;
   tenant_id: string;
+  association_id: string | null;
+  turnaround: Turnaround;
   requester_name: string;
   property_address: string;
   document_types: DocumentType[];
@@ -63,15 +88,11 @@ interface PlatformAlert {
   detail: string;
 }
 
-interface CronRun {
-  id: string;
-  job_name: string;
-  started_at: string;
-  finished_at: string | null;
-  status: string;
-  records_processed: number | null;
-  error_message: string | null;
-  metadata: Record<string, unknown> | null;
+interface TriageCounts {
+  awaiting_data: number;
+  pending_review: number;
+  ready_for_generation: number;
+  rush: number;
 }
 
 interface StatusConfig {
@@ -87,9 +108,10 @@ interface DashboardClientProps {
   tenantRevenues: TenantRevenue[];
   recentRequests: RecentRequest[];
   tenantNameMap: Record<string, string>;
+  associationMap: Record<string, string>;
+  triageCounts: TriageCounts;
   tenantHealthItems: TenantHealthItem[];
   platformAlerts: PlatformAlert[];
-  cronRuns: CronRun[];
   statusConfig: StatusConfig;
 }
 
@@ -100,11 +122,14 @@ export function PlatformDashboardClient({
   tenantRevenues,
   recentRequests,
   tenantNameMap,
+  associationMap,
+  triageCounts,
   tenantHealthItems,
   platformAlerts,
-  cronRuns,
   statusConfig,
 }: DashboardClientProps) {
+  const displayRequests = recentRequests.slice(0, 8);
+
   return (
     <StaggerContainer className="space-y-6" staggerDelay={0.1}>
       {/* Page Header */}
@@ -120,6 +145,48 @@ export function PlatformDashboardClient({
         <PageKpiTickerResponsive cells={kpiCells} />
       </FadeUpChild>
 
+      {/* Cross-Tenant Triage Strip */}
+      <FadeUp>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/platform/tenants"
+            className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            Awaiting Data
+            <span className="inline-flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
+              {triageCounts.awaiting_data}
+            </span>
+          </Link>
+          <Link
+            href="/platform/tenants"
+            className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            Pending Review
+            <span className="inline-flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
+              {triageCounts.pending_review}
+            </span>
+          </Link>
+          <Link
+            href="/platform/tenants"
+            className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            Ready to Generate
+            <span className="inline-flex items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-400 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
+              {triageCounts.ready_for_generation}
+            </span>
+          </Link>
+          <Link
+            href="/platform/tenants"
+            className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            Rush
+            <span className="inline-flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 text-xs font-semibold font-mono min-w-[20px] h-5 px-1.5">
+              {triageCounts.rush}
+            </span>
+          </Link>
+        </div>
+      </FadeUp>
+
       {/* Revenue by Tenant */}
       <FadeUpChild>
         <RevenueByTenantCard tenants={tenantRevenues} />
@@ -133,7 +200,7 @@ export function PlatformDashboardClient({
               <CardTitle className="text-base">Tenant Health</CardTitle>
             </CardHeader>
             <CardContent>
-              <TenantHealth tenants={tenantHealthItems} />
+              <TenantHealthClickable tenants={tenantHealthItems} />
             </CardContent>
           </Card>
 
@@ -165,232 +232,211 @@ export function PlatformDashboardClient({
             </div>
           </CardHeader>
           <CardContent>
-            {recentRequests.length === 0 ? (
+            {displayRequests.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
                 No requests yet.
               </p>
             ) : (
-              <div className="table-scroll-mobile">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-left">
-                      <th className="hidden sm:table-cell pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Date
-                      </th>
-                      <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Tenant
-                      </th>
-                      <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Requester
-                      </th>
-                      <th className="hidden md:table-cell pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Property
-                      </th>
-                      <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Documents
-                      </th>
-                      <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Status
-                      </th>
-                      <th className="hidden sm:table-cell pb-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Total
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentRequests.map((req) => (
-                      <tr
-                        key={req.id}
-                        className="border-b border-border/50 last:border-0 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
-                      >
-                        <td className="hidden sm:table-cell py-3 pr-4 text-muted-foreground">
-                          {new Date(req.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 pr-4">
-                          <Link
-                            href={`/platform/tenants/${req.tenant_id}`}
-                            className="text-xs font-medium hover:text-[#8b5cf6] transition-colors"
-                          >
-                            {tenantNameMap[req.tenant_id] || "Unknown"}
-                          </Link>
-                        </td>
-                        <td className="py-3 pr-4 font-medium">
-                          {req.requester_name}
-                        </td>
-                        <td
-                          className="hidden md:table-cell py-3 pr-4 max-w-[180px] truncate text-muted-foreground"
-                          title={req.property_address}
-                        >
-                          {req.property_address}
-                        </td>
-                        <td className="py-3 pr-4">
-                          <div className="flex flex-wrap gap-1">
-                            {req.document_types.map((dt) => (
-                              <span
-                                key={dt}
-                                className="inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
-                              >
-                                {DOCUMENT_LABELS[dt]?.split(" ")[0] || dt}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="py-3 pr-4">
-                          <span
-                            className={cn(
-                              "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
-                              statusConfig.badgeColors[req.status] ||
-                                "bg-muted text-muted-foreground"
-                            )}
-                          >
-                            <span
-                              className={cn(
-                                "size-1.5 rounded-full",
-                                statusConfig.dotColors[req.status] ||
-                                  "bg-slate-400"
-                              )}
-                            />
-                            {statusConfig.labels[req.status] || req.status}
-                          </span>
-                        </td>
-                        <td className="hidden sm:table-cell py-3 text-right font-mono font-medium">
-                          {formatCents(req.total_price_cents)}
-                        </td>
+              <>
+                <div className="table-scroll-mobile">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left">
+                        <th className="hidden sm:table-cell pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Date
+                        </th>
+                        <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Tenant
+                        </th>
+                        <th className="hidden lg:table-cell pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Association
+                        </th>
+                        <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Requester
+                        </th>
+                        <th className="hidden md:table-cell pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Property
+                        </th>
+                        <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Documents
+                        </th>
+                        <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Status
+                        </th>
+                        <th className="hidden sm:table-cell pb-3 pr-4 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Total
+                        </th>
+                        <th className="pb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Action
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </FadeUpChild>
+                    </thead>
+                    <tbody>
+                      {displayRequests.map((req) => {
+                        const isRush =
+                          req.turnaround === "rush" &&
+                          req.status !== "delivered" &&
+                          req.status !== "cancelled";
+                        const borderClass = isRush
+                          ? "border-l-red-500"
+                          : STATUS_BORDER_COLOR[req.status] || "border-l-slate-200";
 
-      {/* Cron Job History */}
-      <FadeUpChild>
-        <Card className="dash-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="size-4 text-[#8b5cf6]" />
-              Background Jobs
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {cronRuns.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                No cron runs recorded yet.
-              </p>
-            ) : (
-              <div className="table-scroll-mobile">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-left">
-                      <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Job
-                      </th>
-                      <th className="hidden sm:table-cell pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Started
-                      </th>
-                      <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Duration
-                      </th>
-                      <th className="pb-3 pr-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Status
-                      </th>
-                      <th className="hidden sm:table-cell pb-3 pr-4 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Records
-                      </th>
-                      <th className="hidden md:table-cell pb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Details
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cronRuns.map((run) => {
-                      const duration =
-                        run.finished_at && run.started_at
-                          ? `${((new Date(run.finished_at).getTime() - new Date(run.started_at).getTime()) / 1000).toFixed(1)}s`
-                          : "—";
-                      const metadata = (run.metadata || {}) as Record<
-                        string,
-                        unknown
-                      >;
-                      const detailParts: string[] = [];
-                      if (metadata.emails_sent)
-                        detailParts.push(`${metadata.emails_sent} emails`);
-                      if (metadata.tenants_affected)
-                        detailParts.push(
-                          `${metadata.tenants_affected} tenants`
-                        );
-                      if (metadata.expired_accounts)
-                        detailParts.push(
-                          `${metadata.expired_accounts} expired`
-                        );
-                      if (metadata.old_cron_runs_deleted)
-                        detailParts.push(
-                          `${metadata.old_cron_runs_deleted} cleaned`
-                        );
-
-                      return (
-                        <tr
-                          key={run.id}
-                          className="border-b border-border/50 last:border-0 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
-                        >
-                          <td className="py-3 pr-4">
-                            <span className="inline-flex items-center rounded-md border border-border px-2 py-0.5 text-xs font-medium font-mono">
-                              {run.job_name}
-                            </span>
-                          </td>
-                          <td className="hidden sm:table-cell py-3 pr-4 text-muted-foreground font-mono text-xs">
-                            {new Date(run.started_at).toLocaleString()}
-                          </td>
-                          <td className="py-3 pr-4 font-mono text-xs text-muted-foreground">
-                            {duration}
-                          </td>
-                          <td className="py-3 pr-4">
-                            {run.status === "success" ? (
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 text-xs font-medium text-teal-600 dark:text-teal-400">
-                                <span className="size-1.5 rounded-full bg-[#14b8a6]" />
-                                Success
-                              </span>
-                            ) : run.status === "error" ? (
-                              <span
-                                className="inline-flex items-center gap-1.5 rounded-full bg-red-50 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-600 dark:text-red-400"
-                                title={run.error_message || undefined}
+                        return (
+                          <tr
+                            key={req.id}
+                            className={cn(
+                              "border-b border-border/50 last:border-0 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02] border-l-[3px]",
+                              borderClass
+                            )}
+                          >
+                            <td className="hidden sm:table-cell py-3 pr-4">
+                              <div className="text-muted-foreground">
+                                {new Date(req.created_at).toLocaleDateString()}
+                              </div>
+                              <div className="font-mono text-xs text-slate-400">
+                                {formatAge(req.created_at)}
+                              </div>
+                            </td>
+                            <td className="py-3 pr-4">
+                              <Link
+                                href={`/platform/tenants/${req.tenant_id}`}
+                                className="text-xs font-medium text-[#38b6ff] hover:underline transition-colors"
                               >
-                                <span className="size-1.5 rounded-full bg-[#ef4444]" />
-                                Error
+                                {tenantNameMap[req.tenant_id] || "Unknown"}
+                              </Link>
+                            </td>
+                            <td className="hidden lg:table-cell py-3 pr-4 text-xs text-muted-foreground">
+                              {req.association_id && associationMap[req.association_id]
+                                ? associationMap[req.association_id]
+                                : "\u2014"}
+                            </td>
+                            <td className="py-3 pr-4 font-medium">
+                              {req.requester_name}
+                            </td>
+                            <td
+                              className="hidden md:table-cell py-3 pr-4 max-w-[180px] truncate text-muted-foreground"
+                              title={req.property_address}
+                            >
+                              {req.property_address}
+                            </td>
+                            <td className="py-3 pr-4">
+                              <div className="flex flex-wrap gap-1">
+                                {req.document_types.map((dt) => (
+                                  <span
+                                    key={dt}
+                                    className="inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                  >
+                                    {DOCUMENT_LABELS[dt]?.split(" ")[0] || dt}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="py-3 pr-4">
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
+                                  statusConfig.badgeColors[req.status] ||
+                                    "bg-muted text-muted-foreground"
+                                )}
+                              >
+                                <span
+                                  className={cn(
+                                    "size-1.5 rounded-full",
+                                    statusConfig.dotColors[req.status] ||
+                                      "bg-slate-400"
+                                  )}
+                                />
+                                {statusConfig.labels[req.status] || req.status}
                               </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
-                                <Loader2 className="size-3 animate-spin" />
-                                Running
+                            </td>
+                            <td className="hidden sm:table-cell py-3 pr-4 text-right font-mono font-medium">
+                              {formatCents(req.total_price_cents)}
+                            </td>
+                            <td className="py-3">
+                              <span className="text-xs text-[#38b6ff] cursor-default">
+                                View →
                               </span>
-                            )}
-                          </td>
-                          <td className="hidden sm:table-cell py-3 pr-4 text-right font-mono text-xs">
-                            {run.records_processed ?? 0}
-                          </td>
-                          <td className="hidden md:table-cell py-3 text-xs text-muted-foreground">
-                            {run.error_message ? (
-                              <span className="text-[#ef4444]">
-                                {run.error_message.slice(0, 60)}
-                              </span>
-                            ) : (
-                              detailParts.join(", ") || "—"
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                {recentRequests.length > 8 && (
+                  <div className="mt-3 text-center">
+                    <Link
+                      href="/platform/revenue"
+                      className="text-xs text-[#38b6ff] hover:underline transition-colors"
+                    >
+                      View all {recentRequests.length} requests →
+                    </Link>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
       </FadeUpChild>
     </StaggerContainer>
+  );
+}
+
+/* ── Tenant Health (Clickable Rows) ── */
+
+const HEALTH_STATUS_CONFIG = {
+  healthy: { dot: "bg-[#14b8a6]", label: "Healthy" },
+  attention: { dot: "bg-[#f59e0b]", label: "Attention" },
+  inactive: { dot: "bg-slate-400", label: "Inactive" },
+};
+
+function TenantHealthClickable({ tenants }: { tenants: TenantHealthItem[] }) {
+  if (tenants.length === 0) {
+    return (
+      <p className="py-4 text-center text-sm text-muted-foreground">
+        No tenants yet.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {tenants.map((t) => {
+        const config = HEALTH_STATUS_CONFIG[t.status];
+        const completionRate =
+          t.requestsThisMonth > 0
+            ? Math.round((t.deliveredThisMonth / t.requestsThisMonth) * 100)
+            : 0;
+
+        return (
+          <Link
+            key={t.id}
+            href={`/platform/tenants/${t.id}`}
+            className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2.5 cursor-pointer hover:bg-muted/50 transition-colors"
+          >
+            <div className={cn("size-2 rounded-full shrink-0", config.dot)} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium truncate">{t.name}</p>
+                <span className="text-[10px] text-muted-foreground ml-2 shrink-0">
+                  {config.label}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 mt-0.5 text-[11px] text-muted-foreground">
+                <span className="font-mono">{t.requestsThisMonth}</span>{" "}
+                requests
+                <span>
+                  <span className="font-mono">{completionRate}</span>% delivered
+                </span>
+                {t.avgTurnaroundDays !== null && (
+                  <span>{t.avgTurnaroundDays.toFixed(1)}d avg</span>
+                )}
+              </div>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
   );
 }
 
