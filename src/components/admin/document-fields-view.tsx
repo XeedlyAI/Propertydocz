@@ -325,22 +325,14 @@ function DocumentSection({
 
   // Track saved state for ✓ indicator
   const [savedIndicators, setSavedIndicators] = useState<Record<string, boolean>>({});
-  const savedDbRef = useRef<Record<string, string>>(
-    visibleFields.reduce<Record<string, string>>((acc, f) => {
-      acc[f.key] = getTransactionValue(liveData, f.key);
-      return acc;
-    }, {})
-  );
-
-  // Initialize savedDbRef properly
-  useEffect(() => {
+  // Track what's been saved to DB (to avoid redundant blur saves)
+  const [savedDbValues, setSavedDbValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
     for (const f of visibleFields) {
       init[f.key] = getTransactionValue(liveData, f.key);
     }
-    savedDbRef.current = init;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return init;
+  });
 
   // Track if user has manually edited total_due_at_closing
   const [totalManuallyOverridden, setTotalManuallyOverridden] = useState(false);
@@ -471,8 +463,7 @@ function DocumentSection({
     const inputVal = fieldValues[key]?.trim() ?? "";
     const dbValue = dataType === "currency" ? inputValueToCents(inputVal) : inputVal;
 
-    const prevDb = (savedDbRef.current as Record<string, string>)?.[key] ?? "";
-    if (dbValue === prevDb) return;
+    if (dbValue === (savedDbValues[key] ?? "")) return;
 
     try {
       await fetch(`/api/requests/${requestId}/fields`, {
@@ -480,16 +471,14 @@ function DocumentSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ field_key: key, value: dbValue, confirm: false }),
       });
-      if (typeof savedDbRef.current === "object") {
-        (savedDbRef.current as Record<string, string>)[key] = dbValue;
-      }
+      setSavedDbValues((prev) => ({ ...prev, [key]: dbValue }));
       setSavedIndicators((prev) => ({ ...prev, [key]: true }));
       setTimeout(() => setSavedIndicators((prev) => ({ ...prev, [key]: false })), 2000);
       onFieldSaved();
     } catch (err) {
       console.error("Failed to save field:", err);
     }
-  }, [fieldValues, requestId, onFieldSaved]);
+  }, [fieldValues, savedDbValues, requestId, onFieldSaved]);
 
   return (
     <div className="space-y-4">
