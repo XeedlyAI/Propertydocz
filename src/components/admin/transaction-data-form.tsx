@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +14,6 @@ import {
 import {
   Loader2,
   Save,
-  RefreshCw,
-  ChevronDown,
-  ChevronRight,
-  CheckCircle2,
-  AlertTriangle,
   Pencil,
 } from "lucide-react";
 import type { RequestStatus } from "@/lib/types";
@@ -75,8 +70,6 @@ export function TransactionDataForm({
     return initial;
   });
   const [saving, setSaving] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [snapshotOpen, setSnapshotOpen] = useState(false);
 
   // Fields pre-populated from the order form start as read-only
   const ORDER_PREPOPULATED_KEYS = ["owner_name", "closing_date"];
@@ -87,17 +80,6 @@ export function TransactionDataForm({
     }
     return locked;
   });
-
-  // Status indicator counts
-  const stats = useMemo(() => {
-    const populated = associationFieldValues.filter(
-      (fv) => fv.value && fv.value.trim().length > 0
-    ).length;
-    const needAttention = associationFieldValues.filter(
-      (fv) => !fv.value || fv.value.trim().length === 0
-    ).length;
-    return { populated, needAttention };
-  }, [associationFieldValues]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -113,21 +95,6 @@ export function TransactionDataForm({
       console.error("Failed to save transaction data:", err);
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      const res = await fetch(`/api/requests/${requestId}/analyze`, {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error("Refresh failed");
-      router.refresh();
-    } catch (err) {
-      console.error("Failed to refresh from Dropbox:", err);
-    } finally {
-      setRefreshing(false);
     }
   };
 
@@ -228,100 +195,6 @@ export function TransactionDataForm({
             )}
           </Button>
         </CardContent>
-      </Card>
-
-      {/* Status indicator line */}
-      <div className="flex items-center gap-2 px-1 text-sm">
-        {stats.populated > 0 && (
-          <span className="inline-flex items-center gap-1 text-emerald-600">
-            <CheckCircle2 className="size-3.5" />
-            {stats.populated} fields populated
-          </span>
-        )}
-        {stats.populated > 0 && stats.needAttention > 0 && (
-          <span className="text-slate-300">&middot;</span>
-        )}
-        {stats.needAttention > 0 && (
-          <span className="inline-flex items-center gap-1 text-amber-600">
-            <AlertTriangle className="size-3.5" />
-            {stats.needAttention} need attention
-          </span>
-        )}
-      </div>
-
-      {/* Association Data Snapshot (collapsible) */}
-      <Card className="rounded-xl border border-slate-200">
-        <CardHeader className="pb-0">
-          <button
-            type="button"
-            onClick={() => setSnapshotOpen(!snapshotOpen)}
-            className="flex w-full items-center justify-between text-left"
-          >
-            <CardTitle className="text-base">
-              Association Data Snapshot
-            </CardTitle>
-            {snapshotOpen ? (
-              <ChevronDown className="size-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="size-4 text-muted-foreground" />
-            )}
-          </button>
-        </CardHeader>
-
-        {snapshotOpen && (
-          <CardContent className="pt-4 space-y-3">
-            {/* Refresh button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="mb-2"
-            >
-              {refreshing ? (
-                <>
-                  <Loader2 className="mr-2 size-3.5 animate-spin" />
-                  Refreshing...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="mr-2 size-3.5" />
-                  Refresh from Dropbox
-                </>
-              )}
-            </Button>
-
-            {/* Read-only field values */}
-            {associationFieldValues.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No association data available yet.
-              </p>
-            ) : (
-              <div className="grid gap-2 sm:grid-cols-2">
-                {associationFieldValues.map((fv) => (
-                  <div
-                    key={fv.id}
-                    className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
-                  >
-                    <p className="text-xs text-muted-foreground truncate">
-                      {fv.field_key.replace(/_/g, " ")}
-                    </p>
-                    <p className="text-sm font-medium truncate">
-                      {fv.value && fv.value.trim() ? fv.value : (
-                        <span className="text-amber-500 italic">Missing</span>
-                      )}
-                    </p>
-                    {fv.source && (
-                      <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
-                        Source: {fv.source}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        )}
       </Card>
     </div>
   );

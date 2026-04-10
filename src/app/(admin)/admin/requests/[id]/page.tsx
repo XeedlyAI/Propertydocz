@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { TransactionDataForm } from "@/components/admin/transaction-data-form";
+import { DocumentFieldsView } from "@/components/admin/document-fields-view";
 import { StatusActions } from "@/components/admin/status-actions";
 import { GenerateDocumentsButton } from "@/components/admin/generate-documents-button";
 import { GeneratedDocumentsCard } from "@/components/admin/generated-documents-card";
@@ -268,17 +269,28 @@ export default async function RequestDetailPage({
             </CardContent>
           </Card>
 
-          {/* Transaction Data Form (when awaiting_data or ready_for_generation) */}
+          {/* Transaction Data Form + Document Fields (when awaiting_data or ready_for_generation) */}
           {(request.status === "awaiting_data" ||
             request.status === "ready_for_generation") && (
-            <TransactionDataForm
-              requestId={request.id}
-              existingData={
-                (request.live_data as Record<string, string> | null) || {}
-              }
-              associationFieldValues={serializedFieldValues}
-              status={request.status as RequestStatus}
-            />
+            <>
+              <TransactionDataForm
+                requestId={request.id}
+                existingData={
+                  (request.live_data as Record<string, string> | null) || {}
+                }
+                associationFieldValues={serializedFieldValues}
+                status={request.status as RequestStatus}
+              />
+              <DocumentFieldsView
+                documentTypes={request.document_types as string[]}
+                liveData={
+                  (request.live_data as Record<string, string> | null) || {}
+                }
+                associationFieldValues={serializedFieldValues}
+                requestId={request.id}
+                requestStatus={request.status as string}
+              />
+            </>
           )}
 
           {/* Generate Documents — renders in ready_for_generation AND pending_review
