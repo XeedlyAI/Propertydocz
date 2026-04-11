@@ -76,6 +76,29 @@ src/
 - Admin routes require Supabase Auth + tenant membership check
 - Platform admin bypasses tenant scope (role: `platform_admin`)
 
+### Platform Admin Tenant Impersonation
+- Platform admins switch into any tenant via picker in platform sidebar
+- `impersonate_tenant_id` httpOnly cookie (24h expiry) set via `POST /api/platform/impersonate`
+- `getAdminUser()` in `src/lib/auth.ts` checks cookie for `platform_admin` users, loads impersonated tenant
+- Admin sidebar shows purple "Viewing as Tenant" banner with "Back to Platform" link
+- Clearing cookie (`DELETE /api/platform/impersonate`) returns to platform context
+
+## 3-Layer Validation System
+| Layer | When | Where | Blocking? |
+|-------|------|-------|-----------|
+| 1 — Inline | On field blur | `EditableFieldCell` in `document-fields-view.tsx` | No (visual warning) |
+| 2 — Pre-gen gate | Status transition + Generate button | `status-actions.tsx` + `generate-documents-button.tsx` | Errors block, warnings require ack |
+| 3 — AI audit | Post-generation | `generate-documents-button.tsx` (display) | No (review only) |
+
+- Core validation rules: `src/lib/field-validations.ts`
+- Utah HB 217 compliance: late fee cap = max($50, 10% of past-due amount)
+- AI audit results parsed from `·`-separated text into severity-classified bulleted list
+
+## React 19 Compatibility Notes
+- `useRef` does NOT support lazy initializer functions — use `useState` or eager evaluation
+- Never mutate refs during render — causes disappearing UI on child-only re-renders
+- Move deduplication/filtering to parent-level computed arrays, pass as props
+
 ## Document Types & Pricing
 | Document | Price | Rush (+$50) | Bill to Closing |
 |----------|-------|-------------|-----------------|
