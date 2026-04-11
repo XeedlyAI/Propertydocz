@@ -19,12 +19,14 @@ interface StatusActionsProps {
   requestId: string;
   currentStatus: RequestStatus;
   hasGeneratedDocuments?: boolean;
+  liveData?: Record<string, string>;
 }
 
 export function StatusActions({
   requestId,
   currentStatus,
   hasGeneratedDocuments = false,
+  liveData = {},
 }: StatusActionsProps) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
@@ -88,6 +90,11 @@ export function StatusActions({
     );
   }
 
+  // Check if minimum data is present for advancing to ready_for_generation
+  const hasOwner = !!(liveData.owner_name || liveData.owner_names);
+  const hasClosing = !!liveData.closing_date;
+  const canAdvanceToReady = hasOwner && hasClosing;
+
   return (
     <div className="space-y-3">
       {/* ───── received ───── */}
@@ -130,9 +137,26 @@ export function StatusActions({
 
       {/* ───── awaiting_data ───── */}
       {currentStatus === "awaiting_data" && (
-        <p className="text-xs text-slate-400">
-          Complete the highlighted fields above to unlock generation
-        </p>
+        <div className="space-y-3">
+          <Button
+            size="sm"
+            className="w-full justify-start gap-2 bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
+            disabled={loading !== null || !canAdvanceToReady}
+            onClick={() => handleTransition("ready_for_generation")}
+          >
+            {loading === "ready_for_generation" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ArrowRight className="size-4" />
+            )}
+            Mark Ready for Generation
+          </Button>
+          {!canAdvanceToReady && (
+            <p className="text-xs text-slate-400">
+              Enter owner name and closing date above to unlock
+            </p>
+          )}
+        </div>
       )}
 
       {/* ───── ready_for_generation ───── */}

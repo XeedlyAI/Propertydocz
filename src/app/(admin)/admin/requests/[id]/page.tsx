@@ -390,6 +390,7 @@ export default async function RequestDetailPage({
                 requestId={request.id}
                 currentStatus={request.status as RequestStatus}
                 hasGeneratedDocuments={hasGeneratedDocuments}
+                liveData={(request.live_data as Record<string, string> | null) || {}}
               />
             </CardContent>
           </Card>
