@@ -12,7 +12,7 @@ export default async function AdminLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <AdminSidebar tenantName={user.tenantName} userName={user.fullName} />
+      <AdminSidebar tenantName={user.tenantName} userName={user.fullName} isImpersonating={user.isImpersonating} />
       <div className="flex flex-1 flex-col overflow-hidden pt-14 lg:pt-0">
         <AdminTopBar />
         <main className="flex-1 overflow-y-auto">

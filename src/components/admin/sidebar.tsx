@@ -15,6 +15,8 @@ import {
   Menu,
   X,
   FileStack,
+  ArrowLeft,
+  Shield,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -22,6 +24,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 interface SidebarProps {
   tenantName: string;
   userName: string;
+  isImpersonating?: boolean;
 }
 
 interface NavItem {
@@ -44,7 +47,7 @@ const SYSTEM_ITEMS: NavItem[] = [
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
-export function AdminSidebar({ tenantName, userName }: SidebarProps) {
+export function AdminSidebar({ tenantName, userName, isImpersonating = false }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -100,6 +103,30 @@ export function AdminSidebar({ tenantName, userName }: SidebarProps) {
           PropertyDocz
         </span>
       </div>
+
+      {/* Impersonation banner */}
+      {isImpersonating && (
+        <div className="border-b border-[#8b5cf6]/20 bg-[#8b5cf6]/5 px-5 py-2">
+          <div className="flex items-center gap-1.5">
+            <Shield className="size-3 text-[#8b5cf6]" />
+            <p className="text-[10px] font-medium uppercase tracking-wider text-[#8b5cf6]">
+              Viewing as Tenant
+            </p>
+          </div>
+          <Link
+            href="/platform/dashboard"
+            onClick={async (e) => {
+              e.preventDefault();
+              await fetch("/api/platform/impersonate", { method: "DELETE" });
+              window.location.href = "/platform/dashboard";
+            }}
+            className="mt-1 flex items-center gap-1 text-[11px] text-[#8b5cf6] hover:text-[#7c3aed] font-medium transition-colors"
+          >
+            <ArrowLeft className="size-3" />
+            Back to Platform
+          </Link>
+        </div>
+      )}
 
       {/* Tenant name */}
       <div className="border-b border-[#E5E7EB] dark:border-white/8 px-5 py-3">

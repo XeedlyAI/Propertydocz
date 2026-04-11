@@ -17,8 +17,12 @@ import {
   Shield,
   Users,
   Wand2,
+  ArrowRightLeft,
+  ChevronDown,
+  Loader2,
+  Check,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 interface PlatformSidebarProps {
@@ -45,6 +49,118 @@ const SYSTEM_ITEMS: NavItem[] = [
 
 const PURPLE = "#8b5cf6";
 const BLUE = "#38b6ff";
+
+interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+function TenantSwitcher() {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [switching, setSwitching] = useState<string | null>(null);
+
+  // Fetch tenants when dropdown opens
+  useEffect(() => {
+    if (!open || tenants.length > 0) return;
+
+    setLoading(true);
+    fetch("/api/platform/tenants")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.tenants) {
+          setTenants(
+            data.tenants.map((t: { id: string; name: string; slug: string }) => ({
+              id: t.id,
+              name: t.name,
+              slug: t.slug,
+            }))
+          );
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [open, tenants.length]);
+
+  async function handleSelect(tenant: Tenant) {
+    setSwitching(tenant.id);
+    try {
+      const res = await fetch("/api/platform/impersonate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenant_id: tenant.id }),
+      });
+
+      if (res.ok) {
+        router.push("/admin/dashboard");
+        router.refresh();
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setSwitching(null);
+    }
+  }
+
+  return (
+    <div className="px-3 pb-2">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-[#38b6ff]/5 hover:text-[#38b6ff] transition-colors"
+      >
+        <span className="flex items-center gap-2">
+          <ArrowRightLeft className="size-3.5" />
+          Switch to Tenant
+        </span>
+        <ChevronDown
+          className={cn(
+            "size-3 transition-transform duration-150",
+            open && "rotate-180"
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="mt-1 rounded-lg border border-[#E5E7EB] dark:border-white/10 bg-white dark:bg-[#1a1d24] shadow-lg overflow-hidden">
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" />
+              Loading...
+            </div>
+          ) : tenants.length === 0 ? (
+            <p className="px-3 py-3 text-xs text-muted-foreground">
+              No tenants found
+            </p>
+          ) : (
+            <div className="max-h-48 overflow-y-auto py-1">
+              {tenants.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => handleSelect(t)}
+                  disabled={switching !== null}
+                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs hover:bg-[#38b6ff]/5 transition-colors disabled:opacity-50"
+                >
+                  <span className="flex items-center gap-2 min-w-0">
+                    <Building2 className="size-3 shrink-0 text-muted-foreground" />
+                    <span className="truncate font-medium text-foreground">
+                      {t.name}
+                    </span>
+                  </span>
+                  {switching === t.id && (
+                    <Loader2 className="size-3 shrink-0 animate-spin text-[#38b6ff]" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function PlatformSidebar({ userName }: PlatformSidebarProps) {
   const pathname = usePathname();
@@ -138,15 +254,7 @@ export function PlatformSidebar({ userName }: PlatformSidebarProps) {
       </nav>
 
       {/* Switch to Tenant Admin */}
-      <div className="px-3 pb-2">
-        <Link
-          href="/admin/dashboard"
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-[#38b6ff]/5 hover:text-[#38b6ff] transition-colors"
-        >
-          <LayoutDashboard className="size-3.5" />
-          Switch to Tenant Admin
-        </Link>
-      </div>
+      <TenantSwitcher />
 
       {/* User / Sign Out */}
       <div className="border-t border-[#E5E7EB] dark:border-white/8 p-3">

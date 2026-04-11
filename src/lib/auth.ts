@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export interface AdminUser {
@@ -9,6 +10,8 @@ export interface AdminUser {
   tenantSlug: string;
   fullName: string;
   role: string;
+  /** True when a platform admin is viewing this tenant via impersonation */
+  isImpersonating: boolean;
 }
 
 export interface PlatformUser {
@@ -20,6 +23,10 @@ export interface PlatformUser {
 
 /**
  * Get the current authenticated admin user with their tenant info.
+ *
+ * For platform admins: checks the `impersonate_tenant_id` cookie first.
+ * If set, loads that tenant instead of the user's own tenant_id.
+ *
  * Redirects to /login if not authenticated or missing profile.
  */
 export async function getAdminUser(): Promise<AdminUser> {
@@ -39,7 +46,44 @@ export async function getAdminUser(): Promise<AdminUser> {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !profile.tenant_id) {
+  if (!profile) {
+    redirect("/login");
+  }
+
+  // Platform admins can impersonate any tenant via cookie
+  const isPlatformAdmin = profile.role === "platform_admin";
+  let isImpersonating = false;
+
+  if (isPlatformAdmin) {
+    const cookieStore = await cookies();
+    const impersonateTenantId = cookieStore.get("impersonate_tenant_id")?.value;
+
+    if (impersonateTenantId) {
+      // Load the impersonated tenant directly
+      const { data: impersonatedTenant } = await supabase
+        .from("tenants")
+        .select("id, name, slug")
+        .eq("id", impersonateTenantId)
+        .single();
+
+      if (impersonatedTenant) {
+        return {
+          id: profile.id,
+          email: user.email || "",
+          tenantId: impersonatedTenant.id,
+          tenantName: impersonatedTenant.name,
+          tenantSlug: impersonatedTenant.slug,
+          fullName: profile.full_name,
+          role: profile.role,
+          isImpersonating: true,
+        };
+      }
+      // If impersonated tenant not found, fall through to normal flow
+    }
+  }
+
+  // Regular flow: use the user's own tenant
+  if (!profile.tenant_id) {
     redirect("/login");
   }
 
@@ -60,6 +104,7 @@ export async function getAdminUser(): Promise<AdminUser> {
     tenantSlug: (tenant as { id: string; name: string; slug: string }).slug,
     fullName: profile.full_name,
     role: profile.role,
+    isImpersonating,
   };
 }
 
