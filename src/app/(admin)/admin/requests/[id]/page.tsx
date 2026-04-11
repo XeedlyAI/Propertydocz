@@ -303,6 +303,9 @@ export default async function RequestDetailPage({
               <GenerateDocumentsButton
                 requestId={request.id}
                 status={request.status}
+                liveData={(request.live_data as Record<string, string> | null) || {}}
+                associationRecord={association as Record<string, unknown> | null}
+                documentTypes={request.document_types as string[]}
               />
             </div>
           )}
