@@ -391,6 +391,8 @@ export default async function RequestDetailPage({
                 currentStatus={request.status as RequestStatus}
                 hasGeneratedDocuments={hasGeneratedDocuments}
                 liveData={(request.live_data as Record<string, string> | null) || {}}
+                associationRecord={association as Record<string, unknown> | null}
+                documentTypes={request.document_types as string[]}
               />
             </CardContent>
           </Card>

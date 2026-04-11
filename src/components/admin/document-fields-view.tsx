@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getDocumentSchema } from "@/lib/document-schemas";
 import type { DocumentField } from "@/lib/document-schemas";
-import { ChevronDown, ChevronRight, Upload, ExternalLink, Check } from "lucide-react";
+import { validateField } from "@/lib/field-validations";
+import type { FieldWarning, ValidationContext } from "@/lib/field-validations";
+import { ChevronDown, ChevronRight, Upload, ExternalLink, Check, AlertTriangle } from "lucide-react";
 
 // ════════════════════════════════════════
 // Types
@@ -151,17 +153,26 @@ function FieldCell({
 
 /** Controlled editable field cell — state managed by parent */
 function EditableFieldCell({
-  field, value, autoLabel, showSaved, onChange, onBlur,
+  field, value, autoLabel, showSaved, warnings, onChange, onBlur,
 }: {
   field: DocumentField;
   value: string;
   autoLabel?: string;
   showSaved: boolean;
+  warnings: FieldWarning[];
   onChange: (val: string) => void;
   onBlur: () => void;
 }) {
   const hasValue = value.trim().length > 0;
-  const accent = hasValue ? "border-l-2 border-green-400 pl-2" : "border-l-2 border-amber-400 pl-2";
+  const hasError = warnings.some((w) => w.level === "error");
+  const hasWarn = warnings.some((w) => w.level === "warn");
+  const accent = hasError
+    ? "border-l-2 border-red-400 pl-2"
+    : hasWarn
+      ? "border-l-2 border-amber-400 pl-2"
+      : hasValue
+        ? "border-l-2 border-green-400 pl-2"
+        : "border-l-2 border-amber-400 pl-2";
 
   return (
     <div className={accent}>
@@ -197,6 +208,22 @@ function EditableFieldCell({
           className={INPUT_CLASS}
         />
       )}
+      {/* Inline warnings — Layer 1 */}
+      {warnings.length > 0 && (
+        <div className="mt-1 space-y-0.5">
+          {warnings.map((w, i) => (
+            <p
+              key={i}
+              className={`flex items-start gap-1 text-[11px] leading-tight ${
+                w.level === "error" ? "text-red-500" : "text-amber-600"
+              }`}
+            >
+              <AlertTriangle className="size-3 shrink-0 mt-0.5" />
+              {w.message}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -214,8 +241,6 @@ export function DocumentFieldsView({
   if (!documentTypes || documentTypes.length === 0) return null;
 
   // ── Pre-compute deduplication at the parent level ──
-  // This runs during the parent's render and produces stable filtered arrays
-  // that are passed as props. No refs mutated during child renders.
   const seenAssociationKeys = new Set<string>();
   const seenTransactionKeys = new Set<string>();
 
@@ -241,7 +266,6 @@ export function DocumentFieldsView({
     const allAssocFields = schema.fields.filter((f) => f.source === "association");
     const allTransFields = schema.fields.filter((f) => f.source === "per_transaction");
 
-    // Filter out already-seen keys for this section
     const uniqueAssocFields = allAssocFields.filter((f) => {
       if (seenAssociationKeys.has(f.key)) return false;
       seenAssociationKeys.add(f.key);
@@ -343,6 +367,25 @@ function DocumentSection({
   // Track if user has manually edited total_due_at_closing
   const [totalManuallyOverridden, setTotalManuallyOverridden] = useState(false);
 
+  // ── Layer 1: Compute inline warnings for all fields ──
+  const validationCtx: ValidationContext = useMemo(
+    () => ({ fieldValues, associationRecord, docType }),
+    [fieldValues, associationRecord, docType]
+  );
+
+  const fieldWarnings = useMemo(() => {
+    const map: Record<string, FieldWarning[]> = {};
+    for (const f of visibleFields) {
+      const val = fieldValues[f.key] ?? "";
+      if (val.trim()) {
+        map[f.key] = validateField(f.key, val, validationCtx);
+      } else {
+        map[f.key] = [];
+      }
+    }
+    return map;
+  }, [visibleFields, fieldValues, validationCtx]);
+
   // ── Auto-populate preparation_date + derived date fields on mount ──
   const autoPopulatedRef = useRef(false);
   useEffect(() => {
@@ -391,7 +434,6 @@ function DocumentSection({
 
     if (Object.keys(updates).length > 0) {
       setFieldValues((prev) => ({ ...prev, ...updates }));
-      // Save auto-populated values to DB
       for (const save of dbSaves) {
         fetch(`/api/requests/${requestId}/fields`, {
           method: "PUT",
@@ -552,6 +594,7 @@ function DocumentSection({
                   value={val}
                   autoLabel={autoLabel}
                   showSaved={!!savedIndicators[field.key]}
+                  warnings={fieldWarnings[field.key] || []}
                   onChange={(v) => handleChange(field.key, v)}
                   onBlur={() => handleBlur(field.key, field.dataType)}
                 />
