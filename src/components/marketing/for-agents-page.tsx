@@ -179,83 +179,37 @@ function OrderProcessSection() {
 }
 
 /* ───────── MEMBERSHIP TIERS ───────── */
-const TIERS = [
-  { name: "Pay-Per-Order", price: "Free", packages: "0", saving: "—", desc: "Pay as you go. No commitment." },
-  { name: "Agent Pro", price: "$149", packages: "3", saving: "20%", desc: "For individual agents with regular volume.", highlight: false },
-  { name: "Broker Office", price: "$399", packages: "10", saving: "25%", desc: "For offices with multiple agents.", highlight: true },
-  { name: "Title Partner", price: "$799", packages: "25", saving: "30%", desc: "For title companies with high volume.", highlight: false },
+const TIERS_COMING_SOON = [
+  { name: "Agent Pro", desc: "For individual agents with regular volume." },
+  { name: "Broker Office", desc: "For offices with multiple agents." },
+  { name: "Title Partner", desc: "For title companies with high volume." },
 ];
 
 function MembershipSection() {
   return (
     <section className="py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-5xl px-6">
         <FadeUp>
           <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#38b6ff]">
-              Membership Plans
-            </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1A1A2E] sm:text-4xl">
-              Order frequently? Save with a membership.
+            <span className="inline-flex items-center gap-2 rounded-full bg-[#38b6ff]/10 px-4 py-1.5 text-xs font-semibold text-[#38b6ff]">
+              Coming Soon
+            </span>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#1A1A2E] sm:text-4xl">
+              Volume membership plans on the way
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base text-gray-500">
-              Included document packages each month, plus discounted overage rates.
+              We&apos;re building membership tiers with included document packages,
+              discounted overage rates, and priority processing for high-volume
+              users.
             </p>
           </div>
         </FadeUp>
-        <StaggerContainer className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {TIERS.map((tier) => (
+        <StaggerContainer className="mt-12 grid gap-6 sm:grid-cols-3">
+          {TIERS_COMING_SOON.map((tier) => (
             <StaggerItem key={tier.name}>
-              <div
-                className={`relative flex h-full flex-col rounded-2xl p-7 transition-all hover:-translate-y-1 ${
-                  tier.highlight
-                    ? "bg-[#1A1A2E] text-white shadow-xl border-2 border-[#38b6ff]/30"
-                    : "bg-white border border-gray-100 shadow-sm"
-                }`}
-              >
-                {tier.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#38b6ff] px-3 py-0.5 text-[10px] font-semibold text-white">
-                    Most Popular
-                  </div>
-                )}
-                <p className={`text-xs font-semibold uppercase tracking-wider ${tier.highlight ? "text-[#38b6ff]" : "text-gray-400"}`}>
-                  {tier.name}
-                </p>
-                <p className="mt-3 font-mono text-3xl font-bold">
-                  {tier.price}
-                  {tier.price !== "Free" && (
-                    <span className={`text-sm font-normal ${tier.highlight ? "text-white/50" : "text-gray-400"}`}>
-                      /mo
-                    </span>
-                  )}
-                </p>
-                <p className={`mt-2 text-xs ${tier.highlight ? "text-white/60" : "text-gray-500"}`}>
-                  {tier.desc}
-                </p>
-                <div className={`mt-5 space-y-2.5 border-t pt-5 flex-1 ${tier.highlight ? "border-white/10" : "border-gray-100"}`}>
-                  <div className={`flex items-center gap-2 text-xs ${tier.highlight ? "text-white/80" : "text-gray-600"}`}>
-                    <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
-                    {tier.packages === "0" ? "No included packages" : `${tier.packages} document packages/mo`}
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${tier.highlight ? "text-white/80" : "text-gray-600"}`}>
-                    <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
-                    {tier.saving === "—" ? "Standard pricing" : `${tier.saving} off overage`}
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${tier.highlight ? "text-white/80" : "text-gray-600"}`}>
-                    <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
-                    Digital delivery
-                  </div>
-                </div>
-                <Link
-                  href="/pricing"
-                  className={`mt-6 block rounded-xl py-2.5 text-center text-sm font-semibold transition-all ${
-                    tier.highlight
-                      ? "bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
-                      : "bg-[#F4F5F7] text-[#1A1A2E] hover:bg-gray-200"
-                  }`}
-                >
-                  {tier.price === "Free" ? "Get Started" : "Choose Plan"}
-                </Link>
+              <div className="rounded-2xl border border-gray-100 bg-white p-7 text-center shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{tier.name}</p>
+                <p className="mt-3 text-sm text-gray-500">{tier.desc}</p>
               </div>
             </StaggerItem>
           ))}
@@ -267,10 +221,10 @@ function MembershipSection() {
 
 /* ───────── DOCUMENT TYPES WITH CONTEXT ───────── */
 const DOCS_CONTEXT = [
-  { icon: FileText, title: "Resale Certificate", price: "$99", when: "When selling a property in an HOA community. Required by Utah law for most resale transactions." },
-  { icon: DollarSign, title: "Payoff Statement", price: "$15", when: "When closing on a property to determine exact amounts owed to the HOA." },
-  { icon: ClipboardList, title: "Lender Questionnaire", price: "$95", when: "When a buyer's lender needs HOA financial and project data for underwriting (Fannie Mae 1076)." },
-  { icon: BookOpen, title: "Governing Documents", price: "$35", when: "When a buyer or lender needs CC&Rs, bylaws, rules, budget, reserve study, and insurance certificates." },
+  { icon: FileText, title: "Resale Certificate", price: "$250", rushNote: "+$50 rush", when: "When selling a property in an HOA community. Required by Utah law for most resale transactions." },
+  { icon: DollarSign, title: "Payoff Statement", price: "$50", rushNote: null, when: "When closing on a property to determine exact amounts owed to the HOA. Fee capped by Utah §57-8a-106." },
+  { icon: ClipboardList, title: "Lender Questionnaire", price: "$195", rushNote: "+$50 rush", when: "When a buyer's lender needs HOA financial and project data for underwriting (Fannie Mae 1076)." },
+  { icon: BookOpen, title: "Governing Documents", price: "$150", rushNote: "+$50 rush", when: "When a buyer or lender needs CC&Rs, bylaws, rules, budget, reserve study, and insurance certificates." },
 ];
 
 function DocumentContextSection() {
@@ -305,10 +259,12 @@ function DocumentContextSection() {
                   </div>
                   <p className="mt-1 text-sm text-gray-500">{doc.when}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Zap className="size-3 text-amber-500" />
-                  <span className="text-xs text-gray-400">Rush +$50</span>
-                </div>
+                {doc.rushNote && (
+                  <div className="flex items-center gap-2">
+                    <Zap className="size-3 text-amber-500" />
+                    <span className="text-xs text-gray-400">{doc.rushNote}</span>
+                  </div>
+                )}
               </div>
             </FadeUp>
           ))}

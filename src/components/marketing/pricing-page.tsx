@@ -32,8 +32,7 @@ function HeroSection() {
             Simple, transparent pricing
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
-            Pay per document or save with a membership. No hidden fees, no
-            surprises.
+            Transparent per-document pricing. No hidden fees, no surprises.
           </p>
         </FadeUp>
       </div>
@@ -44,10 +43,10 @@ function HeroSection() {
 
 /* ───────── PER-DOCUMENT PRICING ───────── */
 const DOCUMENTS = [
-  { icon: FileText, name: "Resale Certificate", standard: "$99", rush: "$149", desc: "Full financial disclosure per Utah Code \u00A757-8a-227" },
-  { icon: DollarSign, name: "Payoff Statement", standard: "$15", rush: "$65", desc: "Itemized amounts owed with per diem" },
-  { icon: ClipboardList, name: "Lender Questionnaire", standard: "$95", rush: "$145", desc: "Fannie Mae 1076 / Freddie Mac 476" },
-  { icon: BookOpen, name: "Governing Documents", standard: "$35", rush: "$85", desc: "CC&Rs, bylaws, rules, budget, reserve study" },
+  { icon: FileText, name: "Resale Certificate", standard: "$250", rush: "$300", desc: "Full financial disclosure per Utah Code \u00A757-8a-227" },
+  { icon: DollarSign, name: "Payoff Statement", standard: "$50", rush: null, desc: "Itemized amounts owed with per diem (fee capped by Utah \u00A757-8a-106)" },
+  { icon: ClipboardList, name: "Lender Questionnaire", standard: "$195", rush: "$245", desc: "Fannie Mae 1076 / Freddie Mac 476" },
+  { icon: BookOpen, name: "Governing Documents", standard: "$150", rush: "$200", desc: "CC&Rs, bylaws, rules, budget, reserve study" },
 ];
 
 function PerDocumentSection() {
@@ -97,7 +96,7 @@ function PerDocumentSection() {
                   {doc.standard}
                 </div>
                 <div className="w-24 text-center font-mono text-sm font-bold text-amber-600">
-                  {doc.rush}
+                  {doc.rush ?? <span className="text-xs font-normal text-gray-400">N/A</span>}
                 </div>
               </div>
             ))}
@@ -106,7 +105,8 @@ function PerDocumentSection() {
               <p className="text-xs text-amber-700">
                 <Zap className="mr-1 inline size-3" />
                 Rush fee of $50 is applied once per order, not per document.
-                Rush orders target same-day delivery.
+                Rush orders target same-day delivery. Payoff statements are exempt from
+                rush fees per Utah §57-8a-106 fee cap.
               </p>
             </div>
           </div>
@@ -166,65 +166,37 @@ function MembershipSection() {
               Membership Plans
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1A1A2E] sm:text-4xl">
-              Save more with volume
+              Volume discounts — coming soon
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base text-gray-500">
-              A &quot;document package&quot; is one complete set of documents for a single
-              property transaction (e.g., resale certificate + payoff statement).
+              We&apos;re building membership plans for agents, brokerages, and title
+              companies who order frequently. Get included document packages each
+              month and discounted overage rates.
             </p>
           </div>
         </FadeUp>
-        <StaggerContainer className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {TIERS.map((tier) => (
-            <StaggerItem key={tier.name}>
-              <div
-                className={`relative flex h-full flex-col rounded-2xl p-7 transition-all hover:-translate-y-1 ${
-                  tier.highlight
-                    ? "bg-[#1A1A2E] text-white shadow-xl border-2 border-[#38b6ff]/30"
-                    : "bg-white border border-gray-100 shadow-sm"
-                }`}
-              >
-                {tier.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#38b6ff] px-3 py-0.5 text-[10px] font-semibold text-white">
-                    Most Popular
-                  </div>
-                )}
-                <p className={`text-xs font-semibold uppercase tracking-wider ${tier.highlight ? "text-[#38b6ff]" : "text-gray-400"}`}>
-                  {tier.name}
-                </p>
-                <p className="mt-3 font-mono text-3xl font-bold">
-                  {tier.price}
-                  {tier.monthly && (
-                    <span className={`text-sm font-normal ${tier.highlight ? "text-white/50" : "text-gray-400"}`}>/mo</span>
-                  )}
-                </p>
-                <p className={`mt-1 text-xs ${tier.highlight ? "text-[#38b6ff]" : "text-[#38b6ff]"}`}>
-                  {tier.overage}
-                </p>
-                <div className={`mt-6 space-y-3 border-t pt-6 flex-1 ${tier.highlight ? "border-white/10" : "border-gray-100"}`}>
-                  {tier.features.map((feat) => (
-                    <div
-                      key={feat}
-                      className={`flex items-center gap-2.5 text-xs ${tier.highlight ? "text-white/80" : "text-gray-600"}`}
-                    >
-                      <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
-                      {feat}
-                    </div>
-                  ))}
+        <FadeUp delay={0.1}>
+          <div className="relative mt-16 overflow-hidden rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm">
+            <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/60 to-white pointer-events-none z-10" />
+            <div className="relative z-0 grid gap-6 sm:grid-cols-3 opacity-40 blur-[2px]">
+              {TIERS.filter((t) => t.monthly).map((tier) => (
+                <div key={tier.name} className="rounded-xl border border-gray-100 p-6 text-center">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{tier.name}</p>
+                  <p className="mt-2 font-mono text-2xl font-bold text-[#1A1A2E]">{tier.price}<span className="text-sm font-normal text-gray-400">/mo</span></p>
                 </div>
-                <button
-                  className={`mt-6 w-full rounded-xl py-2.5 text-center text-sm font-semibold transition-all ${
-                    tier.highlight
-                      ? "bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
-                      : "bg-[#F4F5F7] text-[#1A1A2E] hover:bg-gray-200"
-                  }`}
-                >
-                  {tier.price === "Free" ? "Get Started" : "Choose Plan"}
-                </button>
-              </div>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
+              ))}
+            </div>
+            <div className="relative z-20 -mt-8">
+              <span className="inline-flex items-center gap-2 rounded-full bg-[#38b6ff]/10 px-5 py-2 text-sm font-semibold text-[#38b6ff]">
+                Coming Soon
+              </span>
+              <p className="mx-auto mt-3 max-w-md text-sm text-gray-500">
+                Interested in volume pricing? Leave your email and we&apos;ll notify
+                you when membership plans launch.
+              </p>
+            </div>
+          </div>
+        </FadeUp>
       </div>
     </section>
   );
@@ -245,66 +217,7 @@ const COMPARISON_ROWS = [
 ];
 
 function ComparisonSection() {
-  return (
-    <section className="py-24 sm:py-32">
-      <div className="mx-auto max-w-5xl px-6">
-        <FadeUp>
-          <div className="text-center">
-            <h2 className="text-2xl font-bold tracking-tight text-[#1A1A2E] sm:text-3xl">
-              Feature comparison
-            </h2>
-          </div>
-        </FadeUp>
-        <FadeUp delay={0.1}>
-          <div className="mt-12 overflow-x-auto">
-            <table className="w-full min-w-[600px]">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
-                    Feature
-                  </th>
-                  <th className="pb-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-400 w-24">
-                    Free
-                  </th>
-                  <th className="pb-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-400 w-24">
-                    Agent Pro
-                  </th>
-                  <th className="pb-3 text-center text-xs font-semibold uppercase tracking-wider text-[#38b6ff] w-24">
-                    Broker
-                  </th>
-                  <th className="pb-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-400 w-24">
-                    Title
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON_ROWS.map((row) => (
-                  <tr key={row.feature} className="border-b border-gray-50">
-                    <td className="py-3 text-sm text-gray-600">{row.feature}</td>
-                    {[row.free, row.pro, row.broker, row.title].map((val, i) => (
-                      <td key={i} className="py-3 text-center">
-                        {typeof val === "boolean" ? (
-                          val ? (
-                            <CheckCircle2 className="mx-auto size-4 text-emerald-500" />
-                          ) : (
-                            <Minus className="mx-auto size-4 text-gray-300" />
-                          )
-                        ) : (
-                          <span className="font-mono text-sm font-medium text-[#1A1A2E]">
-                            {val}
-                          </span>
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </FadeUp>
-      </div>
-    </section>
-  );
+  return null;
 }
 
 /* ───────── MANAGEMENT COMPANY REVENUE SHARE ───────── */
@@ -363,8 +276,8 @@ const FAQS = [
     a: "A document package covers all the documents needed for a single property transaction. For example, if you order a resale certificate and a payoff statement for the same property, that counts as one package.",
   },
   {
-    q: "What happens if I exceed my included packages?",
-    a: "You can still order documents — they're just billed at the per-document rate minus your membership discount (20-30% off depending on your tier).",
+    q: "Will there be volume discounts?",
+    a: "Yes! We're building membership plans with included document packages and discounted overage rates. Sign up for updates and we'll notify you when they launch.",
   },
   {
     q: "How fast is rush delivery?",
@@ -372,11 +285,7 @@ const FAQS = [
   },
   {
     q: "Can I bill the document fee to closing?",
-    a: "Yes! Title Partner members can use bill-to-closing. For other tiers, we accept credit card and ACH payment at time of order.",
-  },
-  {
-    q: "What if I need to cancel my membership?",
-    a: "You can cancel anytime. There are no long-term contracts. Your membership benefits continue through the end of your billing period.",
+    a: "Bill-to-closing is available for standalone payoff statements. We accept credit card and ACH payment at time of order for all other documents.",
   },
   {
     q: "Are the documents legally compliant?",

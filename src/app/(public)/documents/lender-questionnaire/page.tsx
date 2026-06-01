@@ -16,13 +16,13 @@ export default function Page() {
       <DocumentProductJsonLd
         name="HOA Lender Questionnaire"
         description="Completed lender questionnaire providing association financial data, insurance coverage, litigation status, and owner-occupancy ratios required for mortgage underwriting."
-        price="95.00"
+        price="195.00"
         path="/documents/lender-questionnaire"
       />
       <DocumentTypePage
         title="Lender Questionnaire"
         subtitle="The data lenders need to approve HOA property loans"
-        price="$95.00"
+        price="$195.00"
         turnaround="Typically 2-5 business days"
         description="A lender questionnaire is a standardized form that mortgage lenders require when underwriting loans for properties in HOA or condominium communities. It provides critical data about the association's financial health, insurance coverage, litigation status, owner-occupancy ratios, and governance structure. Without a completed lender questionnaire, most conventional and FHA/VA loans for condo units cannot be approved."
         whoNeeds={[

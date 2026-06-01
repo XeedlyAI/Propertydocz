@@ -16,13 +16,13 @@ export default function Page() {
       <DocumentProductJsonLd
         name="HOA Governing Documents"
         description="Complete set of HOA governing documents including CC&Rs, bylaws, rules and regulations, and recent meeting minutes for property transactions and due diligence."
-        price="35.00"
+        price="150.00"
         path="/documents/governing-documents"
       />
       <DocumentTypePage
         title="Governing Documents"
         subtitle="CC&Rs, bylaws, rules, and meeting minutes in one package"
-        price="$35.00"
+        price="$150.00"
         turnaround="Typically 1-2 business days"
         description="Governing documents are the foundational legal documents that define how a homeowners association or condominium operates. They include the Declaration of Covenants, Conditions, and Restrictions (CC&Rs), bylaws, articles of incorporation, rules and regulations, and recent meeting minutes. Buyers, attorneys, and lenders review these documents to understand the rights, obligations, and restrictions that come with owning a property in the community."
         whoNeeds={[

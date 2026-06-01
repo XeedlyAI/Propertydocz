@@ -19,6 +19,7 @@ import {
   DOCUMENT_PRICES,
   DOCUMENT_LABELS,
   RUSH_FEE_CENTS,
+  RUSH_EXEMPT_TYPES,
   calculateOrderTotal,
   formatCents,
 } from "@/lib/pricing";
@@ -359,6 +360,7 @@ export function OrderForm({
   const isStandalonePayoff =
     selectedDocs.length === 1 && selectedDocs[0] === "payoff_statement";
   const showBillToClosing = isStandalonePayoff;
+  const rushApplies = selectedDocs.some((d) => !RUSH_EXEMPT_TYPES.includes(d));
   const baseTotalCents = calculateOrderTotal(selectedDocs, turnaround === "rush");
 
   // ── Subscription pricing ──
@@ -949,9 +951,15 @@ export function OrderForm({
                 <div className="flex items-center gap-2">
                   <Zap className="size-4 text-amber-500" />
                   <span className="text-sm font-medium">Rush</span>
-                  <span className="font-data rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
-                    +{formatCents(RUSH_FEE_CENTS)}
-                  </span>
+                  {rushApplies ? (
+                    <span className="font-data rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                      +{formatCents(RUSH_FEE_CENTS)}
+                    </span>
+                  ) : (
+                    <span className="rounded-md bg-gray-50 px-1.5 py-0.5 text-[10px] font-semibold text-gray-400 dark:bg-gray-800 dark:text-gray-500">
+                      No extra fee
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">1-2 business days</p>
               </div>
@@ -1013,12 +1021,18 @@ export function OrderForm({
                   </span>
                 </div>
               ))}
-              {turnaround === "rush" && (
+              {turnaround === "rush" && rushApplies && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-white/70">Rush Processing</span>
                   <span className="font-data text-sm font-medium text-white">
                     {formatCents(RUSH_FEE_CENTS)}
                   </span>
+                </div>
+              )}
+              {turnaround === "rush" && !rushApplies && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/70">Rush Processing</span>
+                  <span className="text-xs text-white/40">Priority — no extra fee</span>
                 </div>
               )}
 

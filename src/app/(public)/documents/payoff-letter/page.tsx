@@ -16,13 +16,13 @@ export default function Page() {
       <DocumentProductJsonLd
         name="HOA Payoff Letter"
         description="Official payoff statement showing the exact amount owed to the homeowners association, including assessments, fees, and any outstanding balances."
-        price="15.00"
+        price="50.00"
         path="/documents/payoff-letter"
       />
       <DocumentTypePage
         title="Payoff Letter"
         subtitle="Know exactly what's owed to the association at closing"
-        price="$15.00"
+        price="$50.00"
         turnaround="Typically 1-2 business days"
         description="A payoff letter (also called a payoff statement or estoppel letter) provides an official accounting of all amounts owed by a homeowner to the association as of a specific date. This includes regular assessments, special assessments, late fees, fines, legal fees, and any other charges. Title companies and closing attorneys require this document to ensure all association debts are settled at closing."
         whoNeeds={[

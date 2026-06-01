@@ -274,25 +274,25 @@ function AudienceSplitSection() {
 const DOC_TYPES = [
   {
     title: "Resale Certificate",
-    price: "$99",
+    price: "$250",
     icon: FileText,
     desc: "Complete financial disclosure for property resale transactions. Includes assessments, reserves, insurance, policies, and litigation status per Utah Code \u00A757-8a-227.",
   },
   {
     title: "Payoff Statement",
-    price: "$15",
+    price: "$50",
     icon: DollarSign,
     desc: "Itemized statement of all amounts owed to the HOA at closing. Includes per diem calculations, payment instructions, and HB 217 compliance.",
   },
   {
     title: "Lender Questionnaire",
-    price: "$95",
+    price: "$195",
     icon: ClipboardList,
     desc: "Fannie Mae 1076 / Freddie Mac 476 compliant questionnaire. Covers ownership distribution, financials, insurance, litigation, and environmental data.",
   },
   {
     title: "Governing Documents",
-    price: "$35",
+    price: "$150",
     icon: BookOpen,
     desc: "Complete CC&R, bylaws, amendments, rules, budget, reserve study, and insurance certificate package with cover sheet and document checklist.",
   },
@@ -361,47 +361,24 @@ function MembershipTeaser() {
         <FadeUp>
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1A1A2E] to-[#0C0F14] p-8 sm:p-14 shadow-2xl">
             <div className="absolute -top-20 -right-20 size-64 rounded-full bg-[#38b6ff]/10 blur-[80px]" />
-            <div className="relative z-10 grid gap-10 lg:grid-cols-2 lg:items-center">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-[#38b6ff]">
-                  Membership Plans
-                </p>
-                <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl">
-                  Order frequently? Save with a membership.
-                </h2>
-                <p className="mt-4 text-sm leading-relaxed text-white/60">
-                  Get included document packages each month, discounted overage
-                  rates, and priority processing. Plans start at $149/month.
-                </p>
-                <Link
-                  href="/pricing"
-                  className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#38b6ff] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#38b6ff]/25 hover:bg-[#1DA8F0] transition-all min-h-[44px]"
-                >
-                  View Plans <ArrowRight className="size-3.5" />
-                </Link>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {[
-                  { tier: "Agent Pro", price: "$149", packages: "3" },
-                  { tier: "Broker Office", price: "$399", packages: "10" },
-                  { tier: "Title Partner", price: "$799", packages: "25" },
-                ].map((plan) => (
-                  <div
-                    key={plan.tier}
-                    className="rounded-xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm"
-                  >
-                    <p className="text-xs font-medium text-white/40">
-                      {plan.tier}
-                    </p>
-                    <p className="mt-1 font-mono text-xl font-bold text-white">
-                      {plan.price}
-                    </p>
-                    <p className="mt-0.5 text-xs text-[#38b6ff]">
-                      {plan.packages} packages/mo
-                    </p>
-                  </div>
-                ))}
-              </div>
+            <div className="relative z-10 text-center lg:text-left">
+              <span className="inline-flex items-center gap-2 rounded-full bg-[#38b6ff]/10 px-4 py-1.5 text-xs font-semibold text-[#38b6ff]">
+                Coming Soon
+              </span>
+              <h2 className="mt-4 text-2xl font-bold text-white sm:text-3xl">
+                Volume membership plans on the way
+              </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/60">
+                We&apos;re building membership tiers for agents, brokerages, and
+                title companies who order frequently. Included document packages
+                each month, discounted overage rates, and priority processing.
+              </p>
+              <Link
+                href="/pricing"
+                className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#38b6ff] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#38b6ff]/25 hover:bg-[#1DA8F0] transition-all min-h-[44px]"
+              >
+                View Pricing <ArrowRight className="size-3.5" />
+              </Link>
             </div>
           </div>
         </FadeUp>

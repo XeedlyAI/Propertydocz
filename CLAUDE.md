@@ -102,12 +102,12 @@ src/
 ## Document Types & Pricing
 | Document | Price | Rush (+$50) | Bill to Closing |
 |----------|-------|-------------|-----------------|
-| Resale Certificate | $99 | Yes | No |
-| Payoff Statement | $15 | Yes | Yes (standalone only) |
-| Governing Documents | $35 | Yes | No |
-| Lender Questionnaire | $95 | Yes | No |
+| Resale Certificate | $250 | Yes | No |
+| Payoff Statement | $50 | No (fee capped by Utah §57-8a-106) | Yes (standalone only) |
+| Governing Documents | $150 | Yes | No |
+| Lender Questionnaire | $195 | Yes | No |
 
-Rush fee applies once per order, not per document.
+Rush fee applies once per order, not per document. Payoff statement is exempt from rush fees due to statutory fee cap.
 
 ## Document Request Workflow
 ```
