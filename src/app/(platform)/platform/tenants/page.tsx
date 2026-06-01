@@ -141,7 +141,7 @@ export default async function PlatformTenantsPage() {
   for (const t of allTenants) {
     const stats = tenantStats.get(t.id);
     if (stats) {
-      const fee = t.platform_fee_percent || 15;
+      const fee = t.platform_fee_percent || 10;
       totalPlatformRevenueMtd += Math.round((stats.revenueMtd * fee) / 100);
       totalRequestsMtd += stats.requestsMtd;
     }
@@ -369,7 +369,7 @@ export default async function PlatformTenantsPage() {
                             {formatCents(stats.revenue)}
                           </td>
                           <td className="hidden lg:table-cell py-3 pr-4 text-right font-mono">
-                            {t.platform_fee_percent ?? 15}%
+                            {t.platform_fee_percent ?? 10}%
                           </td>
                           <td className="hidden lg:table-cell py-3 pr-4 text-center">
                             {hasStripe ? (

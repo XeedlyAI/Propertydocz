@@ -32,7 +32,7 @@ create table tenants (
   name text not null,
   slug text not null unique, -- subdomain
   stripe_account_id text,
-  platform_fee_percent numeric(5,2) not null default 20.00,
+  platform_fee_percent numeric(5,2) not null default 10.00,
   dropbox_access_token text,
   dropbox_refresh_token text,
   logo_url text,

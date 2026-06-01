@@ -49,7 +49,7 @@ export default async function PlatformDashboardPage() {
   const tenantFeeMap = new Map<string, number>();
   for (const t of allTenants) {
     tenantNameMap[t.id] = t.name;
-    tenantFeeMap.set(t.id, t.platform_fee_percent || 15);
+    tenantFeeMap.set(t.id, t.platform_fee_percent || 10);
   }
 
   // All requests (cross-tenant) — include association_id and turnaround
@@ -120,12 +120,12 @@ export default async function PlatformDashboardPage() {
   const platformCutThisMonth = paidRequests
     .filter((r) => r.created_at >= startOfMonth)
     .reduce((sum, r) => {
-      const fee = tenantFeeMap.get(r.tenant_id) || 15;
+      const fee = tenantFeeMap.get(r.tenant_id) || 10;
       return sum + Math.round(((r.total_price_cents || 0) * fee) / 100);
     }, 0);
 
   const platformCutTotal = paidRequests.reduce((sum, r) => {
-    const fee = tenantFeeMap.get(r.tenant_id) || 15;
+    const fee = tenantFeeMap.get(r.tenant_id) || 10;
     return sum + Math.round(((r.total_price_cents || 0) * fee) / 100);
   }, 0);
 
@@ -133,10 +133,10 @@ export default async function PlatformDashboardPage() {
   const avgFeePercent =
     allTenants.length > 0
       ? allTenants.reduce(
-          (sum, t) => sum + (t.platform_fee_percent || 15),
+          (sum, t) => sum + (t.platform_fee_percent || 10),
           0
         ) / allTenants.length
-      : 15;
+      : 10;
 
   // Revenue by tenant
   const tenantRevenueMap = new Map<
@@ -155,7 +155,7 @@ export default async function PlatformDashboardPage() {
 
   const tenantRevenues = allTenants.map((t) => {
     const stats = tenantRevenueMap.get(t.id) || { revenue: 0, count: 0 };
-    const fee = t.platform_fee_percent || 15;
+    const fee = t.platform_fee_percent || 10;
     const platformCut = Math.round((stats.revenue * fee) / 100);
     return {
       id: t.id,

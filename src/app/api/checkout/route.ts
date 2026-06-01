@@ -330,7 +330,7 @@ export async function POST(request: NextRequest) {
 
         const checkoutUrl = await createCheckoutSession({
           tenantStripeAccountId: tenant.stripe_account_id,
-          platformFeePercent: tenant.platform_fee_percent || 15,
+          platformFeePercent: tenant.platform_fee_percent || 10,
           totalAmountCents: totalPriceCents,
           requestId: docRequest.id,
           tenantName: tenant.name,

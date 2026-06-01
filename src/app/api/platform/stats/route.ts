@@ -59,16 +59,16 @@ export async function GET() {
     const revenueThisMonth = paidThisMonth.reduce((sum, r) => sum + (r.total_price_cents || 0), 0);
 
     // Build fee lookup
-    const feeLookup = new Map(allTenants.map((t) => [t.id, t.platform_fee_percent || 15]));
+    const feeLookup = new Map(allTenants.map((t) => [t.id, t.platform_fee_percent || 10]));
 
     // Platform cut calculation
     const platformCutTotal = paidRequests.reduce((sum, r) => {
-      const fee = feeLookup.get(r.tenant_id) || 15;
+      const fee = feeLookup.get(r.tenant_id) || 10;
       return sum + Math.round((r.total_price_cents || 0) * fee / 100);
     }, 0);
 
     const platformCutThisMonth = paidThisMonth.reduce((sum, r) => {
-      const fee = feeLookup.get(r.tenant_id) || 15;
+      const fee = feeLookup.get(r.tenant_id) || 10;
       return sum + Math.round((r.total_price_cents || 0) * fee / 100);
     }, 0);
 
@@ -76,7 +76,7 @@ export async function GET() {
     const tenantRevenue = allTenants.map((t) => {
       const tenantRequests = paidRequests.filter((r) => r.tenant_id === t.id);
       const revenue = tenantRequests.reduce((sum, r) => sum + (r.total_price_cents || 0), 0);
-      const fee = t.platform_fee_percent || 15;
+      const fee = t.platform_fee_percent || 10;
       const platformCut = Math.round(revenue * fee / 100);
       return {
         id: t.id,

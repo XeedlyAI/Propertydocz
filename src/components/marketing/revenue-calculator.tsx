@@ -165,12 +165,12 @@ export function RevenueCalculator() {
   const fullPackage = annualOrders - resaleOnly - resalePlusPayoff;
 
   const resaleOnlyRev = resaleOnly * 250;
-  const resalePlusPayoffRev = resalePlusPayoff * 400;
-  const fullPackageRev = fullPackage * 1075;
+  const resalePlusPayoffRev = resalePlusPayoff * 300;
+  const fullPackageRev = fullPackage * 645;
   const subtotal = resaleOnlyRev + resalePlusPayoffRev + fullPackageRev;
-  const rushUplift = Math.round(subtotal * 0.15);
+  const rushUplift = Math.round(subtotal * 0.12);
   const totalPlatformRevenue = subtotal + rushUplift;
-  const yourShare = Math.round(totalPlatformRevenue * 0.50);
+  const yourShare = Math.round(totalPlatformRevenue * 0.90);
 
   return (
     <div>
@@ -228,7 +228,7 @@ export function RevenueCalculator() {
         <MetricCard
           label="Your Annual Revenue"
           value={yourShare}
-          sublabel="Your 50% share"
+          sublabel="You keep 90%"
           isHero
         />
       </div>
@@ -237,17 +237,17 @@ export function RevenueCalculator() {
       <div className="mt-6 rounded-xl bg-gray-50 border border-gray-100 px-5 py-4 space-y-1.5">
         <p className="text-xs text-gray-500">
           <span className="font-mono font-medium text-gray-600">{formatNumber(annualOrders)}</span> orders/year:
-          ~{formatNumber(resaleOnly)} resale only ($250) + ~{formatNumber(resalePlusPayoff)} resale+payoff ($400) + ~{formatNumber(fullPackage)} full package ($1,075)
+          ~{formatNumber(resaleOnly)} resale only ($250) + ~{formatNumber(resalePlusPayoff)} resale+payoff ($300) + ~{formatNumber(fullPackage)} full package ($645)
         </p>
         <p className="text-xs text-gray-500">
-          Plus ~15% rush order premium
+          Plus ~12% rush order premium
         </p>
         <p className="text-xs text-gray-500">
-          Total platform revenue: <span className="font-mono font-medium text-gray-600">{formatCurrency(totalPlatformRevenue)}</span>
-          {" "}— your 50% share: <span className="font-mono font-semibold text-[#38b6ff]">{formatCurrency(yourShare)}</span>
+          Total order revenue: <span className="font-mono font-medium text-gray-600">{formatCurrency(totalPlatformRevenue)}</span>
+          {" "}— you keep 90%: <span className="font-mono font-semibold text-[#38b6ff]">{formatCurrency(yourShare)}</span>
         </p>
         <p className="text-[11px] text-gray-400 pt-1 border-t border-gray-200 mt-2">
-          Based on PropertyDocz standard pricing. Actual share depends on partnership terms.
+          Based on PropertyDocz standard pricing with 10% platform fee. No setup cost, no monthly fee.
         </p>
       </div>
     </div>

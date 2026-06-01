@@ -70,7 +70,7 @@ export async function GET(
       (sum, r) => sum + (r.total_price_cents || 0),
       0
     );
-    const fee = tenant.platform_fee_percent || 15;
+    const fee = tenant.platform_fee_percent || 10;
     const platformCut = Math.round((totalRevenue * fee) / 100);
 
     // Admin users for this tenant

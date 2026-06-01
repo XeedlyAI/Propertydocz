@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
         slug: slug.trim().toLowerCase(),
         contact_email: contact_email?.trim() || null,
         contact_phone: contact_phone?.trim() || null,
-        platform_fee_percent: platform_fee_percent ?? 15,
+        platform_fee_percent: platform_fee_percent ?? 10,
       })
       .select()
       .single();

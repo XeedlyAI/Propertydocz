@@ -51,7 +51,7 @@ export function TenantForm({ tenant }: TenantFormProps) {
     tenant?.contact_phone || ""
   );
   const [feePercent, setFeePercent] = useState(
-    (tenant?.platform_fee_percent ?? 15).toString()
+    (tenant?.platform_fee_percent ?? 10).toString()
   );
   const [logoUrl, setLogoUrl] = useState(tenant?.logo_url || "");
   const [primaryColor, setPrimaryColor] = useState(
@@ -100,7 +100,7 @@ export function TenantForm({ tenant }: TenantFormProps) {
             slug: slug.trim().toLowerCase(),
             contact_email: contactEmail.trim() || null,
             contact_phone: contactPhone.trim() || null,
-            platform_fee_percent: parseFloat(feePercent) || 15,
+            platform_fee_percent: parseFloat(feePercent) || 10,
             logo_url: logoUrl.trim() || null,
             primary_color: primaryColor.trim() || null,
           }),
@@ -120,7 +120,7 @@ export function TenantForm({ tenant }: TenantFormProps) {
           slug: slug.trim().toLowerCase(),
           contact_email: contactEmail.trim() || null,
           contact_phone: contactPhone.trim() || null,
-          platform_fee_percent: parseFloat(feePercent) || 15,
+          platform_fee_percent: parseFloat(feePercent) || 10,
         };
 
         if (createAdmin && adminEmail.trim() && adminPassword) {

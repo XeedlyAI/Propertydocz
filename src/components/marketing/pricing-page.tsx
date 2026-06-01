@@ -231,19 +231,19 @@ function RevenueShareSection() {
               <Building2 className="size-6 text-[#38b6ff]" />
             </div>
             <h2 className="mt-6 text-3xl font-bold text-white sm:text-4xl">
-              Management Companies: Earn Revenue
+              Management Companies: Keep Your Revenue
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base text-white/60">
-              PropertyDocz is free for management companies. You earn a revenue
-              share on every document ordered through your branded portal. We handle
-              the platform, payment processing, and AI generation — you keep the
-              relationship and the revenue.
+              PropertyDocz is free to set up. You keep 90% of every document
+              order through your branded portal. We handle the platform, payment
+              processing, and AI generation — you keep the relationship and the
+              revenue.
             </p>
             <div className="mt-10 grid gap-6 sm:grid-cols-3 w-full max-w-3xl">
               {[
                 { label: "Setup Cost", value: "$0" },
                 { label: "Monthly Fee", value: "$0" },
-                { label: "Revenue Share", value: "Up to 70%" },
+                { label: "You Keep", value: "90%" },
               ].map((item) => (
                 <div
                   key={item.label}

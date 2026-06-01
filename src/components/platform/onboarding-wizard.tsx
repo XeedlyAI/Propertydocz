@@ -142,7 +142,7 @@ export function OnboardingWizard({ platformUserId }: WizardProps) {
     contactEmail: "",
     contactPhone: "",
     primaryColor: "#38b6ff",
-    platformFeePercent: "15",
+    platformFeePercent: "10",
     stripeStatus: "none",
     stripeAccountId: null,
     storageProvider: "none",
@@ -215,7 +215,7 @@ export function OnboardingWizard({ platformUserId }: WizardProps) {
         contactEmail: tenant.contact_email || "",
         contactPhone: tenant.contact_phone || "",
         primaryColor: tenant.primary_color || "#38b6ff",
-        platformFeePercent: String(tenant.platform_fee_percent ?? 15),
+        platformFeePercent: String(tenant.platform_fee_percent ?? 10),
         stripeStatus: tenant.stripe_account_id ? "connected" : "none",
         stripeAccountId: tenant.stripe_account_id || null,
         storageConnected: !!tenant.dropbox_access_token,
@@ -300,7 +300,7 @@ export function OnboardingWizard({ platformUserId }: WizardProps) {
             slug: data.slug.trim().toLowerCase(),
             contact_email: data.contactEmail.trim() || null,
             contact_phone: data.contactPhone.trim() || null,
-            platform_fee_percent: parseFloat(data.platformFeePercent) || 15,
+            platform_fee_percent: parseFloat(data.platformFeePercent) || 10,
           };
 
           const res = await fetch("/api/platform/tenants", {
@@ -343,7 +343,7 @@ export function OnboardingWizard({ platformUserId }: WizardProps) {
           body: JSON.stringify({
             name: data.companyName.trim(),
             slug: data.slug.trim().toLowerCase(),
-            platform_fee_percent: parseFloat(data.platformFeePercent) || 15,
+            platform_fee_percent: parseFloat(data.platformFeePercent) || 10,
             primary_color: data.primaryColor,
           }),
         });
@@ -447,7 +447,7 @@ export function OnboardingWizard({ platformUserId }: WizardProps) {
             name: data.companyName.trim(),
             slug: data.slug.trim().toLowerCase(),
             primary_color: data.primaryColor,
-            platform_fee_percent: parseFloat(data.platformFeePercent) || 15,
+            platform_fee_percent: parseFloat(data.platformFeePercent) || 10,
           }),
         });
       }

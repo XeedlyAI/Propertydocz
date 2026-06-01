@@ -197,14 +197,14 @@ function AudienceSplitSection() {
                 Management Companies
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-gray-500">
-                Stop losing document revenue to third-party services. Fulfill
-                orders through your own branded portal, keep a revenue share on
-                every document, and let AI handle the heavy lifting.
+                Stop sending document revenue to third-party services. Fulfill
+                orders through your own branded portal, keep 90% of every order,
+                and let AI handle the heavy lifting.
               </p>
               <ul className="mt-6 space-y-3">
                 {[
                   "Branded ordering portal",
-                  "Revenue share on every document",
+                  "Keep 90% of every document order",
                   "AI-powered generation",
                   "Dropbox sync for governing docs",
                   "Analytics dashboard",

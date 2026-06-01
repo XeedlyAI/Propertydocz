@@ -14,7 +14,7 @@ export default async function PlatformRevenuePage() {
 
   const allTenants = tenants || [];
   const tenantFeeMap = new Map(
-    allTenants.map((t) => [t.id, t.platform_fee_percent || 15])
+    allTenants.map((t) => [t.id, t.platform_fee_percent || 10])
   );
   const tenantNameMap = new Map(allTenants.map((t) => [t.id, t.name]));
 
@@ -43,14 +43,14 @@ export default async function PlatformRevenuePage() {
     .reduce((sum, r) => sum + (r.total_price_cents || 0), 0);
 
   const platformCutTotal = paidReqs.reduce((sum, r) => {
-    const fee = tenantFeeMap.get(r.tenant_id) || 15;
+    const fee = tenantFeeMap.get(r.tenant_id) || 10;
     return sum + Math.round(((r.total_price_cents || 0) * fee) / 100);
   }, 0);
 
   const platformCutThisMonth = paidReqs
     .filter((r) => r.created_at >= startOfMonth)
     .reduce((sum, r) => {
-      const fee = tenantFeeMap.get(r.tenant_id) || 15;
+      const fee = tenantFeeMap.get(r.tenant_id) || 10;
       return sum + Math.round(((r.total_price_cents || 0) * fee) / 100);
     }, 0);
 
@@ -64,7 +64,7 @@ export default async function PlatformRevenuePage() {
     const thisMonth = tenantReqs
       .filter((r) => r.created_at >= startOfMonth)
       .reduce((sum, r) => sum + (r.total_price_cents || 0), 0);
-    const fee = t.platform_fee_percent || 15;
+    const fee = t.platform_fee_percent || 10;
     return {
       id: t.id,
       name: t.name,

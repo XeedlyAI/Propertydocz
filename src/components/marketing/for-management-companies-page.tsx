@@ -50,9 +50,9 @@ function HeroSection() {
         </FadeUp>
         <FadeUp delay={0.2}>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/60">
-            Stop losing document revenue to CondoCerts and third-party services.
-            PropertyDocz gives you a branded portal, AI-powered generation, and a
-            revenue share on every document your properties produce.
+            Stop sending your document revenue to third-party services.
+            PropertyDocz gives you a branded portal and AI-powered generation —
+            you keep 90% of every document order. No setup cost. No monthly fee.
           </p>
         </FadeUp>
         <FadeUp delay={0.3}>
@@ -96,7 +96,7 @@ function ProblemSolutionSection() {
               </h2>
               <div className="mt-6 space-y-4">
                 {[
-                  "Third-party services like CondoCerts charge $200+ per resale certificate — and keep all of it",
+                  "Third-party services handle your documents and keep a cut of the fee — revenue that should be yours",
                   "Your staff spends hours manually assembling documents that AI can generate in minutes",
                   "Agents and title companies are frustrated by slow turnaround and opaque processes",
                   "You have no visibility into document volume, revenue, or fulfillment performance",
@@ -121,7 +121,7 @@ function ProblemSolutionSection() {
                 {[
                   "Branded portal at yourcompany.propertydocz.com — agents order directly from you",
                   "AI generates compliant documents in minutes, not days — you review and approve",
-                  "Revenue share on every document sold through your portal",
+                  "You keep 90% of every document order — just a 10% platform fee",
                   "Real-time dashboard with volume, revenue, and turnaround analytics",
                 ].map((solution) => (
                   <div key={solution} className="flex gap-3 text-sm text-gray-600">
@@ -192,8 +192,8 @@ const FEATURES = [
   },
   {
     icon: DollarSign,
-    title: "Revenue Share",
-    desc: "Earn on every document. Your properties, your revenue — we just power the platform.",
+    title: "Keep 90%",
+    desc: "You keep 90% of every document order. Just a 10% platform fee — no setup cost, no monthly fee.",
   },
 ];
 
