@@ -6,8 +6,11 @@ import Link from "next/link";
 import { getDocumentSchema } from "@/lib/document-schemas";
 import type { DocumentField } from "@/lib/document-schemas";
 import { validateField } from "@/lib/field-validations";
-import type { FieldWarning, ValidationContext } from "@/lib/field-validations";
-import { ChevronDown, ChevronRight, Upload, ExternalLink, Check, AlertTriangle } from "lucide-react";
+import { runPreGenerationCheck } from "@/lib/field-validations";
+import type { FieldWarning, ValidationContext, PreGenCheckResult } from "@/lib/field-validations";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronRight, Upload, ExternalLink, Check, AlertTriangle, XCircle, CheckCircle2 } from "lucide-react";
 
 // ════════════════════════════════════════
 // Types
@@ -20,6 +23,7 @@ interface DocumentFieldsViewProps {
   associationId: string | null;
   requestId: string;
   requestStatus: string;
+  onDocReady?: (docType: string, isReady: boolean) => void;
 }
 
 // ════════════════════════════════════════
@@ -30,11 +34,6 @@ const OWNER_ALTERNATES: Record<string, string> = {
   owner_name: "owner_names",
   owner_names: "owner_name",
 };
-
-const TOP_LEVEL_TRANSACTION_KEYS = new Set([
-  "owner_name", "owner_names", "unit_lot_number", "closing_date",
-  "balance_due", "special_notes", "property_address",
-]);
 
 /** Fields that sum to total_due_at_closing */
 const TOTAL_DUE_COMPONENTS = [
@@ -234,15 +233,12 @@ function EditableFieldCell({
 
 export function DocumentFieldsView({
   documentTypes, liveData, associationRecord, associationId, requestId, requestStatus,
+  onDocReady,
 }: DocumentFieldsViewProps) {
   const router = useRouter();
   const handleFieldSaved = useCallback(() => { router.refresh(); }, [router]);
 
   if (!documentTypes || documentTypes.length === 0) return null;
-
-  // ── Pre-compute deduplication at the parent level ──
-  const seenAssociationKeys = new Set<string>();
-  const seenTransactionKeys = new Set<string>();
 
   const sections: React.ReactNode[] = [];
 
@@ -252,32 +248,29 @@ export function DocumentFieldsView({
 
     if (schema.upload_only) {
       sections.push(
-        <div key={docType} className="space-y-3">
-          <h3 className="text-sm font-semibold text-slate-800">{schema.label}</h3>
-          <div className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-            <Upload className="size-4" />
-            Upload only — no generated fields required
-          </div>
-        </div>
+        <Card key={docType} className="overflow-hidden">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-800">{schema.label}</h3>
+              <span className="text-xs font-mono font-medium text-slate-400">Upload only</span>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+              <Upload className="size-4" />
+              Upload only — no generated fields required
+            </div>
+          </CardContent>
+        </Card>
       );
       continue;
     }
 
+    // No deduplication — each document gets ALL its fields
     const allAssocFields = schema.fields.filter((f) => f.source === "association");
     const allTransFields = schema.fields.filter((f) => f.source === "per_transaction");
 
-    const uniqueAssocFields = allAssocFields.filter((f) => {
-      if (seenAssociationKeys.has(f.key)) return false;
-      seenAssociationKeys.add(f.key);
-      return true;
-    });
-    const uniqueTransFields = allTransFields.filter((f) => {
-      if (seenTransactionKeys.has(f.key)) return false;
-      seenTransactionKeys.add(f.key);
-      return true;
-    });
-
-    const allAssocPopulated = uniqueAssocFields.every((f) =>
+    const allAssocPopulated = allAssocFields.every((f) =>
       getAssociationValue(associationRecord, f).length > 0
     );
 
@@ -286,14 +279,15 @@ export function DocumentFieldsView({
         key={docType}
         docType={docType}
         schema={schema}
-        associationFields={uniqueAssocFields}
-        transactionFields={uniqueTransFields}
+        associationFields={allAssocFields}
+        transactionFields={allTransFields}
         allAssocPopulated={allAssocPopulated}
         liveData={liveData}
         associationRecord={associationRecord}
         associationId={associationId}
         requestId={requestId}
         onFieldSaved={handleFieldSaved}
+        onDocReady={onDocReady}
       />
     );
   }
@@ -302,15 +296,7 @@ export function DocumentFieldsView({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-base font-semibold text-slate-900">Document Field Requirements</h2>
-      <div className="space-y-6">
-        {sections.map((section, i) => (
-          <div key={i}>
-            {i > 0 && <hr className="mb-6 border-slate-200" />}
-            {section}
-          </div>
-        ))}
-      </div>
+      {sections}
     </div>
   );
 }
@@ -321,7 +307,7 @@ export function DocumentFieldsView({
 
 function DocumentSection({
   docType, schema, associationFields, transactionFields, allAssocPopulated,
-  liveData, associationRecord, associationId, requestId, onFieldSaved,
+  liveData, associationRecord, associationId, requestId, onFieldSaved, onDocReady,
 }: {
   docType: string;
   schema: ReturnType<typeof getDocumentSchema> & {};
@@ -333,16 +319,17 @@ function DocumentSection({
   associationId: string | null;
   requestId: string;
   onFieldSaved: () => void;
+  onDocReady?: (docType: string, isReady: boolean) => void;
 }) {
   const [assocOpen, setAssocOpen] = useState(!allAssocPopulated);
 
-  // Visible transaction fields (excluding top-level form fields)
-  const visibleFields = transactionFields.filter((f) => !TOP_LEVEL_TRANSACTION_KEYS.has(f.key));
+  // All transaction fields visible (no TOP_LEVEL_TRANSACTION_KEYS filter)
+  const visibleFields = transactionFields;
 
   // ── Shared field state (dollar values for currency, raw for others) ──
   const [fieldValues, setFieldValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
-    for (const f of visibleFields) {
+    for (const f of transactionFields) {
       const dbVal = getTransactionValue(liveData, f.key);
       if (f.dataType === "currency") {
         init[f.key] = dbVal ? centsToInputValue(dbVal) : "";
@@ -353,12 +340,12 @@ function DocumentSection({
     return init;
   });
 
-  // Track saved state for ✓ indicator
+  // Track saved state for checkmark indicator
   const [savedIndicators, setSavedIndicators] = useState<Record<string, boolean>>({});
   // Track what's been saved to DB (to avoid redundant blur saves)
   const [savedDbValues, setSavedDbValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
-    for (const f of visibleFields) {
+    for (const f of transactionFields) {
       init[f.key] = getTransactionValue(liveData, f.key);
     }
     return init;
@@ -366,6 +353,17 @@ function DocumentSection({
 
   // Track if user has manually edited total_due_at_closing
   const [totalManuallyOverridden, setTotalManuallyOverridden] = useState(false);
+
+  // Per-document check state
+  const [docStatus, setDocStatus] = useState<"needs_work" | "checking" | "has_issues" | "complete">("needs_work");
+  const [checkResult, setCheckResult] = useState<PreGenCheckResult | null>(null);
+  const [warningsAcked, setWarningsAcked] = useState(false);
+
+  // ── Completion counter ──
+  const totalFields = associationFields.length + visibleFields.length;
+  const populatedAssoc = associationFields.filter(f => getAssociationValue(associationRecord, f).length > 0).length;
+  const populatedTrans = visibleFields.filter(f => (fieldValues[f.key] ?? "").trim().length > 0).length;
+  const populatedCount = populatedAssoc + populatedTrans;
 
   // ── Layer 1: Compute inline warnings for all fields ──
   const validationCtx: ValidationContext = useMemo(
@@ -395,7 +393,7 @@ function DocumentSection({
     const updates: Record<string, string> = {};
     const dbSaves: Array<{ key: string; value: string }> = [];
 
-    // preparation_date → today if empty
+    // preparation_date -> today if empty
     if (!fieldValues.preparation_date && visibleFields.some((f) => f.key === "preparation_date")) {
       const today = todayISO();
       updates.preparation_date = today;
@@ -404,21 +402,21 @@ function DocumentSection({
 
     const prepDate = updates.preparation_date || fieldValues.preparation_date;
 
-    // valid_through_date (resale) → prep + 30 days
+    // valid_through_date (resale) -> prep + 30 days
     if (prepDate && !fieldValues.valid_through_date && visibleFields.some((f) => f.key === "valid_through_date")) {
       const vtd = addDays(prepDate, 30);
       updates.valid_through_date = vtd;
       dbSaves.push({ key: "valid_through_date", value: vtd });
     }
 
-    // statement_valid_through (payoff) → prep + 30 days
+    // statement_valid_through (payoff) -> prep + 30 days
     if (prepDate && !fieldValues.statement_valid_through && visibleFields.some((f) => f.key === "statement_valid_through")) {
       const svt = addDays(prepDate, 30);
       updates.statement_valid_through = svt;
       dbSaves.push({ key: "statement_valid_through", value: svt });
     }
 
-    // per_diem_amount → monthly_assessment_amount / 30
+    // per_diem_amount -> monthly_assessment_amount / 30
     if (!fieldValues.per_diem_amount && visibleFields.some((f) => f.key === "per_diem_amount") && associationRecord) {
       const monthlyRaw = associationRecord.monthly_assessment_amount;
       if (monthlyRaw !== null && monthlyRaw !== undefined) {
@@ -526,83 +524,181 @@ function DocumentSection({
     }
   }, [fieldValues, savedDbValues, requestId, onFieldSaved]);
 
-  return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-slate-800">
-        {schema!.label} — Required Data
-      </h3>
+  // ── Check Completeness handler ──
+  function handleCheckCompleteness() {
+    setDocStatus("checking");
+    const requiredKeys = [...associationFields, ...visibleFields]
+      .filter(f => f.required)
+      .map(f => f.key);
 
-      {/* Association Data */}
-      {associationFields.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setAssocOpen(!assocOpen)}
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
-            >
-              {assocOpen ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
-              Association Data
-            </button>
-            {associationId && (
-              <Link
-                href={`/admin/associations/${associationId}?tab=settings`}
-                className="inline-flex items-center gap-1 text-[10px] text-[#38b6ff] hover:underline"
+    const mergedValues: Record<string, string> = {};
+    for (const f of associationFields) {
+      mergedValues[f.key] = getAssociationValue(associationRecord, f);
+    }
+    for (const f of visibleFields) {
+      const val = fieldValues[f.key] ?? "";
+      mergedValues[f.key] = f.dataType === "currency" ? inputValueToCents(val) : val;
+    }
+
+    const result = runPreGenerationCheck(mergedValues, associationRecord, docType, requiredKeys);
+    setCheckResult(result);
+    setWarningsAcked(false);
+
+    if (result.passed && result.warnings.length === 0) {
+      setDocStatus("complete");
+      onDocReady?.(docType, true);
+    } else {
+      setDocStatus("has_issues");
+      onDocReady?.(docType, false);
+    }
+  }
+
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-800">{schema!.label}</h3>
+          <span className={`text-xs font-mono font-medium ${populatedCount === totalFields ? "text-green-600" : "text-slate-400"}`}>
+            {populatedCount}/{totalFields} fields
+          </span>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Association Data */}
+        {associationFields.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setAssocOpen(!assocOpen)}
+                className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
               >
-                Edit in Association <ExternalLink className="size-2.5" />
-              </Link>
+                {assocOpen ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+                Association Data
+              </button>
+              {associationId && (
+                <Link
+                  href={`/admin/associations/${associationId}?tab=settings`}
+                  className="inline-flex items-center gap-1 text-[10px] text-[#38b6ff] hover:underline"
+                >
+                  Edit in Association <ExternalLink className="size-2.5" />
+                </Link>
+              )}
+            </div>
+
+            {assocOpen && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {associationFields.map((field) => {
+                  const value = getAssociationValue(associationRecord, field);
+                  return (
+                    <FieldCell key={field.key} label={field.label} value={value} missing={!value} dataType={field.dataType} />
+                  );
+                })}
+              </div>
             )}
           </div>
+        )}
 
-          {assocOpen && (
+        {/* Transaction Data */}
+        {visibleFields.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-slate-600">Transaction Data</p>
             <div className="grid gap-3 sm:grid-cols-2">
-              {associationFields.map((field) => {
-                const value = getAssociationValue(associationRecord, field);
+              {visibleFields.map((field) => {
+                const val = fieldValues[field.key] ?? "";
+                const autoLabel =
+                  field.key === "total_due_at_closing" && !totalManuallyOverridden
+                    ? "auto-calculated"
+                    : field.key === "per_diem_amount" && !getTransactionValue(liveData, "per_diem_amount")
+                      ? "auto-calculated"
+                      : field.key === "preparation_date" && !getTransactionValue(liveData, "preparation_date")
+                        ? "auto-today"
+                        : field.key === "valid_through_date" && !getTransactionValue(liveData, "valid_through_date")
+                          ? "auto +30 days"
+                          : field.key === "statement_valid_through" && !getTransactionValue(liveData, "statement_valid_through")
+                            ? "auto +30 days"
+                            : undefined;
+
                 return (
-                  <FieldCell key={field.key} label={field.label} value={value} missing={!value} dataType={field.dataType} />
+                  <EditableFieldCell
+                    key={field.key}
+                    field={field}
+                    value={val}
+                    autoLabel={autoLabel}
+                    showSaved={!!savedIndicators[field.key]}
+                    warnings={fieldWarnings[field.key] || []}
+                    onChange={(v) => handleChange(field.key, v)}
+                    onBlur={() => handleBlur(field.key, field.dataType)}
+                  />
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {/* Per-document check results + action buttons */}
+        <div className="mt-4 space-y-3">
+          {/* Check result display */}
+          {checkResult && docStatus === "has_issues" && (
+            <div className="rounded-lg border border-slate-200 p-3 space-y-2">
+              {checkResult.errors.map((e, i) => (
+                <p key={i} className="flex items-start gap-1.5 text-xs text-red-600">
+                  <XCircle className="size-3 shrink-0 mt-0.5" />
+                  <span><strong>{e.label}:</strong> {e.message}</span>
+                </p>
+              ))}
+              {checkResult.warnings.map((w, i) => (
+                <p key={i} className="flex items-start gap-1.5 text-xs text-amber-600">
+                  <AlertTriangle className="size-3 shrink-0 mt-0.5" />
+                  <span><strong>{w.label}:</strong> {w.message}</span>
+                </p>
+              ))}
+              {checkResult.errors.length === 0 && checkResult.warnings.length > 0 && (
+                <label className="flex items-start gap-2 cursor-pointer text-xs text-muted-foreground">
+                  <input type="checkbox" checked={warningsAcked} onChange={e => setWarningsAcked(e.target.checked)} className="mt-0.5 size-3.5 rounded border-border accent-[#38b6ff]" />
+                  <span>I&apos;ve reviewed these warnings and the data is correct</span>
+                </label>
+              )}
+            </div>
           )}
-        </div>
-      )}
 
-      {/* Transaction Data */}
-      {visibleFields.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-slate-600">Transaction Data</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {visibleFields.map((field) => {
-              const val = fieldValues[field.key] ?? "";
-              const autoLabel =
-                field.key === "total_due_at_closing" && !totalManuallyOverridden
-                  ? "auto-calculated"
-                  : field.key === "per_diem_amount" && !getTransactionValue(liveData, "per_diem_amount")
-                    ? "auto-calculated"
-                    : field.key === "preparation_date" && !getTransactionValue(liveData, "preparation_date")
-                      ? "auto-today"
-                      : field.key === "valid_through_date" && !getTransactionValue(liveData, "valid_through_date")
-                        ? "auto +30 days"
-                        : field.key === "statement_valid_through" && !getTransactionValue(liveData, "statement_valid_through")
-                          ? "auto +30 days"
-                          : undefined;
+          {docStatus === "complete" && (
+            <div className="flex items-center gap-2 text-xs text-green-600">
+              <CheckCircle2 className="size-3.5" />
+              Ready for generation
+            </div>
+          )}
 
-              return (
-                <EditableFieldCell
-                  key={field.key}
-                  field={field}
-                  value={val}
-                  autoLabel={autoLabel}
-                  showSaved={!!savedIndicators[field.key]}
-                  warnings={fieldWarnings[field.key] || []}
-                  onChange={(v) => handleChange(field.key, v)}
-                  onBlur={() => handleBlur(field.key, field.dataType)}
-                />
-              );
-            })}
+          {/* Action buttons */}
+          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setCheckResult(null);
+                setDocStatus("needs_work");
+                onDocReady?.(docType, false);
+                handleCheckCompleteness();
+              }}
+            >
+              {docStatus === "needs_work" ? "Check Completeness" : "Re-check"}
+            </Button>
+            {docStatus === "has_issues" && checkResult && checkResult.errors.length === 0 && (
+              <Button
+                size="sm"
+                className="bg-[#38b6ff] text-white hover:bg-[#1DA8F0]"
+                disabled={!warningsAcked}
+                onClick={() => {
+                  setDocStatus("complete");
+                  onDocReady?.(docType, true);
+                }}
+              >
+                Mark Ready
+              </Button>
+            )}
           </div>
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,32 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
-import { formatCents, DOCUMENT_LABELS } from "@/lib/pricing";
 import { getStatusLabel } from "@/lib/status-labels";
-import type { DocumentType, RequestStatus } from "@/lib/types";
+import type { RequestStatus } from "@/lib/types";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-  User,
-  Building2,
-  FileText,
-  Zap,
   ArrowLeft,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
-import { TransactionDataForm } from "@/components/admin/transaction-data-form";
-import { DocumentFieldsView } from "@/components/admin/document-fields-view";
+import { OrderContextCard } from "@/components/admin/order-context-card";
+import { DocumentWorkArea } from "@/components/admin/document-work-area";
 import { StatusActions } from "@/components/admin/status-actions";
-import { GenerateDocumentsButton } from "@/components/admin/generate-documents-button";
 import { GeneratedDocumentsCard } from "@/components/admin/generated-documents-card";
-import { DocumentAccordion } from "@/components/admin/document-accordion";
-import { ReadinessChecklist } from "@/components/admin/readiness-checklist";
-import { getAssociationFieldValues } from "@/lib/services/association-data";
+import { CancelRequestButton } from "@/components/admin/cancel-request-button";
 
 const WORKFLOW_STAGES: { key: RequestStatus; label: string }[] = [
   { key: "received", label: getStatusLabel("received") },
@@ -69,34 +55,15 @@ export default async function RequestDetailPage({
     ? request.associations[0]
     : request.associations;
 
-  // Fetch association field values and generated docs in parallel
-  const [associationFieldValues, generatedDocsResult] = await Promise.all([
-    request.association_id
-      ? getAssociationFieldValues(request.association_id)
-      : Promise.resolve([]),
-    supabase
-      .from("generated_documents")
-      .select("id, document_request_id, document_type, file_url, file_name, file_type, generation_method, generated_at, created_at")
-      .eq("document_request_id", id)
-      .order("created_at", { ascending: false }),
-  ]);
+  // Fetch generated docs
+  const generatedDocsResult = await supabase
+    .from("generated_documents")
+    .select("id, document_request_id, document_type, file_url, file_name, file_type, generation_method, generated_at, created_at")
+    .eq("document_request_id", id)
+    .order("created_at", { ascending: false });
 
   const generatedDocuments = generatedDocsResult.data ?? [];
   const hasGeneratedDocuments = generatedDocuments.length > 0;
-
-  // Serialize for client component (strip any non-serializable data)
-  const serializedFieldValues = associationFieldValues.map((fv) => ({
-    id: fv.id,
-    association_id: fv.association_id,
-    field_key: fv.field_key,
-    value: fv.value,
-    confidence: fv.confidence,
-    source: fv.source,
-    source_document: fv.source_document,
-    last_verified_at: fv.last_verified_at,
-    last_verified_by: fv.last_verified_by,
-    previous_value: fv.previous_value,
-  }));
 
   return (
     <div className="space-y-6">
@@ -180,284 +147,114 @@ export default async function RequestDetailPage({
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        {/* Left Column — Info */}
-        <div className="space-y-6">
-          {/* Readiness Checklist */}
-          <ReadinessChecklist
-            liveData={(request.live_data as Record<string, string> | null) || {}}
-            associationFieldValues={serializedFieldValues}
-            documentTypes={request.document_types as string[]}
-            requestStatus={request.status as string}
-          />
+      {/* Early status actions (received, paid only) */}
+      {(request.status === "received" || request.status === "paid") && (
+        <StatusActions requestId={request.id} currentStatus={request.status as RequestStatus} />
+      )}
 
-          {/* Requester Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <User className="size-4" />
-                Requester
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid gap-3 sm:grid-cols-2 text-sm">
-                <div>
-                  <dt className="text-muted-foreground">Name</dt>
-                  <dd className="font-medium">{request.requester_name}</dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground">Email</dt>
-                  <dd className="font-medium">{request.requester_email}</dd>
-                </div>
-                {request.requester_phone && (
-                  <div>
-                    <dt className="text-muted-foreground">Phone</dt>
-                    <dd className="font-medium">{request.requester_phone}</dd>
-                  </div>
-                )}
-                <div>
-                  <dt className="text-muted-foreground">Type</dt>
-                  <dd className="font-medium capitalize">
-                    {(request.requester_type as string).replace("_", " ")}
-                  </dd>
-                </div>
-              </dl>
-            </CardContent>
-          </Card>
+      {/* Order Context — always visible */}
+      <OrderContextCard
+        request={{
+          requester_name: request.requester_name,
+          requester_email: request.requester_email,
+          requester_phone: request.requester_phone,
+          requester_type: request.requester_type as string,
+          property_address: request.property_address,
+          turnaround: request.turnaround as string,
+          bill_to_closing: request.bill_to_closing,
+          payment_status: request.payment_status as string,
+          total_price_cents: request.total_price_cents,
+          rush_notes: request.rush_notes,
+          live_data: (request.live_data as Record<string, string> | null) || {},
+          document_types: request.document_types as string[],
+        }}
+        associationName={association ? (association as { name: string }).name : "Unknown"}
+      />
 
-          {/* Property & Association */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Building2 className="size-4" />
-                Property &amp; Association
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid gap-3 sm:grid-cols-2 text-sm">
-                <div>
-                  <dt className="text-muted-foreground">Property</dt>
-                  <dd className="font-medium">{request.property_address}</dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground">Association</dt>
-                  <dd className="font-medium">
-                    {association
-                      ? (association as { name: string }).name
-                      : "Unknown"}
-                  </dd>
-                </div>
-              </dl>
-            </CardContent>
-          </Card>
+      {/* Document Work Area (awaiting_data or ready_for_generation) */}
+      {(request.status === "awaiting_data" || request.status === "ready_for_generation") && (
+        <DocumentWorkArea
+          documentTypes={request.document_types as string[]}
+          liveData={(request.live_data as Record<string, string> | null) || {}}
+          associationRecord={association as Record<string, unknown> | null}
+          associationId={request.association_id as string | null}
+          requestId={request.id}
+          requestStatus={request.status as string}
+        />
+      )}
 
-          {/* Documents Accordion */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <FileText className="size-4" />
-                Documents Requested
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DocumentAccordion
-                documentTypes={request.document_types as string[]}
-                requestId={request.id}
-                requestStatus={request.status as string}
-                generatedDocuments={generatedDocuments}
-              />
-            </CardContent>
-          </Card>
+      {/* Post-generation actions (pending_review, approved, delivered) */}
+      {(request.status === "pending_review" || request.status === "approved" || request.status === "delivered") && (
+        <StatusActions requestId={request.id} currentStatus={request.status as RequestStatus} hasGeneratedDocuments={hasGeneratedDocuments} />
+      )}
 
-          {/* Transaction Data Form + Document Fields (when awaiting_data or ready_for_generation) */}
-          {(request.status === "awaiting_data" ||
-            request.status === "ready_for_generation") && (
-            <>
-              <TransactionDataForm
-                requestId={request.id}
-                existingData={
-                  (request.live_data as Record<string, string> | null) || {}
-                }
-                associationFieldValues={serializedFieldValues}
-                status={request.status as RequestStatus}
-              />
-              <DocumentFieldsView
-                documentTypes={request.document_types as string[]}
-                liveData={
-                  (request.live_data as Record<string, string> | null) || {}
-                }
-                associationRecord={association as Record<string, unknown> | null}
-                associationId={request.association_id as string | null}
-                requestId={request.id}
-                requestStatus={request.status as string}
-              />
-            </>
-          )}
-
-          {/* Generate Documents — renders in ready_for_generation AND pending_review
-              so the client component can persist its success banner after generation
-              triggers a router.refresh() that changes status to pending_review */}
-          {(request.status === "ready_for_generation" ||
-            request.status === "pending_review") && (
-            <div data-generate-documents>
-              <GenerateDocumentsButton
-                requestId={request.id}
-                status={request.status}
-                liveData={(request.live_data as Record<string, string> | null) || {}}
-                associationRecord={association as Record<string, unknown> | null}
-                documentTypes={request.document_types as string[]}
-              />
-            </div>
-          )}
-
-          {/* Document Preview (when pending_review or later) */}
-          {(request.status === "pending_review" ||
-            request.status === "approved" ||
-            request.status === "delivered") && (
-            <div data-generated-documents>
-              <GeneratedDocumentsCard
-                requestId={request.id}
-              />
-            </div>
-          )}
+      {/* Generated Documents Card */}
+      {(request.status === "pending_review" || request.status === "approved" || request.status === "delivered") && (
+        <div data-generated-documents>
+          <GeneratedDocumentsCard requestId={request.id} />
         </div>
+      )}
 
-        {/* Right Column — Summary & Actions */}
-        <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-          {/* Order Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Turnaround</span>
-                <span className="flex items-center gap-1 font-medium">
-                  {request.turnaround === "rush" ? (
-                    <>
-                      <Zap className="size-3 text-amber-500" />
-                      Rush
-                    </>
-                  ) : (
-                    "Standard"
-                  )}
-                </span>
-              </div>
+      {/* Activity Log (collapsible) */}
+      <details className="group">
+        <summary className="flex cursor-pointer items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+          <ChevronRight className="size-4 transition-transform group-open:rotate-90" />
+          Activity Log
+        </summary>
+        <div className="mt-3 space-y-3 text-sm pl-6">
+          <div className="flex gap-2">
+            <div className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
+            <div>
+              <p className="font-medium">Request Created</p>
+              <p className="text-xs text-muted-foreground">
+                {new Date(request.created_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}{" "}
+                at{" "}
+                {new Date(request.created_at).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+                {" "}
+                <span className="text-muted-foreground/70">&middot; {request.requester_name ?? "System"}</span>
+              </p>
+            </div>
+          </div>
+          {request.status !== "received" && (
+            <div className="flex gap-2">
+              <div className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
               <div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Payment</span>
-                  <span className="font-medium capitalize">
-                    {request.bill_to_closing
-                      ? "Bill to Closing"
-                      : (request.payment_status as string).replace("_", " ")}
-                  </span>
-                </div>
-                {!request.bill_to_closing &&
-                  (request.payment_status as string) === "pending" && (
-                    <button
-                      type="button"
-                      className="mt-1 text-sm text-[#38b6ff] hover:underline"
-                    >
-                      Send Payment Link
-                    </button>
-                  )}
+                <p className="font-medium">
+                  Status: {getStatusLabel(request.status)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(request.updated_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}{" "}
+                  at{" "}
+                  {new Date(request.updated_at).toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                  {" "}
+                  <span className="text-muted-foreground/70">&middot; System</span>
+                </p>
               </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span className="font-semibold">Total</span>
-                <span className="font-data font-semibold">
-                  {request.bill_to_closing
-                    ? "BTC"
-                    : formatCents(request.total_price_cents)}
-                </span>
-              </div>
-              {request.rush_notes && (
-                <>
-                  <Separator />
-                  <div>
-                    <p className="text-muted-foreground">Rush Notes</p>
-                    <p className="mt-1">{request.rush_notes}</p>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Status Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StatusActions
-                requestId={request.id}
-                currentStatus={request.status as RequestStatus}
-                hasGeneratedDocuments={hasGeneratedDocuments}
-                liveData={(request.live_data as Record<string, string> | null) || {}}
-                associationRecord={association as Record<string, unknown> | null}
-                documentTypes={request.document_types as string[]}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Activity Log */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm">
-                <div className="flex gap-2">
-                  <div className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
-                  <div>
-                    <p className="font-medium">Request Created</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(request.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}{" "}
-                      at{" "}
-                      {new Date(request.created_at).toLocaleTimeString("en-US", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                      {" "}
-                      <span className="text-muted-foreground/70">&middot; {request.requester_name ?? "System"}</span>
-                    </p>
-                  </div>
-                </div>
-                {request.status !== "received" && (
-                  <div className="flex gap-2">
-                    <div className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
-                    <div>
-                      <p className="font-medium">
-                        Status: {getStatusLabel(request.status)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(request.updated_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}{" "}
-                        at{" "}
-                        {new Date(request.updated_at).toLocaleTimeString("en-US", {
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                        {" "}
-                        <span className="text-muted-foreground/70">&middot; System</span>
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
-      </div>
+      </details>
+
+      {/* Cancel Request — small text link */}
+      {request.status !== "delivered" && request.status !== "cancelled" && (
+        <CancelRequestButton requestId={request.id} />
+      )}
     </div>
   );
 }
