@@ -174,7 +174,7 @@ NEXT_PUBLIC_APP_DOMAIN=propertydocz.com
 
 ## Design System (XeedlyAI Standards)
 
-Full reference: `XEEDLY_STANDARDS.md` (project root)
+Full reference: the XeedlyAI standards library at `C:\Users\shadd\Documents\standards` — read its `CLAUDE.md` for the read order (`standards\DESIGN_SYSTEM.md`, `standards\COMPONENT_PATTERNS.md`, `standards\MOTION_AND_INTERACTION.md`; multi-tenant material via `presets\multi-tenant-platform.md`). PropertyDocz-specific deltas + product structure: `PROPERTYDOCZ_DELTAS.md` (wins on conflict). The summary below is convenience; library + DELTAS are authoritative. (The old root `XEEDLY_STANDARDS.md` was retired 2026-07-01.)
 
 ### Fonts
 - **Inter** — all UI text, headings, body (CSS var: `--font-sans`)
@@ -249,4 +249,4 @@ Every dashboard page follows this order:
 ## Reference
 - Full build plan: PROPERTYDOCZ_BUILD_PLAN.md
 - Build roadmap: PROMPT_PLAN.md (create during Phase 0)
-- Design system: XEEDLY_STANDARDS.md
+- Design system: XeedlyAI standards library (`C:\Users\shadd\Documents\standards`) + PROPERTYDOCZ_DELTAS.md
