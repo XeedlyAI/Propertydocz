@@ -1,6 +1,6 @@
 # PROPERTYDOCZ_DELTAS.md — PropertyDocz overrides on the XeedlyAI standards library
 
-Per the library's `conventions/DELTAS-PATTERN.md`: this file documents intentional divergence. Where it's silent, the library (`C:\Users\shadd\Documents\standards`) governs. PropertyDocz **is the canonical default brand** (primary `#38b6ff`, Inter + JetBrains Mono, standard status ramp) — so the deltas here are minimal and mostly product structure.
+Per the library's `conventions/DELTAS-PATTERN.md`: this file documents intentional divergence. Where it's silent, the library (`..\standards`) governs. PropertyDocz **is the canonical default brand** (primary `#38b6ff`, Inter + JetBrains Mono, standard status ramp) — so the deltas here are minimal and mostly product structure.
 
 Created 2026-07-01 (standards-consolidation Wave 4), absorbing the product-specific parts of the retired `XEEDLY_STANDARDS.md` era; its generic content lives in the library (UX Principles now in `standards/DESIGN_SYSTEM.md` §0).
 
