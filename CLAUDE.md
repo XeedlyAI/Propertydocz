@@ -250,3 +250,9 @@ Every dashboard page follows this order:
 - Full build plan: PROPERTYDOCZ_BUILD_PLAN.md
 - Build roadmap: PROMPT_PLAN.md (create during Phase 0)
 - Design system: XeedlyAI standards library (`..\standards`) + PROPERTYDOCZ_DELTAS.md
+
+## Persistent Memory
+
+This project uses the Obsidian vault (sibling repo `..îdly-internal-tools`) as cross-session memory.
+Read `CLAUDE-INTEGRATION.md` at session start for the full read/write protocol.
+At minimum, read `projects/PropertyDocz.md` before starting work.
