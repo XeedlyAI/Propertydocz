@@ -95,7 +95,7 @@ async function insertActivityLog(
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
-  console.log("Seed script: inserting 4 test document_requests for corehoa\n");
+  console.log("Seed script: inserting 3 test document_requests for corehoa\n");
 
   // 1. Look up tenant by slug
   const { data: tenant, error: tenantErr } = await supabase
@@ -111,82 +111,72 @@ async function main() {
   const tenantId: string = tenant.id;
   console.log(`Tenant "corehoa": ${tenantId}`);
 
-  // 2. Hardcoded association UUIDs
+  // 2. Real CoreHOA association UUIDs
   const ASSOCIATION_IDS = {
-    mountainViewCondos: 'd816b7e9-0892-41f4-8016-f62aae1d173e',
-    sunsetRidgeHOA_1234: '494f3146-748e-443f-8054-42ff98a356b5',
-    sunsetRidgeHOA_1200: '8eddf4c1-79c2-473d-83aa-11d0aa24602e',
+    wolfLodge: '6f6a8c14-f585-494f-b695-6e4a15c60ce2',
+    pepperwood: '9082ddb3-8cc7-47e4-819c-57f57415c4bc',
+    cottonwoodCanyon: 'd7933617-f07b-4d35-87dc-78367155eb1d',
   };
 
-  console.log(`Mountain View Condos: ${ASSOCIATION_IDS.mountainViewCondos}`);
-  console.log(`Sunset Ridge HOA (1234): ${ASSOCIATION_IDS.sunsetRidgeHOA_1234}`);
-  console.log(`Sunset Ridge HOA (1200): ${ASSOCIATION_IDS.sunsetRidgeHOA_1200}\n`);
+  console.log(`Wolf Lodge HOA: ${ASSOCIATION_IDS.wolfLodge}`);
+  console.log(`Pepperwood Townhomes: ${ASSOCIATION_IDS.pepperwood}`);
+  console.log(`Cottonwood Canyon Estates: ${ASSOCIATION_IDS.cottonwoodCanyon}\n`);
 
-  // 3. Define the 4 test requests
+  // 3. Define 3 test requests
   const requests = [
     {
-      label: "Request 1: Resale Certificate",
+      label: "Request 1: Wolf Lodge — Resale + Payoff + Lender (multi-doc)",
       requester_name: "Sarah Johnson",
-      requester_email: "sarah@utahrealty.com",
+      requester_email: "sarah.johnson@remax.com",
       requester_type: "agent" as const,
-      property_address: "1622 Heatherwood Circle, Unit 209",
-      association_id: ASSOCIATION_IDS.mountainViewCondos,
-      status: "received" as const,
-      payment_status: "pending" as const,
-      document_types: ["resale_certificate"],
-      total_price_cents: 9900,
-      turnaround: "standard" as const,
-      live_data: {
-        owner_name: "Robert & Linda Martinez",
-        closing_date: daysFromNow(30),
-      },
-    },
-    {
-      label: "Request 2: Payoff + Resale combo",
-      requester_name: "Michael Torres",
-      requester_email: "m.torres@firstam.com",
-      requester_type: "title_company" as const,
-      property_address: "4500 Mountain View Dr, Unit B22",
-      association_id: ASSOCIATION_IDS.mountainViewCondos,
+      property_address: "8432 Wolf Lodge Dr, Unit 204",
+      association_id: ASSOCIATION_IDS.wolfLodge,
       status: "awaiting_data" as const,
       payment_status: "paid" as const,
-      document_types: ["payoff_statement", "resale_certificate"],
-      total_price_cents: 24400,
+      document_types: ["resale_certificate", "payoff_statement", "lender_questionnaire"],
+      total_price_cents: 49500,
       turnaround: "standard" as const,
-      live_data: {},
-    },
-    {
-      label: "Request 3: Lender Questionnaire",
-      requester_name: "Jennifer Walsh",
-      requester_email: "j.walsh@wellsfargo.com",
-      requester_type: "lender" as const,
-      property_address: "1200 Sunset Ridge Blvd, Unit 310",
-      association_id: ASSOCIATION_IDS.sunsetRidgeHOA_1200,
-      status: "ready_for_generation" as const,
-      payment_status: "paid" as const,
-      document_types: ["lender_questionnaire"],
-      total_price_cents: 27500,
-      turnaround: "rush" as const,
       live_data: {
-        owner_name: "Jennifer & Mark Walsh",
-        closing_date: daysFromNow(14),
+        owner_names: "Michael & Lisa Chen",
+        closing_date: daysFromNow(44),
       },
-      rush_notes: "Lender deadline in 2 weeks",
     },
     {
-      label: "Request 4: Governing Documents",
-      requester_name: "David Kim",
-      requester_email: "david@kw.com",
-      requester_type: "agent" as const,
-      property_address: "1234 Mountain View Dr, Unit 5",
-      association_id: ASSOCIATION_IDS.sunsetRidgeHOA_1234,
-      status: "delivered" as const,
+      label: "Request 2: Pepperwood — Resale + Governing Docs (rush)",
+      requester_name: "David Park",
+      requester_email: "dpark@summittitle.com",
+      requester_type: "title_company" as const,
+      property_address: "1240 Pepperwood Ln, Unit 12",
+      association_id: ASSOCIATION_IDS.pepperwood,
+      status: "awaiting_data" as const,
       payment_status: "paid" as const,
-      document_types: ["governing_documents"],
-      total_price_cents: 9900,
+      document_types: ["resale_certificate", "governing_documents"],
+      total_price_cents: 45000,
+      turnaround: "rush" as const,
+      rush_notes: "Closing July 8 — need docs by July 5",
+      live_data: {
+        owner_names: "Jennifer Martinez",
+        closing_date: daysFromNow(37),
+        unit_lot_number: "12",
+      },
+    },
+    {
+      label: "Request 3: Cottonwood Canyon — Payoff only (bill to closing)",
+      requester_name: "Amy Roberts",
+      requester_email: "aroberts@guildmortgage.com",
+      requester_type: "lender" as const,
+      property_address: "2891 Cottonwood Canyon Rd",
+      association_id: ASSOCIATION_IDS.cottonwoodCanyon,
+      status: "awaiting_data" as const,
+      payment_status: "bill_to_closing" as const,
+      document_types: ["payoff_statement"],
+      total_price_cents: 5000,
       turnaround: "standard" as const,
-      live_data: { owner_name: "David Kim" },
-      delivered_at: daysFromNow(-3),
+      bill_to_closing: true,
+      live_data: {
+        owner_names: "Robert & Karen Thompson",
+        closing_date: daysFromNow(51),
+      },
     },
   ];
 
@@ -224,8 +214,9 @@ async function main() {
       };
 
       if (customerId) payload.customer_id = customerId;
-      if ("rush_notes" in req) payload.rush_notes = req.rush_notes;
-      if ("delivered_at" in req) payload.delivered_at = req.delivered_at;
+      if ("rush_notes" in req) payload.rush_notes = (req as Record<string, unknown>).rush_notes;
+      if ("bill_to_closing" in req) payload.bill_to_closing = (req as Record<string, unknown>).bill_to_closing;
+      if ("delivered_at" in req) payload.delivered_at = (req as Record<string, unknown>).delivered_at;
 
       const { data: inserted, error: insertErr } = await supabase
         .from("document_requests")
