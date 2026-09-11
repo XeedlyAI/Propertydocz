@@ -80,39 +80,38 @@ function loadTemplate(docType: DocumentType): string {
   return readFileSync(templatePath, "utf-8");
 }
 
+export type NumberKind = "dollar" | "count";
+
 /**
  * Format a number string with commas (US standard).
- * If the value looks like a dollar amount (starts with $), formats the numeric part
- * with commas and 2 decimal places. If it's a plain number >= 1000, adds commas.
- * Non-numeric values are returned as-is.
+ *
+ *   "dollar": $1234.56 → $1,234.56 · 1234.5 → 1,234.50 · -$2500 → -$2,500.00
+ *             (two decimals always; a leading $ or minus is preserved)
+ *   "count":  1775 → 1,775 · 999 → 999 (integers, no decimals)
+ *
+ * Non-numeric values (and "N/A") are returned as-is. The kind comes from the
+ * field's membership in DOLLAR_FIELDS / NUMERIC_FIELDS — until 2026-09-11 the
+ * count branch was unreachable and unit/page counts rendered as "1,200.00".
  */
-function formatNumber(value: string): string {
+export function formatNumber(value: string, kind: NumberKind = "dollar"): string {
   if (!value || value === "N/A") return value;
 
-  // Dollar amount: $1234.56 → $1,234.56
-  const dollarMatch = value.match(/^\$?\s*(-?\d[\d,]*\.?\d*)$/);
-  if (dollarMatch) {
-    const raw = dollarMatch[1].replace(/,/g, "");
-    const num = parseFloat(raw);
-    if (isNaN(num)) return value;
-    const hasDollarSign = value.trimStart().startsWith("$");
-    const formatted = num.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    return hasDollarSign ? `$${formatted}` : formatted;
+  if (kind === "count") {
+    const intMatch = value.trim().match(/^(-?\d[\d,]*)$/);
+    if (!intMatch) return value;
+    const num = parseInt(intMatch[1].replace(/,/g, ""), 10);
+    return isNaN(num) ? value : num.toLocaleString("en-US");
   }
 
-  // Plain integer >= 1000: 1775 → 1,775
-  const intMatch = value.match(/^(-?\d+)$/);
-  if (intMatch) {
-    const num = parseInt(intMatch[1], 10);
-    if (Math.abs(num) >= 1000) {
-      return num.toLocaleString("en-US");
-    }
-  }
-
-  return value;
+  // Dollar amount: optional sign, optional $, digits with optional commas/decimals.
+  const dollarMatch = value.trim().match(/^(-?)\s*(\$?)\s*(-?)(\d[\d,]*\.?\d*)$/);
+  if (!dollarMatch) return value;
+  const [, signBefore, dollar, signAfter, digits] = dollarMatch;
+  const num = parseFloat(digits.replace(/,/g, ""));
+  if (isNaN(num)) return value;
+  const formatted = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const sign = signBefore || signAfter ? "-" : "";
+  return `${sign}${dollar}${formatted}`;
 }
 
 /**
@@ -150,11 +149,13 @@ const NUMERIC_FIELDS = new Set([
  * Pre-process data values: add commas to financial figures and large numbers.
  * Applied BEFORE Typst interpolation so templates stay clean.
  */
-function formatDataValues(data: Record<string, string>): Record<string, string> {
+export function formatDataValues(data: Record<string, string>): Record<string, string> {
   const formatted: Record<string, string> = {};
   for (const [key, value] of Object.entries(data)) {
-    if (DOLLAR_FIELDS.has(key) || NUMERIC_FIELDS.has(key)) {
-      formatted[key] = formatNumber(value);
+    if (DOLLAR_FIELDS.has(key)) {
+      formatted[key] = formatNumber(value, "dollar");
+    } else if (NUMERIC_FIELDS.has(key)) {
+      formatted[key] = formatNumber(value, "count");
     } else {
       formatted[key] = value;
     }
@@ -174,7 +175,7 @@ function formatDataValues(data: Record<string, string>): Record<string, string> 
  *
  * We prefix each with a backslash so Typst treats them as literal text.
  */
-function escapeTypst(value: string): string {
+export function escapeTypst(value: string): string {
   return value
     .replace(/\\/g, "\\\\")
     .replace(/\$/g, "\\$")
@@ -191,7 +192,7 @@ function escapeTypst(value: string): string {
  * All injected values are escaped so Typst-special characters
  * (like $ in "$325.00") don't break compilation.
  */
-function interpolateTemplate(
+export function interpolateTemplate(
   template: string,
   data: Record<string, string>
 ): string {
@@ -216,7 +217,7 @@ function interpolateTemplate(
  * Otherwise renders a typed electronic signature using italic Inter.
  * The signature_block is injected RAW (not escaped) since it contains Typst markup.
  */
-function buildSignatureBlock(
+export function buildSignatureBlock(
   hasSignatureImage: boolean,
   preparedBy: string,
   preparedByTitle: string,

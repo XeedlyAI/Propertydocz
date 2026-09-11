@@ -30,8 +30,8 @@ export default async function AssociationsPage() {
   // Parallel queries for counts and related data
   let propertyCounts: Record<string, number> = {};
   let govDocCounts: Record<string, number> = {};
-  let requestCounts: Record<string, number> = {};
-  let revenueCounts: Record<string, number> = {};
+  const requestCounts: Record<string, number> = {};
+  const revenueCounts: Record<string, number> = {};
   let totalActiveRequests = 0;
   let totalPendingRevenue = 0;
 
