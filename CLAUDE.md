@@ -8,7 +8,7 @@ PropertyDocz is a multi-tenant HOA document ordering and fulfillment platform. H
 **Deployed via:** Vercel (auto-deploy from main branch)
 
 ## Stack
-- **Framework:** Next.js 15 (App Router, TypeScript)
+- **Framework:** Next.js 16 (App Router, TypeScript)
 - **Database:** Supabase (new dedicated instance)
 - **Auth:** Supabase Auth (email/password, tenant-scoped)
 - **Payments:** Stripe Connect (platform + connected accounts)
@@ -21,18 +21,23 @@ PropertyDocz is a multi-tenant HOA document ordering and fulfillment platform. H
 - **Icons:** Lucide React
 
 ## Git Rules
-- Always work on `main` branch
-- Always commit and push to `main`
-- Always commit and push to main after completing any task. Never leave unpushed work.
-- Worktrees are fine — they are hardcoded into Claude Code behavior. Clean up old worktrees each session.
-- No feature branches unless explicitly requested
+- Work on a short-lived branch per task (`<type>/<slug>`; a Claude Code worktree is fine). Never commit to `main` directly.
+- End every task with `/xeedly-standards:ship`: it runs the gate and the build, commits, pushes ONCE, and opens the pull request. Every push is a paid Vercel build, so push once per PR.
+- Merge (squash) only when the `CI` check is green. Vercel deploys from `main`.
+- Never leave a branch unmerged and un-PR'd at session end; clean up old worktrees each session.
 
 ## Build & Verify Rules
 - **DO NOT** run `npm run dev` — dev server does not work in this environment
 - **DO NOT** open browser previews — Chrome is broken on the dev machine
-- **DO** verify changes via `npm run build` — if it builds, it ships
-- Vercel auto-deploys from main on push
-- Run Supabase migrations manually via Supabase SQL Editor (not CLI)
+- **DO** verify with `npm run verify` (typecheck → lint → unit tests) before every commit and `npm run build` before every push
+- Vercel auto-deploys from `main` on merge
+- Run Supabase migrations manually via Supabase SQL Editor (not CLI). `supabase/` holds numbered files (002–006), named files, and timestamped files under `migrations/`; there is no automated migration check here
+
+## Verification Gate
+
+Every change passes `npm run verify` locally and the `CI` workflow (`.github/workflows/ci.yml`: the same steps plus `npm run build`) on the pull request. The `xeedly-standards` plugin enforces the loop automatically: ESLint runs on each file as it is edited, and typecheck + tests run before a turn that changed code can end. Never silence a check to get past it (no `eslint-disable` for convenience, no `.skip`, no loosened tolerance).
+
+**Tests live next to the code as `*.test.ts`.** They pin order pricing and the rush rule (`pricing.ts`), subscription-aware pricing (`services/pricing.service.ts`), every Layer 1/2 validation rule including the HB 217 late-fee cap (`field-validations.ts`), the Typst escaping/interpolation/signature helpers (`documents/generate.ts`), and subdomain → tenant resolution. Anything new that computes a price, a fee, or a legal check gets a test the same way. Nothing in the suite touches the network or the Typst compiler.
 
 ## Project Structure
 ```

@@ -125,7 +125,7 @@ export default async function DashboardPage() {
   const assocIds = (associations || []).map((a) => a.id);
 
   let govDocCounts: Record<string, number> = {};
-  let assocRequestCounts: Record<string, number> = {};
+  const assocRequestCounts: Record<string, number> = {};
 
   if (assocIds.length > 0) {
     const { data: govDocs } = await supabase

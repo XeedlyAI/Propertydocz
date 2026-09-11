@@ -52,7 +52,7 @@ export async function getAdminUser(): Promise<AdminUser> {
 
   // Platform admins can impersonate any tenant via cookie
   const isPlatformAdmin = profile.role === "platform_admin";
-  let isImpersonating = false;
+  const isImpersonating = false;
 
   if (isPlatformAdmin) {
     const cookieStore = await cookies();
