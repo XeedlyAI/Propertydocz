@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { overageDiscountFraction } from "@/lib/subscriptions";
 
 /**
  * GET /api/customer/session?userId=...
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
     subscriptionStatus: activeSub?.status || null,
     packagesUsed: activeSub?.packages_used || 0,
     packagesIncluded: activeSub?.packages_included || 0,
-    overageDiscount: activeSub?.overage_discount_percent || 0,
+    overageDiscount: overageDiscountFraction(activeSub?.overage_discount_percent),
     billingCycleEnd: activeSub?.billing_cycle_end || null,
     isOrgSubscription,
   });

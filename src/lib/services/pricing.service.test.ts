@@ -1,10 +1,8 @@
 /**
- * Subscription-aware pricing at checkout. The discount here is a FRACTION
- * (0.20 = 20%) because the Stripe webhook copies SUBSCRIPTION_TIERS[tier]
- * .overageDiscount into customer_subscriptions.overage_discount_percent.
- * (The older membership_tiers path stores whole percents and uses
- * calculateOveragePrice — see usage-tracking.test.ts. Two conventions,
- * flagged 2026-09-11.)
+ * Subscription-aware pricing at checkout. overage_discount_percent is a WHOLE
+ * PERCENT (20 = 20%) on both subscription tables since 2026-09-11; rows the
+ * webhook wrote before that hold the tier's decimal (0.20) and are read the
+ * same way via overageDiscountFraction until the migration converts them.
  */
 import { describe, expect, it } from "vitest";
 import { calculateOrderPricing, type SubscriptionInfo } from "./pricing.service";
@@ -15,7 +13,7 @@ const sub = (o: Partial<SubscriptionInfo> = {}): SubscriptionInfo => ({
   status: "active",
   packages_included: 3,
   packages_used: 0,
-  overage_discount_percent: 0.2,
+  overage_discount_percent: 20,
   billing_cycle_start: null,
   billing_cycle_end: null,
   ...o,
@@ -53,7 +51,7 @@ describe("calculateOrderPricing", () => {
       packagesIncluded: 3,
       coverageStatus: "overage",
     });
-    expect(calculateOrderPricing(19500, sub({ tier: "title_partner", packages_included: 25, packages_used: 30, overage_discount_percent: 0.3 }))).toMatchObject({
+    expect(calculateOrderPricing(19500, sub({ tier: "title_partner", packages_included: 25, packages_used: 30, overage_discount_percent: 30 }))).toMatchObject({
       finalPrice: 13650,
       discountAmount: 5850,
       message: "All 25 packages used. 30% overage discount applied.",
@@ -61,6 +59,10 @@ describe("calculateOrderPricing", () => {
   });
 
   it("rounds the discount to whole cents", () => {
-    expect(calculateOrderPricing(19501, sub({ packages_used: 3, overage_discount_percent: 0.25 }))).toMatchObject({ discountAmount: 4875, finalPrice: 14626 });
+    expect(calculateOrderPricing(19501, sub({ packages_used: 3, overage_discount_percent: 25 }))).toMatchObject({ discountAmount: 4875, finalPrice: 14626 });
+  });
+
+  it("still honours a legacy row that stored the discount as a fraction", () => {
+    expect(calculateOrderPricing(25000, sub({ packages_used: 3, overage_discount_percent: 0.2 }))).toMatchObject({ finalPrice: 20000, discountAmount: 5000, message: "All 3 packages used. 20% overage discount applied." });
   });
 });

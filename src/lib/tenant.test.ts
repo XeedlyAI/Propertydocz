@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { getTenantSlugFromHost } from "./tenant";
 import { getStatusLabel } from "./status-labels";
-import { getTierName, getTierPriceLabel } from "./subscriptions";
+import { getTierName, getTierPriceLabel, overageDiscountFraction, overageDiscountPercent } from "./subscriptions";
 
 describe("getTenantSlugFromHost", () => {
   it.each([
@@ -29,6 +29,19 @@ describe("getStatusLabel", () => {
     expect(getStatusLabel("ready_for_generation")).toBe("Ready to Generate");
     expect(getStatusLabel("delivered")).toBe("Delivered");
     expect(getStatusLabel("some_new_state")).toBe("Some New State");
+  });
+});
+
+describe("overage discount units", () => {
+  it("reads whole percents and legacy fractions to the same fraction", () => {
+    expect(overageDiscountFraction(20)).toBe(0.2);
+    expect(overageDiscountFraction(0.2)).toBe(0.2);
+    expect(overageDiscountFraction(1)).toBe(1); // 100% stored as a fraction of 1 — the boundary reads as fraction
+    expect(overageDiscountFraction(0)).toBe(0);
+    expect(overageDiscountFraction(null)).toBe(0);
+    expect(overageDiscountFraction(NaN)).toBe(0);
+    expect(overageDiscountPercent(0.25)).toBe(25);
+    expect(overageDiscountPercent(30)).toBe(30);
   });
 });
 

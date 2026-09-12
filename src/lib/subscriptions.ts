@@ -85,6 +85,26 @@ export const TIER_ORDER: SubscriptionTier[] = [
   "title_partner",
 ];
 
+/**
+ * The overage discount as stored on `customer_subscription.overage_discount_percent`
+ * and `membership_tiers.overage_discount_percent` is a WHOLE PERCENT (20 = 20%),
+ * matching the column name. Before 2026-09-11 the Stripe webhook wrote the tier's
+ * decimal (0.20) into the customer_subscription column, so rows written before
+ * migration 20260911_overage_discount_whole_percent ran hold a fraction. This
+ * helper reads both: a value in (0, 1] is a legacy fraction, anything larger is a
+ * percent. No real tier discounts 1% or less, so the split is unambiguous.
+ */
+export function overageDiscountFraction(stored: number | null | undefined): number {
+  const v = Number(stored ?? 0);
+  if (!Number.isFinite(v) || v <= 0) return 0;
+  return v <= 1 ? v : v / 100;
+}
+
+/** Whole-percent form of the stored discount, for display and for writes. */
+export function overageDiscountPercent(stored: number | null | undefined): number {
+  return Math.round(overageDiscountFraction(stored) * 100);
+}
+
 /** Get display name for a tier slug */
 export function getTierName(tier: SubscriptionTier): string {
   return SUBSCRIPTION_TIERS[tier]?.name ?? "Unknown";

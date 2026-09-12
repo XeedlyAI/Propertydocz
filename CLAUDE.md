@@ -114,6 +114,8 @@ src/
 
 Rush fee applies once per order, not per document. Payoff statement is exempt from rush fees due to statutory fee cap.
 
+**Overage discount unit:** `overage_discount_percent` on both `customer_subscription` and `membership_tiers` is a whole percent (20 = 20%). `SUBSCRIPTION_TIERS[tier].overageDiscount` is the decimal (0.20) and is converted at the write. Read stored values only through `overageDiscountFraction()` / `overageDiscountPercent()` in `src/lib/subscriptions.ts` — rows written before migration `20260911_overage_discount_whole_percent` hold the decimal.
+
 ## Document Request Workflow
 ```
 received → paid → awaiting_data → ready_for_generation → pending_review → approved → delivered
