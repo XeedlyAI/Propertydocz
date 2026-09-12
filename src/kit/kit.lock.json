@@ -1,0 +1,12 @@
+{
+  "name": "@xeedlyai/kit",
+  "version": "0.1.1",
+  "source": "XeedlyAI/standards packages/kit",
+  "syncedAt": "2026-09-12T00:22:02.329Z",
+  "files": {
+    "check-migrations.mjs": "6d85ec55d14919f60364f87338ee7124b1a3e3a2",
+    "fake-supabase.ts": "6356b0b113db097f822984623cbecfef4053250e",
+    "kit-check.mjs": "f98dba30c62a6f093c43c4766ad62be944c7c092",
+    "supabase.ts": "434f797be48b7a7117e4ffe212e57df2b11a57a4"
+  }
+}

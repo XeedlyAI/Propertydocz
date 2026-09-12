@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "npm run typecheck && npm run lint && npm run test"
+    "verify": "npm run typecheck && npm run lint && npm run kit:check && npm run test",
+    "kit:sync": "node ../standards/packages/kit/bin/sync.mjs",
+    "kit:check": "node src/kit/kit-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",
