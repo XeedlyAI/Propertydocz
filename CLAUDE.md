@@ -37,6 +37,8 @@ PropertyDocz is a multi-tenant HOA document ordering and fulfillment platform. H
 
 Every change passes `npm run verify` locally and the `CI` workflow (`.github/workflows/ci.yml`: the same steps plus `npm run build`) on the pull request. The `xeedly-standards` plugin enforces the loop automatically: ESLint runs on each file as it is edited, and typecheck + tests run before a turn that changed code can end. Never silence a check to get past it (no `eslint-disable` for convenience, no `.skip`, no loosened tolerance).
 
+**Shared kit:** `src/kit/` is `@xeedlyai/kit`, vendored from `../standards/packages/kit` — the Supabase client factories, the in-memory Supabase test fake, and the migration check. Never edit it in place (`kit:check` fails in verify and CI); change the kit in the standards repo, then `npm run kit:sync`.
+
 **Tests live next to the code as `*.test.ts`.** They pin order pricing and the rush rule (`pricing.ts`), subscription-aware pricing (`services/pricing.service.ts`), every Layer 1/2 validation rule including the HB 217 late-fee cap (`field-validations.ts`), the Typst escaping/interpolation/signature helpers (`documents/generate.ts`), and subdomain → tenant resolution. Anything new that computes a price, a fee, or a legal check gets a test the same way. Nothing in the suite touches the network or the Typst compiler.
 
 ## Project Structure
