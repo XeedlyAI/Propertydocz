@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { AccountClient } from "./account-client";
+import { overageDiscountFraction } from "@/lib/subscriptions";
 
 export default async function AccountPage() {
   const supabase = await createClient();
@@ -80,7 +81,7 @@ export default async function AccountPage() {
               packagesUsed: subscription.packages_used,
               monthlyPrice: subscription.monthly_price,
               billingCycleEnd: subscription.billing_cycle_end,
-              overageDiscount: subscription.overage_discount_percent,
+              overageDiscount: overageDiscountFraction(subscription.overage_discount_percent),
               stripeCustomerId: subscription.stripe_customer_id,
             }
           : null

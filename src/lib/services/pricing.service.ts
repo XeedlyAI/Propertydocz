@@ -5,7 +5,7 @@
  * Handles three scenarios: standard (no sub), subscription (covered), overage (discounted).
  */
 
-import { getTierName, type SubscriptionTier } from "@/lib/subscriptions";
+import { getTierName, overageDiscountFraction, type SubscriptionTier } from "@/lib/subscriptions";
 
 export interface SubscriptionInfo {
   id: string;
@@ -13,6 +13,7 @@ export interface SubscriptionInfo {
   status: string;
   packages_included: number;
   packages_used: number;
+  /** Whole percent (20 = 20%); legacy rows may hold a fraction — see overageDiscountFraction. */
   overage_discount_percent: number;
   billing_cycle_start: string | null;
   billing_cycle_end: string | null;
@@ -71,7 +72,7 @@ export function calculateOrderPricing(
   }
 
   // At limit — apply overage discount
-  const discountRate = subscription.overage_discount_percent;
+  const discountRate = overageDiscountFraction(subscription.overage_discount_percent);
   const discountAmount = Math.round(basePriceCents * discountRate);
   const finalPrice = basePriceCents - discountAmount;
 

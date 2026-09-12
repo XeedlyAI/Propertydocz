@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
               billing_cycle_end: new Date(sub.current_period_end * 1000).toISOString().split("T")[0],
               packages_included: tierConfig?.packagesPerMonth || 0,
               packages_used: 0,
-              overage_discount_percent: tierConfig?.overageDiscount || 0,
+              overage_discount_percent: Math.round((tierConfig?.overageDiscount ?? 0) * 100),
               monthly_price: tierConfig?.priceCents || 0,
             });
 
@@ -271,7 +271,7 @@ export async function POST(request: NextRequest) {
               billing_cycle_start: new Date(sub.current_period_start * 1000).toISOString().split("T")[0],
               billing_cycle_end: new Date(sub.current_period_end * 1000).toISOString().split("T")[0],
               packages_included: tierConfig?.packagesPerMonth || undefined,
-              overage_discount_percent: tierConfig?.overageDiscount || undefined,
+              overage_discount_percent: tierConfig ? Math.round(tierConfig.overageDiscount * 100) : undefined,
               monthly_price: tierConfig?.priceCents || undefined,
               updated_at: new Date().toISOString(),
             })
